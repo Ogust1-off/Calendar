@@ -27,17 +27,87 @@ function _obOpen() {
   el.innerHTML =
     '<div id="ob-sheet">' +
     '<div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>' +
-    (_obIsSettings ? '<button class="ob-x" onclick="_obClose()" aria-label="Close">×</button>' : '') +
+    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>' +
+    (_obIsSettings ? '<button class="ob-x" onclick="_obClose()" aria-label="Close">\u00d7</button>' : '') +
     '<div id="ob-content"></div>' +
     '<div id="ob-bottom"></div>' +
     '</div>';
   document.body.appendChild(el);
-  requestAnimationFrame(function(){ el.classList.add('ob-in'); _obRender(); });
+  requestAnimationFrame(function(){ el.classList.add('ob-in'); _obRender(); _obInitDrag(el); });
+}
+
+function _obInitDrag(overlay) {
+  var sheet = overlay.querySelector('#ob-sheet');
+  var handleZone = overlay.querySelector('#ob-handle-zone');
+  if (!sheet || !handleZone) return;
+  var startY = 0, curY = 0, dragging = false;
+  var THRESHOLD = 120;
+
+  function onStart(e) {
+    dragging = true;
+    startY = e.touches ? e.touches[0].clientY : e.clientY;
+    curY = 0;
+    sheet.style.transition = 'none';
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    var dy = (e.touches ? e.touches[0].clientY : e.clientY) - startY;
+    if (dy < 0) dy = 0;
+    curY = dy;
+    sheet.style.transform = 'translateY(' + dy + 'px)';
+    var pct = Math.min(dy / THRESHOLD, 1);
+    overlay.style.background = 'rgba(0,0,0,' + (0.52 * (1 - pct * 0.7)) + ')';
+    if (e.cancelable) e.preventDefault();
+  }
+  function onEnd() {
+    if (!dragging) return;
+    dragging = false;
+    sheet.style.transition = '';
+    if (curY >= THRESHOLD) {
+      sheet.style.transform = 'translateY(110%)';
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity .25s';
+      setTimeout(function() {
+        overlay.remove();
+        if (!_obIsSettings) {
+          var cfg = _obLoad();
+          if (!(cfg.apiKey && cfg.calendars && cfg.calendars[0])) {
+            _obShowUnconfigured();
+          }
+        }
+      }, 280);
+    } else {
+      sheet.style.transform = '';
+      overlay.style.background = '';
+    }
+  }
+
+  handleZone.addEventListener('touchstart', onStart, { passive: true });
+  document.addEventListener('touchmove', onMove, { passive: false });
+  document.addEventListener('touchend', onEnd, { passive: true });
+  handleZone.addEventListener('mousedown', onStart);
+  document.addEventListener('mousemove', function(e){ if(dragging) onMove(e); });
+  document.addEventListener('mouseup', onEnd);
 }
 
 function _obClose() {
   var o = document.getElementById('ob-overlay');
   if (o) { o.classList.add('ob-out'); setTimeout(function(){ o.remove(); }, 380); }
+}
+
+function _obShowUnconfigured() {
+  var c = document.getElementById('aw-compact');
+  if (!c) return;
+  var cfg = _obLoad ? _obLoad() : {};
+  var lang = cfg.lang || 'en';
+  var msg = lang === 'fr' ? "L\u2019agenda n\u2019est pas configur\u00e9." : 'Calendar not configured.';
+  var btnTxt = lang === 'fr' ? 'Configurer' : 'Set up';
+  c.innerHTML =
+    '<div class="aw-state" style="display:flex;flex-direction:column;align-items:center;gap:18px;padding:52px 24px">' +
+    '<div style="font-size:48px;line-height:1">&#x1F4C5;</div>' +
+    '<div style="font-size:16px;font-weight:600;color:var(--text);text-align:center">' + msg + '</div>' +
+    '<button onclick="showOnboarding()" style="padding:13px 32px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:15px;font-weight:600;font-family:inherit;box-shadow:0 4px 16px rgba(99,102,241,.35);">' + btnTxt + '</button>' +
+    '</div>';
 }
 
 // Steps: 0=welcome, 1=API key, 2=calendars, 3=profile (optional), 4=done
@@ -301,14 +371,18 @@ function _obToggleEye(id,btn) {
   min-height:68vh;max-height:95dvh;
   display:flex;flex-direction:column;overflow:hidden;
   box-shadow:0 -20px 60px rgba(0,0,0,.7);
-  transform:translateY(60px);transition:transform .38s cubic-bezier(.32,1.2,.45,1)}
+  transform:translateY(60px);transition:transform .38s cubic-bezier(.32,1.2,.45,1);will-change:transform;}
 #ob-overlay.ob-in #ob-sheet{transform:translateY(0)}
 @media(prefers-color-scheme:light){#ob-sheet{background:#f2f2f7;border-top-color:rgba(0,0,0,.06)}}
 
 /* Handle bar */
-#ob-sheet::before{content:'';display:block;width:36px;height:4px;border-radius:2px;
-  background:rgba(255,255,255,.18);margin:10px auto 0;flex-shrink:0}
-@media(prefers-color-scheme:light){#ob-sheet::before{background:rgba(0,0,0,.14)}}
+#ob-handle-zone{
+  width:100%;padding:10px 0 4px;cursor:grab;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;touch-action:none;
+}
+#ob-handle-zone:active{cursor:grabbing}
+#ob-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);}
+@media(prefers-color-scheme:light){#ob-handle{background:rgba(0,0,0,.16)}}
 
 .ob-orbs{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
 .ob-orb1,.ob-orb2{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18}
