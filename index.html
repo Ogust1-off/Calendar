@@ -17,385 +17,346 @@
   <link rel="icon" type="image/png" sizes="32x32" href="Asset/Picture/icon-32.png"/>
   <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
   <style>
-  /* ═══════════════════════════════════════════════
-     TOKENS
-  ═══════════════════════════════════════════════ */
+  /* ══════ TOKENS ══════ */
   :root {
-    --accent:   #60a5fa;
-    --accent2:  #818cf8;
-    --bg:       #0a0e1a;
-    --surface:  rgba(255,255,255,0.06);
-    --surface2: rgba(255,255,255,0.10);
-    --border:   rgba(255,255,255,0.09);
-    --border2:  rgba(255,255,255,0.16);
-    --text:     rgba(255,255,255,0.92);
-    --muted:    rgba(255,255,255,0.48);
-    --faint:    rgba(255,255,255,0.26);
-    --navbar-h: 56px;
-    --tab-h:    56px;
-    /* Liquid Glass recipe */
-    --lg-bg:    rgba(255,255,255,0.07);
-    --lg-blur:  blur(24px) saturate(180%);
-    --lg-border:rgba(255,255,255,0.14);
-    --lg-shadow:0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12);
+    --accent:#60a5fa; --accent2:#818cf8;
+    --bg:#0a0e1a; --surface:rgba(255,255,255,.06); --surface2:rgba(255,255,255,.10);
+    --border:rgba(255,255,255,.09); --border2:rgba(255,255,255,.16);
+    --text:rgba(255,255,255,.92); --muted:rgba(255,255,255,.48); --faint:rgba(255,255,255,.26);
+    --navbar-h:56px; --tab-h:56px;
+    --lg-bg:rgba(255,255,255,.07); --lg-blur:blur(24px) saturate(180%);
+    --lg-border:rgba(255,255,255,.14); --lg-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12);
   }
-  @media (prefers-color-scheme: light) {
+  @media (prefers-color-scheme:light) {
     :root {
-      --accent:   #2563eb;
-      --accent2:  #6366f1;
-      --bg:       #e8ecf4;
-      --surface:  rgba(255,255,255,0.55);
-      --surface2: rgba(255,255,255,0.80);
-      --border:   rgba(0,0,0,0.07);
-      --border2:  rgba(0,0,0,0.13);
-      --text:     rgba(10,14,30,0.90);
-      --muted:    rgba(10,14,30,0.50);
-      --faint:    rgba(10,14,30,0.32);
-      --lg-bg:    rgba(255,255,255,0.60);
-      --lg-blur:  blur(24px) saturate(200%);
-      --lg-border:rgba(255,255,255,0.90);
-      --lg-shadow:0 6px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+      --accent:#2563eb; --accent2:#6366f1;
+      --bg:#e8ecf4; --surface:rgba(255,255,255,.55); --surface2:rgba(255,255,255,.80);
+      --border:rgba(0,0,0,.07); --border2:rgba(0,0,0,.13);
+      --text:rgba(10,14,30,.90); --muted:rgba(10,14,30,.50); --faint:rgba(10,14,30,.32);
+      --lg-bg:rgba(255,255,255,.60); --lg-blur:blur(24px) saturate(200%);
+      --lg-border:rgba(255,255,255,.90); --lg-shadow:0 6px 24px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.9);
     }
   }
 
-  /* ═══════════════════════════════════════════════
-     BASE
-  ═══════════════════════════════════════════════ */
-  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-  html { height:100%; background:var(--bg); color-scheme:dark light; }
-  body {
-    height:100%; background:var(--bg); color:var(--text);
+  /* ══════ BASE ══════ */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{height:100%;background:var(--bg);color-scheme:dark light;}
+  body{
+    height:100%;background:var(--bg);color:var(--text);
     font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    overscroll-behavior:none; overflow:hidden;
+    -webkit-font-smoothing:antialiased;overscroll-behavior:none;overflow:hidden;
   }
-
-  /* Fond dégradé ambiant */
-  body::before {
-    content:''; position:fixed; inset:0; z-index:-1;
+  body::before{
+    content:'';position:fixed;inset:0;z-index:-1;
     background:
-      radial-gradient(ellipse 65% 50% at 20% 0%,  rgba(59,130,246,0.18) 0%, transparent 65%),
-      radial-gradient(ellipse 50% 40% at 80% 100%, rgba(99,102,241,0.14) 0%, transparent 60%),
+      radial-gradient(ellipse 65% 50% at 20% 0%,rgba(59,130,246,.18) 0%,transparent 65%),
+      radial-gradient(ellipse 50% 40% at 80% 100%,rgba(99,102,241,.14) 0%,transparent 60%),
       var(--bg);
   }
-  @media (prefers-color-scheme: light) {
-    body::before { background:
-      radial-gradient(ellipse 65% 50% at 20% 0%,  rgba(59,130,246,0.10) 0%, transparent 65%),
-      radial-gradient(ellipse 50% 40% at 80% 100%, rgba(99,102,241,0.08) 0%, transparent 60%),
+  @media(prefers-color-scheme:light){
+    body::before{background:
+      radial-gradient(ellipse 65% 50% at 20% 0%,rgba(59,130,246,.10) 0%,transparent 65%),
+      radial-gradient(ellipse 50% 40% at 80% 100%,rgba(99,102,241,.08) 0%,transparent 60%),
       var(--bg);
     }
   }
 
-  /* ═══════════════════════════════════════════════
-     APP SHELL
-  ═══════════════════════════════════════════════ */
-  #app-shell {
-    position:fixed; inset:0;
-    display:flex; flex-direction:column;
-    /* NO padding-top — navbar handles safe area internally */
-    height:100%; height:100dvh;
+  /* ══════ APP SHELL ══════ */
+  #app-shell{
+    position:fixed;inset:0;display:flex;flex-direction:column;
+    height:100%;height:100dvh;
   }
 
-  /* ── Liquid Glass mixin (reusable) ── */
-  .lg {
-    background: var(--lg-bg);
-    backdrop-filter: var(--lg-blur);
-    -webkit-backdrop-filter: var(--lg-blur);
-    border: 1px solid var(--lg-border);
-    box-shadow: var(--lg-shadow);
-  }
-
-  /* ═══════════════════════════════════════════════
-     NAV BAR — Liquid Glass
-  ═══════════════════════════════════════════════ */
-  #app-navbar {
+  /* ══════ NAV BAR — Liquid Glass ══════ */
+  #app-navbar{
     flex-shrink:0;
-    min-height:var(--navbar-h);
     padding-top:env(safe-area-inset-top);
-    display:flex; align-items:center;
-    padding-left:14px; padding-right:14px; gap:10px; z-index:200;
-    background: var(--lg-bg);
-    backdrop-filter: var(--lg-blur);
-    -webkit-backdrop-filter: var(--lg-blur);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 1px 0 var(--lg-border);
+    padding-left:14px;padding-right:14px;
+    min-height:calc(var(--navbar-h) + env(safe-area-inset-top));
+    display:flex;align-items:flex-end;padding-bottom:10px;
+    gap:10px;z-index:200;
+    background:var(--lg-bg);
+    backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
+    border-bottom:1px solid var(--border);
+    box-shadow:0 1px 0 var(--lg-border);
   }
-  .nav-logo { display:flex; align-items:center; gap:9px; text-decoration:none; flex-shrink:0; }
-  .nav-logo-icon { width:30px; height:30px; border-radius:9px; overflow:hidden; flex-shrink:0; box-shadow:0 2px 8px rgba(59,130,246,0.35); }
-  .nav-logo-icon svg { width:100%; height:100%; display:block; }
-  .nav-logo-name { font-size:16px; font-weight:700; letter-spacing:-.03em; color:var(--text); line-height:1.1; }
-  .nav-logo-name small { font-size:10px; font-weight:400; color:var(--muted); letter-spacing:0; display:block; }
-  .nav-spacer { flex:1; }
-  #nav-updated { font-size:10.5px; color:var(--faint); font-style:italic; white-space:nowrap; }
-
-  /* Nav button — Liquid Glass pill */
-  .nav-btn {
-    width:34px; height:34px; border-radius:10px; border:none; cursor:pointer;
-    background:var(--surface); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
-    border:1px solid var(--border); color:var(--muted);
-    display:flex; align-items:center; justify-content:center;
-    -webkit-tap-highlight-color:transparent;
-    transition:background .15s,color .15s,transform .1s;
-    flex-shrink:0;
+  .nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0;}
+  .nav-logo-icon{width:30px;height:30px;border-radius:9px;overflow:hidden;flex-shrink:0;box-shadow:0 2px 8px rgba(59,130,246,.35);}
+  .nav-logo-icon svg,.nav-logo-icon img{width:100%;height:100%;display:block;object-fit:cover;}
+  .nav-logo-name{font-size:16px;font-weight:700;letter-spacing:-.03em;color:var(--text);line-height:1.1;}
+  .nav-logo-name small{font-size:10px;font-weight:400;color:var(--muted);letter-spacing:0;display:block;}
+  .nav-spacer{flex:1;}
+  #nav-updated{font-size:10.5px;color:var(--faint);font-style:italic;white-space:nowrap;}
+  .nav-btn{
+    width:34px;height:34px;border-radius:10px;
+    background:var(--surface);backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border);color:var(--muted);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:background .15s,color .15s,transform .1s;flex-shrink:0;
   }
-  .nav-btn:active { transform:scale(.88); }
-  .nav-btn svg { width:15px; height:15px; }
+  .nav-btn:active{transform:scale(.88);}
+  .nav-btn svg{width:15px;height:15px;}
 
-  /* ═══════════════════════════════════════════════
-     VIEWS
-  ═══════════════════════════════════════════════ */
-  .app-view {
-    display:none; flex:1;
-    overflow-y:auto; overflow-x:hidden;
+  /* ══════ VIEWS ══════ */
+  .app-view{
+    display:none;flex:1;
+    overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;
-    padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 12px);
+    padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 8px);
   }
-  .app-view.active { display:block; }
-  /* Make sure views fill exactly the remaining height */
-  #app-shell { display:flex; flex-direction:column; }
+  .app-view.active{display:block;}
 
-  /* ═══════════════════════════════════════════════
-     AGENDA VIEW — day-by-day avec sticky header
-  ═══════════════════════════════════════════════ */
+  /* ══════ VUE AGENDA — vue compacte originale + Liquid Glass ══════ */
+
+  /* Override : la widget n'a pas de fond propre */
+  #view-agenda .agenda-widget{
+    background:none!important;border:none!important;border-radius:0!important;
+    box-shadow:none!important;backdrop-filter:none!important;margin:0!important;overflow:visible!important;
+  }
+  #view-agenda .aw-header{display:none!important;}
 
   /* Sticky day header — Liquid Glass */
-  .ag-day-header {
-    position:sticky; top:0; z-index:50;
-    display:flex; align-items:center; gap:12px;
-    padding:10px 16px 9px;
-    background: var(--lg-bg);
-    backdrop-filter: var(--lg-blur);
-    -webkit-backdrop-filter: var(--lg-blur);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 1px 0 var(--lg-border), 0 4px 16px rgba(0,0,0,0.12);
-  }
-  .ag-day-num {
-    width:38px; height:38px; border-radius:50%; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:18px; font-weight:600; color:var(--muted);
-    transition:background .18s, color .18s;
-  }
-  .ag-day-num.today {
-    background:linear-gradient(135deg,#3b82f6,#6366f1);
-    color:#fff;
-    box-shadow:0 4px 14px rgba(59,130,246,0.45);
-  }
-  .ag-day-info { flex:1; }
-  .ag-day-name { font-size:13px; font-weight:600; color:var(--text); letter-spacing:-.01em; }
-  .ag-day-name.today { color:var(--accent); }
-  .ag-day-sub { font-size:11px; color:var(--faint); margin-top:1px; }
-  .ag-today-pill {
-    font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-    color:var(--accent); background:rgba(96,165,250,.14); border:1px solid rgba(96,165,250,.28);
-    padding:2px 8px; border-radius:99px; flex-shrink:0;
-  }
-  @media (prefers-color-scheme:light) {
-    .ag-today-pill { color:#2563eb; background:rgba(37,99,235,.1); border-color:rgba(37,99,235,.22); }
+  #view-agenda .aw-compact-day-hd{
+    position:sticky!important;top:0!important;z-index:50!important;
+    background:var(--lg-bg)!important;
+    backdrop-filter:var(--lg-blur)!important;-webkit-backdrop-filter:var(--lg-blur)!important;
+    border-bottom:1px solid var(--border)!important;
+    border-top:none!important;
+    box-shadow:0 4px 16px rgba(0,0,0,.12)!important;
+    padding:11px 18px 9px!important;
+    margin-top:0!important;
   }
 
-  /* Empty day */
-  .ag-empty-day {
-    padding:18px 18px 16px 70px;
-    font-size:13px; color:var(--faint); font-style:italic;
-    border-bottom:1px solid var(--border);
+  /* Event rows — Liquid Glass cards */
+  #view-agenda .aw-event{
+    margin:6px 12px!important;
+    border-radius:16px!important;
+    background:var(--lg-bg)!important;
+    backdrop-filter:var(--lg-blur)!important;-webkit-backdrop-filter:var(--lg-blur)!important;
+    border:1px solid var(--border)!important;
+    box-shadow:var(--lg-shadow)!important;
+    padding:13px 16px!important;
   }
+  #view-agenda .aw-event:last-child{border-bottom:none!important;}
+  #view-agenda .aw-event:hover{background:var(--surface2)!important;}
+  #view-agenda .aw-skipped-row{padding:7px 18px!important;}
+  #view-agenda .aw-empty-state{padding:40px 24px!important;}
 
-  /* Weekend / no-class day */
-  .ag-rest-day {
-    display:flex; align-items:center; gap:10px;
-    padding:16px 18px; border-bottom:1px solid var(--border);
-  }
-  .ag-rest-icon { font-size:20px; flex-shrink:0; opacity:.6; }
-  .ag-rest-label { font-size:13px; color:var(--faint); }
+  /* Skipped list separator */
+  #view-agenda .aw-skipped-list{background:transparent!important;border-bottom:none!important;}
 
-  /* Event card — Liquid Glass */
-  .ag-event {
-    margin:8px 12px;
-    border-radius:16px;
-    padding:12px 14px 12px 14px;
-    display:flex; gap:12px; align-items:flex-start;
+  /* ══════ VUE SEMAINE — day-by-day slider ══════ */
+  #view-week{overflow:hidden;padding-bottom:0;}
+
+  /* Semaine header */
+  #week-nav{
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:12px 16px 10px;
     background:var(--lg-bg);
-    backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
-    border:1px solid var(--border);
-    box-shadow:var(--lg-shadow);
-    transition:transform .12s, box-shadow .12s;
-    cursor:pointer;
-    position:relative; overflow:hidden;
-  }
-  .ag-event:active { transform:scale(.985); }
-  /* Accent left bar */
-  .ag-event-bar {
-    position:absolute; left:0; top:8px; bottom:8px;
-    width:3px; border-radius:0 3px 3px 0;
-  }
-  .ag-event-body { flex:1; min-width:0; padding-left:6px; }
-  .ag-event-name {
-    font-size:14px; font-weight:600; color:var(--text);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    letter-spacing:-.015em; display:flex; align-items:center; gap:6px; flex-wrap:wrap;
-  }
-  .ag-event-meta {
-    font-size:12px; color:var(--muted); margin-top:3px;
-    display:flex; align-items:center; gap:5px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .ag-event-meta svg { width:11px; height:11px; opacity:.55; flex-shrink:0; }
-  .ag-event-time {
-    font-size:12px; color:var(--muted); text-align:right; flex-shrink:0;
-    font-variant-numeric:tabular-nums; line-height:1.5;
-    display:flex; flex-direction:column; align-items:flex-end; gap:2px;
-  }
-  .ag-event-dur { font-size:10.5px; color:var(--faint); }
-  /* Now badge */
-  .ag-now-bar {
-    height:2px; border-radius:99px; margin-top:8px;
-    background:rgba(255,255,255,.1);
-  }
-  .ag-now-bar-fill { height:100%; border-radius:99px; transition:width 1s linear; }
-  .ag-now-pill {
-    display:inline-flex; align-items:center;
-    font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    padding:1px 7px; border-radius:99px; border:1px solid;
-  }
-  .ag-event.is-past { opacity:.45; filter:saturate(.35); }
-  .ag-event.is-now  { box-shadow:0 0 0 1.5px currentColor, var(--lg-shadow); }
-
-  /* Event badge */
-  .ag-badge {
-    font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    padding:2px 7px; border-radius:99px; border:1px solid; flex-shrink:0;
-    display:inline-flex; align-items:center;
-  }
-  .ag-badge-group {
-    color:var(--muted); background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12);
-    font-size:9px;
-  }
-  @media (prefers-color-scheme:light) { .ag-badge-group { background:rgba(0,0,0,.05); border-color:rgba(0,0,0,.12); } }
-
-  /* Link */
-  .ag-link { color:var(--accent); text-decoration:none; font-size:11.5px; }
-  .ag-link:hover { text-decoration:underline; }
-
-  /* Color dot */
-  .ag-dot {
-    width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:5px;
-  }
-
-  /* ═══════════════════════════════════════════════
-     SEMAINE VIEW overrides
-  ═══════════════════════════════════════════════ */
-  .agenda-widget, #calendar-week {
-    background:none!important; border:none!important; border-radius:0!important;
-    box-shadow:none!important; backdrop-filter:none!important; margin:0!important; overflow:visible!important;
-  }
-  .agenda-widget .aw-header { display:none!important; }
-  .aw-cal-nav { padding:12px 14px 8px!important; }
-  /* Week view: both axes scrollable */
-  #view-week { overflow-x:hidden; overflow-y:auto; }
-  #view-week #aw-full { display:block!important; }
-  .aw-tgrid-scroll { overflow-x:auto!important; overflow-y:auto!important; -webkit-overflow-scrolling:touch!important; }
-  /* Grid needs a real height to scroll vertically */
-  #view-week .aw-tgrid-bottom { height:auto!important; }
-
-  /* Liquid Glass pour les events de la vue grille */
-  .aw-gev {
-    border-radius:9px!important;
-    backdrop-filter:blur(12px) saturate(140%)!important;
-    -webkit-backdrop-filter:blur(12px) saturate(140%)!important;
-    border:1px solid rgba(255,255,255,.12)!important;
-  }
-  @media (prefers-color-scheme:light) {
-    .aw-gev { border-color:rgba(255,255,255,.55)!important; }
-  }
-
-  /* ═══════════════════════════════════════════════
-     ACCOUNT PAGE
-  ═══════════════════════════════════════════════ */
-  .account-page { padding:28px 16px 24px; display:flex; flex-direction:column; align-items:center; gap:24px; }
-  .account-hero { display:flex; flex-direction:column; align-items:center; gap:10px; padding-top:12px; }
-  .account-hero-icon {
-    width:76px; height:76px; border-radius:22px; overflow:hidden;
-    box-shadow:0 10px 28px rgba(59,130,246,0.38);
-  }
-  .account-hero-icon svg { width:100%; height:100%; display:block; }
-  .account-hero-name { font-size:22px; font-weight:700; letter-spacing:-.035em; color:var(--text); }
-  .account-hero-sub  { font-size:12px; color:var(--faint); }
-  /* Liquid Glass rows */
-  .account-rows {
-    width:100%; border-radius:18px; overflow:hidden;
-    background:var(--lg-bg); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
-    border:1px solid var(--border); box-shadow:var(--lg-shadow);
-  }
-  .account-row {
-    width:100%; display:flex; align-items:center; gap:13px;
-    padding:15px 16px; border:none; background:none;
-    color:var(--text); font-size:15px; font-family:inherit;
-    cursor:pointer; text-align:left;
+    backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
     border-bottom:1px solid var(--border);
-    -webkit-tap-highlight-color:transparent;
-    transition:background .12s;
+    position:relative;z-index:10;
   }
-  .account-row:last-child { border-bottom:none; }
-  .account-row:active { background:var(--surface2); }
-  .account-row-icon { font-size:19px; flex-shrink:0; }
-  .account-row-label { flex:1; font-size:15px; }
-  .account-row-chevron { width:14px; height:14px; color:var(--faint); flex-shrink:0; }
-  #nav-updated-acc { font-size:11px; color:var(--faint); font-style:italic; }
+  #week-nav-title{font-size:22px;font-weight:800;letter-spacing:-.04em;color:var(--text);}
+  #week-nav-title span{font-weight:400;color:var(--muted);}
+  .week-nav-pills{display:flex;gap:6px;align-items:center;}
+  .week-pill{
+    height:30px;padding:0 14px;border-radius:99px;border:none;cursor:pointer;
+    background:var(--surface);backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border);color:var(--muted);
+    font-size:12px;font-weight:500;font-family:inherit;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .15s,color .15s,transform .1s;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .week-pill.today-pill-active{background:var(--accent);color:#fff;border-color:transparent;box-shadow:0 2px 10px rgba(37,99,235,.35);}
+  .week-pill:active{transform:scale(.93);}
+  .week-pill svg{width:14px;height:14px;}
 
-  /* ═══════════════════════════════════════════════
-     TAB BAR — Liquid Glass
-  ═══════════════════════════════════════════════ */
-  #app-tabbar {
-    position:fixed; bottom:0;
-    left:env(safe-area-inset-left); right:env(safe-area-inset-right);
+  /* Day strip — horizontal scroll snapping */
+  #week-day-strip{
+    display:flex;overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    flex:1;
+  }
+  #week-day-strip::-webkit-scrollbar{display:none;}
+
+  /* Each day page */
+  .week-day-page{
+    flex:0 0 100%;scroll-snap-align:start;
+    display:flex;flex-direction:column;
+    overflow-y:auto;overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 8px);
+  }
+
+  /* Day date header inside strip */
+  .week-day-date{
+    padding:14px 18px 10px;
+    display:flex;align-items:center;gap:12px;
+    border-bottom:1px solid var(--border);
+    flex-shrink:0;
+  }
+  .week-day-num{
+    width:42px;height:42px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:600;color:var(--muted);
+    flex-shrink:0;
+  }
+  .week-day-num.today{
+    background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;
+    box-shadow:0 4px 14px rgba(59,130,246,.45);
+  }
+  .week-day-label{flex:1;}
+  .week-day-name{font-size:15px;font-weight:600;color:var(--text);letter-spacing:-.01em;}
+  .week-day-name.today{color:var(--accent);}
+  .week-day-full{font-size:11.5px;color:var(--faint);margin-top:1px;}
+  .week-today-badge{
+    font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--accent);background:rgba(96,165,250,.14);border:1px solid rgba(96,165,250,.28);
+    padding:2px 8px;border-radius:99px;
+  }
+  @media(prefers-color-scheme:light){
+    .week-today-badge{color:#2563eb;background:rgba(37,99,235,.1);border-color:rgba(37,99,235,.22);}
+  }
+
+  /* Events in day pages — Liquid Glass cards */
+  .week-ev-card{
+    margin:6px 12px;border-radius:16px;
+    padding:12px 14px 12px 16px;
+    display:flex;gap:10px;align-items:flex-start;
+    background:var(--lg-bg);
+    backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border);box-shadow:var(--lg-shadow);
+    cursor:pointer;position:relative;overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .1s;
+  }
+  .week-ev-card:active{transform:scale(.985);}
+  .week-ev-bar{position:absolute;left:0;top:8px;bottom:8px;width:3px;border-radius:0 3px 3px 0;}
+  .week-ev-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+  .week-ev-body{flex:1;min-width:0;}
+  .week-ev-name{
+    font-size:14px;font-weight:600;color:var(--text);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    letter-spacing:-.015em;display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  }
+  .week-ev-meta{
+    font-size:12px;color:var(--muted);margin-top:3px;
+    display:flex;align-items:center;gap:5px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .week-ev-meta svg{width:11px;height:11px;opacity:.55;flex-shrink:0;}
+  .week-ev-time{
+    font-size:12px;color:var(--muted);text-align:right;flex-shrink:0;
+    font-variant-numeric:tabular-nums;line-height:1.5;
+    display:flex;flex-direction:column;align-items:flex-end;gap:2px;
+  }
+  .week-ev-dur{font-size:10.5px;color:var(--faint);}
+  .week-ev-progress{height:2px;border-radius:99px;margin-top:7px;background:rgba(255,255,255,.1);}
+  .week-ev-progress-fill{height:100%;border-radius:99px;transition:width 1s linear;}
+  .week-badge{
+    font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 7px;border-radius:99px;border:1px solid;flex-shrink:0;
+    display:inline-flex;align-items:center;
+  }
+  .week-badge-group{color:var(--muted);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);}
+  .week-now-pill{
+    display:inline-flex;align-items:center;
+    font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    padding:1px 7px;border-radius:99px;border:1px solid;
+  }
+  .week-link{color:var(--accent);text-decoration:none;font-size:11.5px;}
+  .week-empty-day{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:48px 24px;gap:8px;color:var(--faint);font-size:13px;
+  }
+  .week-empty-icon{font-size:32px;margin-bottom:4px;}
+  @media(prefers-color-scheme:light){
+    .week-badge-group{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.12);}
+  }
+
+  /* ══════ VUE COMPTE ══════ */
+  .account-page{padding:28px 16px 24px;display:flex;flex-direction:column;align-items:center;gap:24px;}
+  .account-hero{display:flex;flex-direction:column;align-items:center;gap:10px;padding-top:12px;}
+  .account-hero-icon{width:76px;height:76px;border-radius:22px;overflow:hidden;box-shadow:0 10px 28px rgba(59,130,246,.38);}
+  .account-hero-icon img{width:100%;height:100%;display:block;object-fit:cover;}
+  .account-hero-name{font-size:22px;font-weight:700;letter-spacing:-.035em;color:var(--text);}
+  .account-hero-sub{font-size:12px;color:var(--faint);}
+  .account-rows{
+    width:100%;border-radius:18px;overflow:hidden;
+    background:var(--lg-bg);backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border);box-shadow:var(--lg-shadow);
+  }
+  .account-row{
+    width:100%;display:flex;align-items:center;gap:13px;
+    padding:15px 16px;border:none;background:none;
+    color:var(--text);font-size:15px;font-family:inherit;
+    cursor:pointer;text-align:left;
+    border-bottom:1px solid var(--border);
+    -webkit-tap-highlight-color:transparent;transition:background .12s;
+  }
+  .account-row:last-child{border-bottom:none;}
+  .account-row:active{background:var(--surface2);}
+  .account-row-icon{font-size:19px;flex-shrink:0;}
+  .account-row-label{flex:1;}
+  .account-row-chevron{width:14px;height:14px;color:var(--faint);flex-shrink:0;}
+  #nav-updated-acc{font-size:11px;color:var(--faint);font-style:italic;}
+
+  /* ══════ TAB BAR — Liquid Glass ══════ */
+  #app-tabbar{
+    position:fixed;bottom:0;
+    left:env(safe-area-inset-left);right:env(safe-area-inset-right);
     height:calc(var(--tab-h) + env(safe-area-inset-bottom));
     padding-bottom:env(safe-area-inset-bottom);
-    display:flex; align-items:flex-start;
+    display:flex;align-items:flex-start;
     background:var(--lg-bg);
-    backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
     border-top:1px solid var(--border);
-    box-shadow:0 -1px 0 var(--lg-border), 0 -4px 20px rgba(0,0,0,.15);
+    box-shadow:0 -1px 0 var(--lg-border),0 -4px 20px rgba(0,0,0,.15);
     z-index:200;
   }
-  .tab-btn {
-    flex:1; height:var(--tab-h);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
-    border:none; background:none; cursor:pointer; color:var(--faint);
-    -webkit-tap-highlight-color:transparent; font-family:inherit;
-    transition:color .15s, transform .1s;
+  .tab-btn{
+    flex:1;height:var(--tab-h);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    border:none;background:none;cursor:pointer;color:var(--faint);
+    -webkit-tap-highlight-color:transparent;font-family:inherit;
+    transition:color .15s,transform .1s;
   }
-  .tab-btn:active { transform:scale(.88); }
-  .tab-btn.active { color:var(--accent); }
-  .tab-btn svg  { width:23px; height:23px; }
-  .tab-btn span { font-size:10px; font-weight:500; letter-spacing:.015em; }
-  .tab-indicator {
-    position:absolute; top:0; height:2px; border-radius:0 0 3px 3px;
+  .tab-btn:active{transform:scale(.88);}
+  .tab-btn.active{color:var(--accent);}
+  .tab-btn svg{width:23px;height:23px;}
+  .tab-btn span{font-size:10px;font-weight:500;letter-spacing:.015em;}
+  .tab-indicator{
+    position:absolute;top:0;height:2px;border-radius:0 0 3px 3px;
     background:linear-gradient(90deg,var(--accent),var(--accent2));
-    transition:left .28s cubic-bezier(.34,1.4,.64,1), width .28s;
+    transition:left .28s cubic-bezier(.34,1.4,.64,1),width .28s;
     box-shadow:0 0 8px rgba(96,165,250,.6);
   }
 
-  /* ═══════════════════════════════════════════════
-     INSTALL BANNER
-  ═══════════════════════════════════════════════ */
-  #install-banner {
-    display:none; position:fixed;
+  /* ══════ INSTALL BANNER ══════ */
+  #install-banner{
+    display:none;position:fixed;
     bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 12px);
-    left:14px; right:14px;
-    background:var(--lg-bg); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
-    border:1px solid var(--border2); border-radius:18px; padding:12px 16px;
-    gap:10px; align-items:center; color:var(--text);
-    box-shadow:var(--lg-shadow); z-index:300;
+    left:14px;right:14px;
+    background:var(--lg-bg);backdrop-filter:var(--lg-blur);-webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border2);border-radius:18px;padding:12px 16px;
+    gap:10px;align-items:center;color:var(--text);
+    box-shadow:var(--lg-shadow);z-index:300;
     animation:bannerUp .35s cubic-bezier(.34,1.56,.64,1);
   }
-  #install-banner.show { display:flex; }
-  @keyframes bannerUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  .install-icon { font-size:22px; flex-shrink:0; }
-  .install-text { flex:1; line-height:1.4; }
-  .install-text strong { display:block; font-size:13.5px; font-weight:600; margin-bottom:2px; }
-  .install-text small  { font-size:11.5px; color:var(--muted); }
-  .install-close { background:none; border:none; color:var(--faint); font-size:20px; cursor:pointer; padding:2px 4px; }
+  #install-banner.show{display:flex;}
+  @keyframes bannerUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  .install-icon{font-size:22px;flex-shrink:0;}
+  .install-text{flex:1;line-height:1.4;}
+  .install-text strong{display:block;font-size:13.5px;font-weight:600;margin-bottom:2px;}
+  .install-text small{font-size:11.5px;color:var(--muted);}
+  .install-close{background:none;border:none;color:var(--faint);font-size:20px;cursor:pointer;padding:2px 4px;}
   </style>
 </head>
 <body>
@@ -405,13 +366,7 @@
   <nav id="app-navbar">
     <a class="nav-logo" href="#">
       <div class="nav-logo-icon">
-        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="48" height="48" rx="13" fill="url(#ng)"/>
-          <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/>
-          <defs><linearGradient id="ng" x1="0" y1="0" x2="48" y2="48">
-            <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#6366f1"/>
-          </linearGradient></defs>
-        </svg>
+        <img src="Asset/Picture/icon-180.png" alt="Calendar"/>
       </div>
       <div class="nav-logo-name">Calendar<small>by Shortcut™</small></div>
     </a>
@@ -425,31 +380,49 @@
     </button>
   </nav>
 
-  <!-- VUE AGENDA -->
+  <!-- VUE AGENDA — vue compacte originale -->
   <div id="view-agenda" class="app-view active">
-    <div id="ag-days-container"></div>
+    <div id="calendar-agenda" class="agenda-widget">
+      <!-- aw-compact est le container original de awRenderCompact -->
+      <div id="aw-compact">
+        <div class="aw-state"><span class="aw-spinner"></span>Chargement…</div>
+      </div>
+      <!-- header caché requis par agenda_b.js -->
+      <div class="aw-header" style="display:none">
+        <span class="aw-title"></span>
+        <span class="aw-last-updated" id="aw-last-updated"></span>
+        <button class="aw-toggle" id="aw-toggle-btn" style="display:none"><span class="aw-btn-label">Calendar</span></button>
+      </div>
+    </div>
   </div>
 
-  <!-- VUE SEMAINE -->
-  <div id="view-week" class="app-view">
-    <div id="calendar-week" class="agenda-widget">
-      <div id="aw-full"></div>
+  <!-- VUE SEMAINE — jour par jour avec swipe -->
+  <div id="view-week" class="app-view" style="display:none;flex-direction:column;">
+
+    <!-- Nav semaine -->
+    <div id="week-nav">
+      <div id="week-nav-title">…</div>
+      <div class="week-nav-pills">
+        <button class="week-pill" id="week-prev-btn" onclick="weekGoBy(-1)" title="Jour précédent">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7l4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="week-pill" id="week-today-btn" onclick="weekGoToday()">Aujourd'hui</button>
+        <button class="week-pill" onclick="weekGoBy(1)" title="Jour suivant">
+          <svg viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
     </div>
+
+    <!-- Strip de pages jour par jour -->
+    <div id="week-day-strip"></div>
+
   </div>
 
   <!-- VUE COMPTE -->
   <div id="view-account" class="app-view">
     <div class="account-page">
       <div class="account-hero">
-        <div class="account-hero-icon">
-          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="48" height="48" rx="14" fill="url(#ag)"/>
-            <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/>
-            <defs><linearGradient id="ag" x1="0" y1="0" x2="48" y2="48">
-              <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#6366f1"/>
-            </linearGradient></defs>
-          </svg>
-        </div>
+        <div class="account-hero-icon"><img src="Asset/Picture/icon-180.png" alt="Calendar"/></div>
         <div class="account-hero-name">Calendar</div>
         <div class="account-hero-sub">by Shortcut™ · © 2026 Ogust'1</div>
       </div>
@@ -469,15 +442,8 @@
     </div>
   </div>
 
-  <!-- éléments cachés requis par agenda_b.js -->
-  <div style="display:none" aria-hidden="true">
-    <div id="aw-compact"></div>
-    <div class="aw-header">
-      <span class="aw-title"></span>
-      <span class="aw-last-updated" id="aw-last-updated"></span>
-      <button class="aw-toggle" id="aw-toggle-btn"><span class="aw-btn-label">Calendar</span></button>
-    </div>
-  </div>
+  <!-- aw-full caché — requis par awRenderCalendar mais on n'utilise pas sa sortie -->
+  <div style="display:none" aria-hidden="true"><div id="aw-full"></div></div>
 
   <!-- TAB BAR -->
   <div id="app-tabbar">
@@ -517,266 +483,297 @@
 <script src="Asset/JS/onboarding.js"></script>
 <script src="Asset/JS/agenda_b.js"></script>
 <script>
-/* ══════════════════════════════════════════════════
-   AGENDA VIEW — rendu jour par jour avec sticky header
-══════════════════════════════════════════════════ */
-var _agByDay = null;
-var _agToday = null;
+/* ══════════════════════════════════════════════
+   VUE SEMAINE — jour par jour
+══════════════════════════════════════════════ */
+var _wkByDay   = null;
+var _wkToday   = null;
+var _wkCurDate = null;  // date string currently visible
+var _wkDates   = [];    // all available dates
 
 var COLOR_HEX = {
-  blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
-  amber:'#f59e0b', rose:'#f43f5e', cyan:'#06b6d4',
-  orange:'#f97316', grey:'#94a3b8', lime:'#84cc16'
+  blue:'#3b82f6',violet:'#8b5cf6',emerald:'#10b981',
+  amber:'#f59e0b',rose:'#f43f5e',cyan:'#06b6d4',
+  orange:'#f97316',grey:'#94a3b8',lime:'#84cc16'
 };
 
-function agBuildDays(byDay, today) {
-  _agByDay = byDay; _agToday = today;
-  var container = document.getElementById('ag-days-container');
-  if (!container) return;
+function wkColorFor(name) {
+  var MAP=[{m:'math',c:'blue'},{m:'physique',c:'cyan'},{m:'informatique',c:'violet'},
+    {m:'sciences ind',c:'amber'},{m:'anglais',c:'emerald'},{m:'sport',c:'rose'},
+    {m:'culture',c:'orange'},{m:'proj',c:'grey'}];
+  var COLS=['blue','violet','emerald','amber','rose','cyan','orange','grey'];
+  var n=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for(var i=0;i<MAP.length;i++) if(n.includes(MAP[i].m)) return MAP[i].c;
+  var w=n.split(/[\s\-\u2013]/)[0],h=0;
+  for(var j=0;j<w.length;j++) h=(h*31+w.charCodeAt(j))>>>0;
+  return COLS[h%COLS.length];
+}
+function wkFmtTime(iso){return new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});}
+function wkFmtDur(s,e){var ms=new Date(e)-new Date(s),h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000);if(h===0)return m+'min';if(m===0)return h+'h';return h+'h'+String(m).padStart(2,'0');}
+function wkDateStr(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
-  var nowTs = Date.now();
-  var base  = new Date(today + 'T00:00:00');
-  var html  = '';
-  var hasAny = false;
+function wkBuildStrip(byDay, today) {
+  _wkByDay  = byDay;
+  _wkToday  = today;
+  if (!_wkCurDate) _wkCurDate = today;
 
+  // Build list of all dates with events + ±7 days around today
+  var base = new Date(today + 'T00:00:00');
+  _wkDates = [];
   for (var i = 0; i < 49; i++) {
-    var d  = new Date(base); d.setDate(base.getDate() + i);
-    var ds = agDateStr(d);
-    var isToday  = (ds === today);
-    var isWE     = (d.getDay() === 0 || d.getDay() === 6);
-    var items    = (byDay[ds] || []);
-    var future   = items.filter(function(x) {
-      var ev = x.ev;
-      return ev.start.length === 10 ? ds >= today : new Date(ev.end) > nowTs;
-    });
+    var d = new Date(base); d.setDate(base.getDate() + i);
+    _wkDates.push(wkDateStr(d));
+  }
 
-    // Build header
-    var dow   = d.toLocaleDateString('fr-FR', {weekday:'long'});
-    dow = dow.charAt(0).toUpperCase() + dow.slice(1);
-    var dmStr = d.toLocaleDateString('fr-FR', {day:'numeric', month:'long'});
-    var numStr = d.getDate();
+  var strip = document.getElementById('week-day-strip');
+  if (!strip) return;
+  strip.innerHTML = '';
 
-    html += '<div class="ag-day-section" data-date="' + ds + '">';
-    html += '<div class="ag-day-header">';
-    html += '<div class="ag-day-num' + (isToday ? ' today' : '') + '">' + numStr + '</div>';
-    html += '<div class="ag-day-info">';
-    html += '<div class="ag-day-name' + (isToday ? ' today' : '') + '">' + dow + '</div>';
-    html += '<div class="ag-day-sub">' + dmStr + '</div>';
-    html += '</div>';
-    if (isToday) html += '<div class="ag-today-pill">Aujourd\'hui</div>';
-    html += '</div>'; // end header
+  _wkDates.forEach(function(ds) {
+    var page = wkBuildDayPage(ds, byDay, today);
+    strip.appendChild(page);
+  });
 
-    if (future.length === 0) {
-      if (isWE) {
-        html += '<div class="ag-rest-day"><span class="ag-rest-icon">🌿</span><span class="ag-rest-label">Week-end</span></div>';
-      } else {
-        html += '<div class="ag-empty-day">Aucun cours</div>';
-      }
-    } else {
-      hasAny = true;
-      future.forEach(function(x) {
-        html += agEventCard(x.ev, x.i, isToday, nowTs);
-      });
+  // Scroll to current date instantly
+  wkScrollTo(_wkCurDate, false);
+  wkUpdateNav();
+
+  // Listen to scroll end to update nav title
+  strip.addEventListener('scroll', wkOnScroll, {passive: true});
+}
+
+var _wkScrollTimer = null;
+function wkOnScroll() {
+  clearTimeout(_wkScrollTimer);
+  _wkScrollTimer = setTimeout(function() {
+    var strip = document.getElementById('week-day-strip');
+    if (!strip) return;
+    var idx = Math.round(strip.scrollLeft / strip.offsetWidth);
+    if (idx >= 0 && idx < _wkDates.length) {
+      _wkCurDate = _wkDates[idx];
+      wkUpdateNav();
     }
-
-    html += '</div>'; // end section
-  }
-
-  container.innerHTML = html;
-
-  // Scroll to today's section
-  var todaySec = container.querySelector('[data-date="' + today + '"]');
-  if (todaySec) {
-    var view = document.getElementById('view-agenda');
-    if (view) view.scrollTop = todaySec.offsetTop;
-  }
+  }, 80);
 }
 
-function agDateStr(d) {
-  var y = d.getFullYear();
-  var m = String(d.getMonth()+1).padStart(2,'0');
-  var day = String(d.getDate()).padStart(2,'0');
-  return y + '-' + m + '-' + day;
+function wkScrollTo(ds, smooth) {
+  var strip = document.getElementById('week-day-strip');
+  if (!strip) return;
+  var idx = _wkDates.indexOf(ds);
+  if (idx < 0) return;
+  strip.scrollTo({left: idx * strip.offsetWidth, behavior: smooth ? 'smooth' : 'instant'});
 }
 
-function agEventCard(ev, idx, isToday, nowTs) {
-  var allDay   = ev.start.length === 10;
-  var now      = !allDay && (new Date(ev.start) <= nowTs && new Date(ev.end) >= nowTs);
-  var past     = !allDay && !now && new Date(ev.end) < nowTs;
-  var fullName = ev.summary || '(Sans titre)';
-  var shortName= fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
-  var color    = ev.cal2 ? 'lime' : agColorFor(shortName);
-  var accent   = COLOR_HEX[color] || '#3b82f6';
-  var isLM     = window.matchMedia('(prefers-color-scheme: light)').matches;
+function wkUpdateNav() {
+  var el = document.getElementById('week-nav-title');
+  var tb = document.getElementById('week-today-btn');
+  if (!_wkCurDate) return;
+  var d = new Date(_wkCurDate + 'T00:00:00');
+  var dow = d.toLocaleDateString('fr-FR',{weekday:'long'});
+  dow = dow.charAt(0).toUpperCase() + dow.slice(1);
+  var month = d.toLocaleDateString('fr-FR',{month:'long'});
+  month = month.charAt(0).toUpperCase() + month.slice(1);
+  if (el) el.innerHTML = '<strong>' + dow + '</strong> <span>' + d.getDate() + ' ' + month + ' ' + d.getFullYear() + '</span>';
+  if (tb) tb.classList.toggle('today-pill-active', _wkCurDate === _wkToday);
+}
 
-  var typeM  = fullName.match(/\b(CM|TD|TP|DS|Exam|Cours)\b/i);
-  var badge  = typeM ? typeM[0].toUpperCase() : '';
-  var grpM   = fullName.match(/(?:AB|CD|EF|GH|A&M\d[A-Z\s]*(?:S\d+)?)/i);
-  var group  = grpM ? grpM[0].trim() : '';
+function weekGoBy(delta) {
+  var idx = _wkDates.indexOf(_wkCurDate);
+  var newIdx = Math.max(0, Math.min(_wkDates.length - 1, idx + delta));
+  _wkCurDate = _wkDates[newIdx];
+  wkScrollTo(_wkCurDate, true);
+  wkUpdateNav();
+}
+function weekGoToday() {
+  _wkCurDate = _wkToday;
+  wkScrollTo(_wkCurDate, true);
+  wkUpdateNav();
+}
 
-  var startStr = allDay ? 'Journée' : agFmtTime(ev.start) + ' – ' + agFmtTime(ev.end);
-  var dur = allDay ? '' : agFmtDur(ev.start, ev.end);
+function wkBuildDayPage(ds, byDay, today) {
+  var page = document.createElement('div');
+  page.className = 'week-day-page';
+  page.dataset.date = ds;
 
-  // Progress
-  var pct = now ? Math.min(100, Math.round((nowTs - new Date(ev.start)) / (new Date(ev.end) - new Date(ev.start)) * 100)) : 0;
+  var nowTs   = Date.now();
+  var isToday = (ds === today);
+  var d       = new Date(ds + 'T00:00:00');
+  var isWE    = (d.getDay() === 0 || d.getDay() === 6);
+  var dow     = d.toLocaleDateString('fr-FR',{weekday:'long'});
+  dow = dow.charAt(0).toUpperCase() + dow.slice(1);
+  var full = d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
+  var num  = d.getDate();
 
-  // Parse desc for extras
-  var desc = ev.description || '';
+  // Date header
+  var hdr = '<div class="week-day-date">';
+  hdr += '<div class="week-day-num' + (isToday?' today':'') + '">' + num + '</div>';
+  hdr += '<div class="week-day-label">';
+  hdr += '<div class="week-day-name' + (isToday?' today':'') + '">' + dow + '</div>';
+  hdr += '<div class="week-day-full">' + full + '</div>';
+  hdr += '</div>';
+  if (isToday) hdr += '<div class="week-today-badge">Aujourd\'hui</div>';
+  hdr += '</div>';
+
+  var items = (byDay[ds] || []).filter(function(x){
+    var ev = x.ev;
+    return ev.start.length===10 ? ds >= today : new Date(ev.end) > nowTs;
+  });
+
+  if (items.length === 0) {
+    hdr += '<div class="week-empty-day">';
+    hdr += '<div class="week-empty-icon">' + (isWE ? '🌿' : '✅') + '</div>';
+    hdr += '<div>' + (isWE ? 'Week-end' : 'Aucun cours') + '</div>';
+    hdr += '</div>';
+  } else {
+    items.forEach(function(x) {
+      hdr += wkEventCard(x.ev, x.i, nowTs);
+    });
+  }
+
+  page.innerHTML = hdr;
+  return page;
+}
+
+function wkEventCard(ev, idx, nowTs) {
+  var allDay = ev.start.length === 10;
+  var now    = !allDay && new Date(ev.start) <= nowTs && new Date(ev.end) >= nowTs;
+  var past   = !allDay && !now && new Date(ev.end) < nowTs;
+  var full   = ev.summary || '(Sans titre)';
+  var short  = full.includes(' - ') ? full.split(' - ')[0].trim() : full;
+  var color  = ev.cal2 ? 'lime' : wkColorFor(short);
+  var accent = COLOR_HEX[color] || '#3b82f6';
+  var isLM   = window.matchMedia('(prefers-color-scheme: light)').matches;
+  var alpha  = isLM ? '22' : '28';
+
+  var typeM = full.match(/\b(CM|TD|TP|DS|Exam|Cours)\b/i);
+  var badge = typeM ? typeM[0].toUpperCase() : '';
+  var grpM  = full.match(/(?:AB|CD|EF|GH|A&M\d[A-Z\s]*(?:S\d+)?)/i);
+  var group = grpM ? grpM[0].trim() : '';
+
+  var timeStr = allDay ? 'Journée' : wkFmtTime(ev.start) + ' – ' + wkFmtTime(ev.end);
+  var dur     = allDay ? '' : wkFmtDur(ev.start, ev.end);
+  var pct     = now ? Math.min(100,Math.round((nowTs-new Date(ev.start))/(new Date(ev.end)-new Date(ev.start))*100)) : 0;
+
+  // Teacher from description
   var teacher = '';
-  var fmBlock = desc.match(/Formateur[^:]*:([\s\S]*?)(?:Participants|---|$)/i);
-  if (fmBlock) {
-    var names = (fmBlock[1].match(/[A-ZÀÂÄ][A-ZÀÂÄ\s\-]{2,}[a-zàâä][a-zàâä\-]+/g) || [])
-      .filter(function(n){ return n.length > 3 && !n.includes('@'); });
-    teacher = names.join(', ');
+  var desc    = ev.description || '';
+  var fmB     = desc.match(/Formateur[^:]*:([\s\S]*?)(?:Participants|---|$)/i);
+  if (fmB) {
+    var ns = (fmB[1].match(/[A-ZÀÂÄ][A-ZÀÂÄ\s\-]{2,}[a-zàâä][a-zàâä\-]+/g)||[]).filter(function(n){return n.length>3&&!n.includes('@');});
+    teacher = ns.join(', ');
   }
-  var mapM = desc.match(/https?:\/\/(?:www\.)?openstreetmap\.[^\s]+/i) || desc.match(/https?:\/\/maps\.[^\s]+/i);
+  var mapM   = desc.match(/https?:\/\/(?:www\.)?openstreetmap\.[^\s]+/i)||desc.match(/https?:\/\/maps\.[^\s]+/i);
   var mapUrl = mapM ? mapM[0] : '';
 
-  var alpha = isLM ? '22' : '28';
-  var cardStyle = now ? 'border-color:' + accent + '55;' : '';
-  var barStyle  = 'background:' + accent;
-
-  var html = '<div class="ag-event' + (past?' is-past':'') + (now?' is-now':'') + '" style="' + cardStyle + 'color:' + accent + '" data-ev="' + idx + '" onclick="awPopOpen(this,' + idx + ')">';
-  html += '<div class="ag-event-bar" style="' + barStyle + '"></div>';
-  // Dot
-  html += '<div class="ag-dot" style="background:' + accent + ';box-shadow:0 0 7px ' + accent + '88"></div>';
-  html += '<div class="ag-event-body">';
-  html += '<div class="ag-event-name">' + shortName;
-  if (badge) html += '<span class="ag-badge" style="color:' + accent + ';border-color:' + accent + alpha + ';background:' + accent + '18">' + badge + '</span>';
-  if (group) html += '<span class="ag-badge ag-badge-group">' + group + '</span>';
-  if (now)   html += '<span class="ag-now-pill" style="color:' + accent + ';border-color:' + accent + '55;background:' + accent + '18">En cours</span>';
-  html += '</div>';
+  var borderStyle = now ? 'border-color:'+accent+'66;' : '';
+  var h = '<div class="week-ev-card' + (past?' is-past':'') + '" style="' + borderStyle + 'color:'+accent+'" onclick="awPopOpen(this,'+idx+')">';
+  h += '<div class="week-ev-bar" style="background:'+accent+'"></div>';
+  h += '<div class="week-ev-dot" style="background:'+accent+';box-shadow:0 0 7px '+accent+'88"></div>';
+  h += '<div class="week-ev-body">';
+  h += '<div class="week-ev-name">'+short;
+  if (badge) h += '<span class="week-badge" style="color:'+accent+';border-color:'+accent+alpha+';background:'+accent+'18">'+badge+'</span>';
+  if (group) h += '<span class="week-badge week-badge-group">'+group+'</span>';
+  if (now)   h += '<span class="week-now-pill" style="color:'+accent+';border-color:'+accent+'55;background:'+accent+'18">En cours</span>';
+  h += '</div>';
   if (ev.location) {
-    html += '<div class="ag-event-meta">';
-    html += '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>';
-    html += ev.location.split(',')[0].trim();
-    if (mapUrl) html += ' <a class="ag-link" href="' + mapUrl + '" target="_blank" rel="noopener">↗</a>';
-    html += '</div>';
+    h += '<div class="week-ev-meta"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>'+ev.location.split(',')[0].trim();
+    if (mapUrl) h += ' <a class="week-link" href="'+mapUrl+'" target="_blank" rel="noopener">↗</a>';
+    h += '</div>';
   }
-  if (teacher) {
-    html += '<div class="ag-event-meta">';
-    html += '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
-    html += teacher + '</div>';
-  }
-  if (now) {
-    html += '<div class="ag-now-bar"><div class="ag-now-bar-fill" style="width:' + pct + '%;background:' + accent + '" data-ag-bar="' + idx + '"></div></div>';
-  }
-  html += '</div>'; // body
-  html += '<div class="ag-event-time"><span>' + startStr + '</span>';
-  if (dur) html += '<span class="ag-event-dur">' + dur + '</span>';
-  html += '</div>';
-  html += '</div>'; // card
-  return html;
+  if (teacher) h += '<div class="week-ev-meta"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'+teacher+'</div>';
+  if (now) h += '<div class="week-ev-progress"><div class="week-ev-progress-fill" style="width:'+pct+'%;background:'+accent+'" data-wk-bar="'+idx+'"></div></div>';
+  h += '</div>';
+  h += '<div class="week-ev-time"><span>'+timeStr+'</span>';
+  if (dur) h += '<span class="week-ev-dur">'+dur+'</span>';
+  h += '</div></div>';
+  return h;
 }
 
-function agColorFor(name) {
-  var COLOR_MAP = [
-    {m:'math',c:'blue'},{m:'physique',c:'cyan'},{m:'informatique',c:'violet'},
-    {m:'sciences ind',c:'amber'},{m:'anglais',c:'emerald'},{m:'sport',c:'rose'},
-    {m:'culture',c:'orange'},{m:'proj',c:'grey'}
-  ];
-  var COLORS = ['blue','violet','emerald','amber','rose','cyan','orange','grey'];
-  var norm = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  for (var i=0;i<COLOR_MAP.length;i++) {
-    if (norm.includes(COLOR_MAP[i].m)) return COLOR_MAP[i].c;
-  }
-  var word = norm.split(/[\s\-\u2013]/)[0];
-  var h = 0;
-  for (var j=0;j<word.length;j++) h = (h*31 + word.charCodeAt(j)) >>> 0;
-  return COLORS[h % COLORS.length];
-}
-function agFmtTime(iso) {
-  return new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-}
-function agFmtDur(s,e) {
-  var ms=new Date(e)-new Date(s), h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);
-  if(h===0) return m+'min'; if(m===0) return h+'h'; return h+'h'+String(m).padStart(2,'0');
-}
-
-/* Patch awRender to also build the new agenda view */
-var _origAwRender = null;
-document.addEventListener('DOMContentLoaded', function() {
-  if (typeof awRender === 'function') {
-    _origAwRender = awRender;
-    // Override not possible directly — use MutationObserver on aw-compact
-    // Instead we hook into awInit success via polling
-  }
-});
-
-// Poll for data availability and build agenda view
-var _agBuilt = false;
-setInterval(function() {
-  if (!_agBuilt && typeof awEvCache !== 'undefined' && awEvCache.length > 0 && typeof window._awByDay !== 'undefined') {
-    var today = (typeof awToday === 'function') ? awToday() : new Date().toISOString().slice(0,10);
-    agBuildDays(window._awByDay, today);
-    _agBuilt = true;
-  }
-  // Rebuild if data refreshed
-  if (_agBuilt && typeof awLastUpdated !== 'undefined' && window._lastAgBuild !== awLastUpdated) {
-    var today2 = (typeof awToday === 'function') ? awToday() : new Date().toISOString().slice(0,10);
-    agBuildDays(window._awByDay, today2);
-    window._lastAgBuild = awLastUpdated;
-  }
-  // Sync last-updated
-  var src = document.getElementById('aw-last-updated');
-  var d1  = document.getElementById('nav-updated');
-  var d2  = document.getElementById('nav-updated-acc');
-  if (src && d1 && src.textContent !== d1.textContent) { d1.textContent = src.textContent; d1.style.color = src.style.color||''; }
-  if (src && d2) d2.textContent = src.textContent;
-  // Update progress bars
-  document.querySelectorAll('[data-ag-bar]').forEach(function(el) {
-    var idx = parseInt(el.dataset.agBar);
-    var ev  = awEvCache && awEvCache[idx];
-    if (!ev) return;
-    var now = Date.now();
-    var pct = Math.min(100, Math.round((now - new Date(ev.start)) / (new Date(ev.end) - new Date(ev.start)) * 100));
-    el.style.width = pct + '%';
-  });
-}, 800);
-
-/* Re-render on color scheme change */
-window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function() {
-  if (_agByDay && _agToday) { _agBuilt = false; }
-});
-
-/* ══════════════════════════════════════════════════
+/* ══════════════════════════════════════════════
    TABS
-══════════════════════════════════════════════════ */
-var VIEWS = ['view-agenda','view-week','view-account'];
-var TABS  = ['tab-today','tab-week','tab-settings'];
+══════════════════════════════════════════════ */
+var VIEWS=['view-agenda','view-week','view-account'];
+var TABS =['tab-today','tab-week','tab-settings'];
 
 function tabSelect(idx) {
-  VIEWS.forEach(function(id,i){ var el=document.getElementById(id); if(el) el.classList.toggle('active',i===idx); });
+  VIEWS.forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(!el) return;
+    if(i===idx){ el.style.display=(id==='view-week'?'flex':'block'); el.classList.add('active'); }
+    else{ el.style.display='none'; el.classList.remove('active'); }
+  });
   TABS.forEach(function(id,i){ var el=document.getElementById(id); if(el) el.classList.toggle('active',i===idx); });
-  var tb=document.getElementById('app-tabbar'), ind=document.getElementById('tab-indicator');
+  // indicator
+  var tb=document.getElementById('app-tabbar'),ind=document.getElementById('tab-indicator');
   if(tb&&ind){ var w=tb.offsetWidth/TABS.length; ind.style.left=(idx*w)+'px'; ind.style.width=w+'px'; }
-  // Scroll agenda to today when switching back
-  if (idx===0 && _agByDay) {
-    var con=document.getElementById('ag-days-container');
-    var view=document.getElementById('view-agenda');
-    if(con&&view){
-      var today=(typeof awToday==='function')?awToday():new Date().toISOString().slice(0,10);
-      var sec=con.querySelector('[data-date="'+today+'"]');
-      if(sec) view.scrollTop=sec.offsetTop;
-    }
+
+  if(idx===1 && _wkByDay){
+    // Rebuild strip if needed, scroll to today or current
+    setTimeout(function(){
+      var strip=document.getElementById('week-day-strip');
+      if(strip&&strip.children.length===0 && _wkByDay) wkBuildStrip(_wkByDay,_wkToday);
+      else if(strip&&_wkCurDate) wkScrollTo(_wkCurDate,false);
+    },50);
   }
 }
-function appShowAgenda(){ tabSelect(0); }
-function appShowWeek(){   tabSelect(1); }
-function forceRefresh(){  _agBuilt=false; if(typeof awInit==='function') awInit(); }
 
-window.addEventListener('load', function(){ tabSelect(0); });
+function appShowAgenda(){tabSelect(0);}
+function appShowWeek(){tabSelect(1);}
+function forceRefresh(){if(typeof awInit==='function') awInit();}
+
+window.addEventListener('load',function(){ tabSelect(0); });
+
+/* Sync last-updated + rebuild week on data change */
+var _lastBuildTs = 0;
+setInterval(function(){
+  var src=document.getElementById('aw-last-updated');
+  var d1=document.getElementById('nav-updated'), d2=document.getElementById('nav-updated-acc');
+  if(src&&d1&&src.textContent!==d1.textContent){ d1.textContent=src.textContent; d1.style.color=src.style.color||''; }
+  if(src&&d2) d2.textContent=src.textContent;
+
+  // Detect new data and rebuild week view
+  if(typeof awLastUpdated!=='undefined' && typeof window._awByDay!=='undefined' && window._awByDay){
+    if(awLastUpdated!==_lastBuildTs){
+      _lastBuildTs=awLastUpdated;
+      var today=(typeof awToday==='function')?awToday():new Date().toISOString().slice(0,10);
+      _wkToday=today; _wkByDay=window._awByDay;
+      // Rebuild strip (if week view was already opened)
+      if(document.getElementById('view-week').classList.contains('active')){
+        wkBuildStrip(window._awByDay,today);
+      } else {
+        // Mark as dirty so it rebuilds next time week tab is opened
+        var strip=document.getElementById('week-day-strip'); if(strip) strip.innerHTML='';
+      }
+    }
+  }
+
+  // Update progress bars in week view
+  document.querySelectorAll('[data-wk-bar]').forEach(function(el){
+    var idx=parseInt(el.dataset.wkBar);
+    var ev=typeof awEvCache!=='undefined'?awEvCache[idx]:null;
+    if(!ev) return;
+    var now=Date.now();
+    if(new Date(ev.start)>now||new Date(ev.end)<now) return;
+    var pct=Math.min(100,Math.round((now-new Date(ev.start))/(new Date(ev.end)-new Date(ev.start))*100));
+    el.style.width=pct+'%';
+  });
+
+  // Re-render color scheme change
+  if(typeof awEvCache!=='undefined'&&awEvCache.length>0&&window._awByDay){
+    var isLMnow=window.matchMedia('(prefers-color-scheme: light)').matches;
+    if(typeof _lastLM==='undefined') _lastLM=isLMnow;
+    if(isLMnow!==_lastLM){ _lastLM=isLMnow; var strip2=document.getElementById('week-day-strip'); if(strip2) strip2.innerHTML=''; }
+  }
+},600);
 
 /* ── Service Worker ── */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
-}
+if('serviceWorker' in navigator) window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
 
 /* ── Install banner ── */
 function isIos(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
 function isStandalone(){ return window.navigator.standalone===true; }
 function dismissBanner(){ document.getElementById('install-banner').classList.remove('show'); localStorage.setItem('install-dismissed','1'); }
-window.addEventListener('load', function(){
+window.addEventListener('load',function(){
   if(isIos()&&!isStandalone()&&!localStorage.getItem('install-dismissed'))
     setTimeout(function(){ document.getElementById('install-banner').classList.add('show'); },4500);
 });
