@@ -335,8 +335,8 @@ function awRowHtml(ev, idx = -1) {
         ? '<span class="aw-time-single">'+(window._t?window._t('allDay'):'All day')+'</span>'
         : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur ? ' <span style="opacity:.4;font-size:9px">('+dur+')</span>' : ''}</span>`
       }
-      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">in ${awFmtRemaining(ev.start)}</div>` : ''}
-      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} left</div>` : ''}
+      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">${(window._t?window._t('in',''):'')}${awFmtRemaining(ev.start)}</div>` : ''}
+      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} ${(window._t?window._t('left'):'left')}</div>` : ''}
     </div>
   </div>`;
 }
@@ -607,15 +607,15 @@ function awPopOpen(el, idx) {
       </div>` : ''}
       ${startsSoon ? `
         <div class="aw-pop-progress-label" style="justify-content:flex-end;gap:4px">
-        <span>In</span>
+        <span>'+(window._t?window._t('inLabel'):'In')+'</span>
         <span id="aw-pop-soon-cnt" style="font-weight:600;color:${accent}">${awFmtRemainingLong(ev.start)}</span>
       </div>` : ''}
       ${now ? `<div class="aw-pop-progress-wrap">
         <div id="aw-pop-bar" class="aw-pop-progress-bar" style="width:${pct}%;background:${accent}"></div>
       </div>
       <div class="aw-pop-progress-label">
-        <span id="aw-pop-pct">${pct}% elapsed</span>
-        <span id="aw-pop-rem">${awFmtRemainingLong(ev.end)} left</span>
+        <span id="aw-pop-pct">${pct}% '+(window._t?window._t('elapsed'):'elapsed')+'</span>
+        <span id="aw-pop-rem">${awFmtRemainingLong(ev.end)} '+(window._t?window._t('left'):'left')+'</span>
       </div>` : ''}
     </div>`;
 
@@ -661,7 +661,7 @@ function awPopOpen(el, idx) {
         if (!bar || !pctEl || !remEl) { clearInterval(window._awPopTimer); return; }
         const p = awProgress(ev.start, ev.end);
         bar.style.width = p + '%';
-        pctEl.textContent = p + '% elapsed';
+        pctEl.textContent = p + '% ' + (window._t?window._t('elapsed'):'elapsed');
         remEl.textContent = awFmtRemainingLong(ev.end) + ' '+(window._t?window._t('left'):'left');
       }
       if (startsSoon) {
@@ -723,7 +723,7 @@ function awRenderCompact(byDay, today) {
       const label   = awFmtDayLabel(ds, true);
       const msg     = window._t?window._t('noMoreToday'):'No more events today';
       return `<div class="aw-skipped-row">
-        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class="aw-skipped-today-pill">Today</span>' : ''}</span>
+        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class=\"aw-skipped-today-pill\">'+( window._t?window._t('today'):'Today')+'</span>' : ''}</span>
         <span class="aw-skipped-msg">${msg}</span>
       </div>`;
     }).join('');
@@ -741,8 +741,8 @@ function awRenderCompact(byDay, today) {
     if (isWE) {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u{1F33F}</div>
-        <div class="aw-empty-title">Bon week-end !</div>
-        <div class="aw-empty-sub">Prochain cours : ${nextMonday}</div>
+        <div class="aw-empty-title">'+(window._t?window._t('haveGreatWe'):'Have a great weekend!')+'</div>
+        <div class="aw-empty-sub">'+(window._t?window._t('nextClass'):'Next class')+': ${nextMonday}+'</div>
       </div>`;
     } else {
       html += `<div class="aw-empty-state">
@@ -963,11 +963,11 @@ async function awInit() {
   } catch(e) {
     const c = document.getElementById('aw-compact');
     if (c && !awEvCache.length) {
-      c.innerHTML = `<div class="aw-state">Unable to load agenda.<br><small style="opacity:.5">${e.message}</small></div>`;
+      c.innerHTML = '<div class="aw-state">'+(window._t?window._t('unableLoad',e.message):'Unable to load: '+e.message)+'</div>';
     }
     // Show subtle error on last-updated label
     const el = document.getElementById('aw-last-updated');
-    if (el) { el.textContent = 'Update failed'; el.style.color = 'var(--rose, #f43f5e)'; }
+    if (el) { el.textContent = (window._t?window._t('updateFailed'):'Update failed'); el.style.color = 'var(--rose, #f43f5e)'; }
   }
   awScheduleReload();
 }
@@ -994,7 +994,7 @@ window.addEventListener('online', () => {
 window.addEventListener('offline', () => {
   awIsOnline = false;
   const el = document.getElementById('aw-last-updated');
-  if (el) { el.textContent = 'Offline'; el.style.color = 'var(--amber, #f59e0b)'; }
+  if (el) { el.textContent = (window._t?window._t('offline'):'Offline'); el.style.color = 'var(--amber, #f59e0b)'; }
 });
 
 awInit();
@@ -1035,7 +1035,7 @@ setInterval(() => {
     if (!ev) return;
     const msTill = new Date(ev.start) - Date.now();
     if (msTill <= 0 || msTill >= 10800000) return;
-    el.textContent = 'in ' + awFmtRemaining(ev.start);
+    el.textContent = (window._t?window._t('in',''):'')+awFmtRemaining(ev.start);
   });
 }, 1000);
 // ── ONE-DAY GRID VIEW ──────────────────────────────────────────────────────

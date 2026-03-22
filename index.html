@@ -637,6 +637,8 @@ var _STRINGS = {
     inProgress:'In progress', completed:'COMPLETED', startingSoon:'STARTING SOON',
     justUpdated:'Just updated', offline:'Offline', updateFailed:'Update failed',
     locale:'en-GB',
+    in:'in',inLabel:'In',elapsed:'elapsed',left:'left',
+    unableLoad:'Unable to load',configureMsg:'Please set up your calendar.',
   },
   fr: {
     tabAgenda:'Agenda', tabWeek:'Semaine', tabAccount:'Compte',
@@ -651,10 +653,13 @@ var _STRINGS = {
     inProgress:'En cours', completed:'TERMINÉ', startingSoon:'BIENTÔT',
     justUpdated:'Mis à jour', offline:'Hors ligne', updateFailed:'Échec',
     locale:'fr-FR',
+    in:'dans',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',left:'restant',
+    unableLoad:'Impossible de charger',configureMsg:'Veuillez configurer votre agenda.',
   }
 };
 function _lang(){ try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';} }
-function _t(k){ var s=_STRINGS[_lang()]||_STRINGS.en; return s[k]||_STRINGS.en[k]||k; }
+function _t(k,a){ var s=_STRINGS[_lang()]||_STRINGS.en; var v=s[k]||_STRINGS.en[k]||k; if(a!==undefined&&typeof v==='function')return v(a); return v; }
+window._t=_t;
 
 function _applyLang(){
   var l=_lang();
