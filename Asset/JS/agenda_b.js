@@ -509,17 +509,21 @@ let awEvCache = [];
 let awLastUpdated = null;
 
 function awUpdateTimer() {
-  const el = document.getElementById('aw-last-updated');
-  if (!el || !awLastUpdated) return;
+  if (!awLastUpdated) return;
   const secs = Math.round((Date.now() - awLastUpdated) / 1000);
   const rounded = Math.round(secs / 30) * 30;
   const mins = Math.floor(rounded / 60);
   const remSecs = rounded % 60;
   var _wt=window._t||function(k,a){return a!==undefined?k+' '+a:k;};
-  el.textContent = secs < 10 ? _wt('justUpdated')
+  var txt = secs < 10 ? _wt('justUpdated')
     : secs < 60 ? _wt('updatedSAgo',secs)
     : remSecs === 0 ? _wt('updatedMAgo',mins)
     : _wt('updatedM30Ago',mins);
+  // Write to all indicator elements directly
+  ['aw-last-updated','nb-upd','acc-upd'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){el.textContent=txt;el.style.color='';}
+  });
 }
 
 function awPopOpen(el, idx) {

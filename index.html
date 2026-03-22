@@ -83,7 +83,7 @@
   /* Views */
   .view{display:none;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
-    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 32px)}
+    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 80px)}
   .view.on{display:block}
   #v-week.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
 
@@ -198,6 +198,8 @@
   .acc-row:last-child{border-bottom:none}
   .acc-row:active{background:var(--bg3)}
   .acc-row-static{cursor:default!important}.acc-row-static:active{background:none!important}
+  .acc-row-danger .acc-row-lbl{color:#ff453a}
+  @media(prefers-color-scheme:light){.acc-row-danger .acc-row-lbl{color:#ff3b30}}
   .acc-row-ico{font-size:18px;flex-shrink:0}
   .acc-row-lbl{flex:1}
   .acc-row-chv{width:12px;height:12px;color:var(--lbl3);flex-shrink:0}
@@ -212,13 +214,13 @@
     height:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 14px);
     padding-bottom:env(safe-area-inset-bottom,0px);
     display:flex;align-items:flex-start;justify-content:center;z-index:200;
-    background:none;border-top:none;pointer-events:none;}
+    background:none;border-top:none;}
   #tb-pill{display:flex;align-items:center;background:rgba(28,28,30,.88);
     backdrop-filter:blur(48px) saturate(200%);-webkit-backdrop-filter:blur(48px) saturate(200%);
     border:.5px solid rgba(255,255,255,.18);border-radius:99px;
     box-shadow:0 8px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.14);
     margin-top:8px;padding:5px 8px;gap:2px;height:calc(var(--tb) - 2px);
-    position:relative;pointer-events:all;}
+    position:relative;}
   @media(prefers-color-scheme:light){#tb-pill{background:rgba(248,248,250,.94);
     border-color:rgba(0,0,0,.10);box-shadow:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.95)}}
   .tbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
@@ -363,6 +365,10 @@
           <span class="acc-row-ico">&#11014;&#65039;</span>
           <span class="acc-row-lbl">Update app</span>
           <span id="acc-update-status" class="acc-row-status"></span>
+        </button>
+        <button class="acc-row acc-row-danger" onclick="accLogout()">
+          <span class="acc-row-ico">&#128682;</span>
+          <span class="acc-row-lbl" id="acc-logout-lbl">Sign out &amp; reset</span>
         </button>
       </div>
       <p id="acc-upd"></p>
@@ -559,22 +565,18 @@ function accRefresh(){
 }
 function accSetLang(lang){
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.lang=lang;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
-  // Re-apply all translated strings
-  _applyLang();
-  // Re-render agenda compact (day labels, today pill, empty states)
-  if(window._awByDay&&typeof awRenderCompact==='function'){
-    var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
-    awRenderCompact(window._awByDay,today);
-  }
-  // Re-render week header (month name in new locale)
-  wkUpdateHdr();
-  // Invalidate all rendered day grids so they re-render
-  document.querySelectorAll('.wk-grid-host').forEach(function(h){h.innerHTML='';});
-  _wkDirty=true;
+  location.reload();
 }
 function showCalSettings(){
   if(typeof _obOpenCalSettings==='function')_obOpenCalSettings();
   else if(typeof showSettings==='function')showSettings();
+}
+function accLogout(){
+  var lang='en';try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');if(d&&d.lang)lang=d.lang;}catch(e){}
+  var msg=lang==='fr'?"Réinitialiser et se déconnecter ?":'Sign out and reset the app?';
+  if(!confirm(msg))return;
+  localStorage.removeItem('shortcut_config');
+  location.reload();
 }
 function accUpdateApp(){
   var st=document.getElementById('acc-update-status');if(st)st.textContent='⌛ Clearing…';
@@ -678,6 +680,9 @@ function _applyLang(){
   // Install banner
   var it=document.querySelector('.ib-txt strong');if(it)it.textContent=_t('installTitle');
   var is2=document.querySelector('.ib-txt small');if(is2)is2.textContent=_t('installSub');
+  // Logout label
+  var ll=document.getElementById('acc-logout-lbl');
+  if(ll)ll.textContent=l==='fr'?"Se déconnecter & réinitialiser":'Sign out & reset';
   // Lang selector sync
   var sel=document.getElementById('acc-lang');if(sel)sel.value=l;
   // Re-render agenda and week with new locale
@@ -694,7 +699,7 @@ setInterval(function(){
   var src=document.getElementById('aw-last-updated');
   ['nb-upd','acc-upd'].forEach(function(id){
     var el=document.getElementById(id);
-    if(src&&el&&src.textContent!==el.textContent){el.textContent=src.textContent;el.style.color=src.style.color||'';}
+    if(src&&el){el.textContent=src.textContent;el.style.color=src.style.color||'';}
   });
   if(typeof awLastUpdated!=='undefined'&&window._awByDay&&awLastUpdated!==_lastTs){
     _lastTs=awLastUpdated;
@@ -712,7 +717,44 @@ window.addEventListener('load',function(){
   goTab(0);
   _applyProfile();
   _applyLang();
+  _initPillSwipe();
 });
+
+function _initPillSwipe(){
+  var pill=document.getElementById('tb-pill');
+  if(!pill)return;
+  var startX=0,startTab=0,moved=false;
+
+  pill.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;
+    startTab=_tab;
+    moved=false;
+  },{passive:true});
+
+  pill.addEventListener('touchmove',function(e){
+    var dx=e.touches[0].clientX-startX;
+    if(Math.abs(dx)>6){
+      moved=true;
+      // Slight visual feedback on pill
+      var clamped=Math.max(-40,Math.min(40,dx*0.2));
+      pill.style.transform='translateX('+clamped+'px)';
+    }
+  },{passive:true});
+
+  pill.addEventListener('touchend',function(e){
+    pill.style.transform='';
+    pill.style.transition='transform .2s cubic-bezier(.34,1.4,.64,1)';
+    setTimeout(function(){pill.style.transition='';},220);
+    if(!moved)return;
+    var dx=e.changedTouches[0].clientX-startX;
+    var thresh=pill.offsetWidth/5;
+    var newTab=startTab;
+    if(dx<-thresh&&startTab<2)newTab=startTab+1;
+    else if(dx>thresh&&startTab>0)newTab=startTab-1;
+    if(newTab!==startTab)goTab(newTab);
+    moved=false;
+  },{passive:true});
+}
 
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
 
