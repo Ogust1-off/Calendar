@@ -2,6 +2,71 @@
 Copyright © 2026 Ogust'1. All rights reserved.
 */
 
+// ── i18n ──────────────────────────────────────────────────────────────────────
+const _I18N = {
+  en: {
+    loading: 'Loading…',
+    allDay: _T('allDay'),
+    inProgress: 'In progress',
+    completed: 'COMPLETED',
+    startingSoon: 'STARTING SOON',
+    left: 'left',
+    justUpdated: _T('justUpdated'),
+    updatedSAgo: s => `Updated ${s}s ago`,
+    updatedMAgo: m => `Updated ${m}min ago`,
+    updatedM30Ago: m => `Updated ${m}min 30s ago`,
+    offline: _T('offline'),
+    updateFailed: _T('updateFailed'),
+    configureMsg: _T('configureMsg'),
+    unableLoad: e => `Unable to load.<br><small style="opacity:.5">${e}</small>`,
+    noMoreToday: _T('noMoreToday'),
+    noUpcoming: _T('noUpcoming'),
+    enjoyBreak: _T('enjoyBreak'),
+    haveGreatWe: _T('haveGreatWe'),
+    nextClass: 'Next class',
+    today: 'Today',
+    locate: ''+_T('locate')+'',
+    joinVideo: v => `↗ Join ${v}`,
+    in: s => `in ${s}`,
+    elapsed: p => `${p}% elapsed`,
+  },
+  fr: {
+    loading: 'Chargement…',
+    allDay: 'Toute la journée',
+    inProgress: 'En cours',
+    completed: 'TERMINÉ',
+    startingSoon: 'BIENTÔT',
+    left: 'restant',
+    justUpdated: 'Mis à jour',
+    updatedSAgo: s => `Mis à jour il y a ${s}s`,
+    updatedMAgo: m => `Mis à jour il y a ${m}min`,
+    updatedM30Ago: m => `Mis à jour il y a ${m}min 30s`,
+    offline: 'Hors ligne',
+    updateFailed: 'Échec de mise à jour',
+    configureMsg: 'Veuillez configurer votre agenda dans les réglages.',
+    unableLoad: e => `Impossible de charger.<br><small style="opacity:.5">${e}</small>`,
+    noMoreToday: 'Plus de cours aujourd'hui',
+    noUpcoming: 'Aucun cours à venir',
+    enjoyBreak: 'Profitez-en !',
+    haveGreatWe: 'Bon week-end !',
+    nextClass: 'Prochain cours',
+    today: 'Aujourd'hui',
+    locate: '↗ Localiser',
+    joinVideo: v => `↗ Rejoindre ${v}`,
+    in: s => `dans ${s}`,
+    elapsed: p => `${p}% écoulé`,
+  }
+};
+function _getLang() {
+  try { var d=JSON.parse(localStorage.getItem('shortcut_config')||'null'); return (d&&d.lang)||'en'; } catch(e){ return 'en'; }
+}
+function _T(key, ...args) {
+  var lang = _getLang();
+  var t = (_I18N[lang]||_I18N.en)[key];
+  if (typeof t === 'function') return t(...args);
+  return t || (_I18N.en[key] || key);
+}
+
 // ── Config from localStorage ──────────────────────────────────────────────────
 function _getCfg() {
   try { return JSON.parse(localStorage.getItem('shortcut_config') || 'null'); } catch(e) { return null; }
@@ -303,7 +368,7 @@ function awRowHtml(ev, idx = -1) {
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
     group     ? `<span class="aw-row-badge aw-row-badge--group">${group}</span>` : '',
-    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">In progress</span>` : '',
+    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">'+_T('inProgress')+'</span>` : '',
   ].filter(Boolean).join('');
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
@@ -327,17 +392,17 @@ function awRowHtml(ev, idx = -1) {
       <div class="aw-name">${shortName}${badges ? `<span class="aw-row-badges">${badges}</span>` : ''}</div>
       ${ev.location ? `<div class="aw-meta">${PIN}${ev.location}${mapUrl ? ' <a class="aw-map-link" href="' + mapUrl + '" target="_blank" rel="noopener">↗ Locate</a>' : ''}</div>` : ''}
       ${teacher     ? `<div class="aw-meta">${PERSON_SVG}${teacher}</div>` : ''}
-      ${visioUrl    ? `<div class="aw-meta">${VISIO_SVG}<a class="aw-map-link" href="${visioUrl}" target="_blank" rel="noopener">↗ Join ${visioLabel}</a></div>` : ''}
+      ${visioUrl    ? `<div class="aw-meta">${VISIO_SVG}<a class="aw-map-link" href="${visioUrl}" target="_blank" rel="noopener">'+_T('joinVideo',visioLabel)+'</a></div>` : ''}
       ${transport   ? `<div class="aw-meta">${TRAIN_SVG}${transport.url ? `<a class="aw-map-link" href="${transport.url}" target="_blank" rel="noopener">↗ ${transport.text}</a>` : transport.text}</div>` : ''}
       ${now         ? `<div class="aw-progress" style="background:${accent}${isLM?'18':'22'}"><div class="aw-progress-bar" data-ev-bar="${idx}" style="width:${pct}%;background:${accent}"></div></div>` : ''}
     </div>
     <div class="aw-time">
       ${allDay
-        ? '<span class="aw-time-single">All day</span>'
+        ? '<span class="aw-time-single">'+_T('allDay')+'</span>'
         : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur ? ` <span style="opacity:.4;font-size:9px">(${dur})</span>` : ''}</span>`
       }
       ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent};margin-top:2px">in ${awFmtRemaining(ev.start)}</div>` : ''}
-      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent};margin-top:2px">${awFmtRemaining(ev.end)} left</div>` : ''}
+      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent};margin-top:2px">${awFmtRemaining(ev.end)} '+_T('left')+'</div>` : ''}
     </div>
   </div>`;
 }
@@ -517,9 +582,9 @@ function awUpdateTimer() {
   const mins = Math.floor(rounded / 60);
   const remSecs = rounded % 60;
   el.textContent = secs < 10 ? 'Just updated'
-    : secs < 60 ? `Updated ${secs}s ago`
-    : remSecs === 0 ? `Updated ${mins}min ago`
-    : `Updated ${mins}min 30s ago`;
+    : secs < 60 ? _T('updatedSAgo', secs)
+    : remSecs === 0 ? _T('updatedMAgo', mins)
+    : _T('updatedM30Ago', mins);
 }
 
 function awPopOpen(el, idx) {
@@ -577,7 +642,7 @@ function awPopOpen(el, idx) {
       <div class="aw-pop-title">${fullName}</div>
       <div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span>${ev.start.length === 10 ? 'All day' : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
+        <span>${ev.start.length === 10 ? _T('allDay') : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
       </div>
       ${ev.location ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
@@ -599,11 +664,11 @@ function awPopOpen(el, idx) {
         ${typeBadge ? `<span class="aw-pop-tag" style="border-color:${accent};color:${accent}">${typeBadge}</span>` : ''}
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
         ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
-        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
-        ${startsSoon ? `<span class="aw-pop-tag">STARTING SOON</span>` : ''}
+        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">'+_T('completed')+'</span>` : ''}
+        ${startsSoon ? `<span class="aw-pop-tag">'+_T('startingSoon')+'</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
         ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
-        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
+        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">'+_T('completed')+'</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
         <div class="aw-pop-progress-label" style="justify-content:flex-end;gap:4px">
@@ -764,7 +829,7 @@ function awRenderCompact(byDay, today) {
 
   html += `<div class="aw-compact-day-hd">
     <span class="aw-compact-day-label${isToday ? ' today' : ''}">${dayLabel}</span>
-    ${isToday ? '<span class="aw-today-pill">Today</span>' : ''}
+    ${isToday ? '<span class="aw-today-pill">'+_T('today')+'</span>' : ''}
   </div>`;
 
   html += targetDay.items.map((ev) => {

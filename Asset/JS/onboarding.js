@@ -472,3 +472,113 @@ function _obToggleEye(id,btn) {
 `;
   document.head.appendChild(s);
 })();
+
+// ── Dedicated Calendar Settings sheet (from Account tab) ──────────────────────
+// A clean sheet showing only API key + calendars, with a close button.
+function _obOpenCalSettings() {
+  if (document.getElementById('ob-overlay')) return;
+  var el = document.createElement('div');
+  el.id = 'ob-overlay';
+  el.innerHTML =
+    '<div id="ob-sheet">' +
+    '<div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>' +
+    '<button class="ob-x" onclick="_obCalClose()" aria-label="Close">\u00d7</button>' +
+    '<div id="ob-cal-content"></div>' +
+    '<div id="ob-cal-bottom"></div>' +
+    '</div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){ el.classList.add('ob-in'); _obCalRender(0); });
+}
+
+var _obCalStep = 0; // 0=apikey, 1=calendars, 2=done
+
+function _obCalRender(step) {
+  _obCalStep = step;
+  var con = document.getElementById('ob-cal-content');
+  var bot = document.getElementById('ob-cal-bottom');
+  if (!con || !bot) return;
+  con.classList.remove('ob-slide');
+  var r = step === 0 ? _sCalApi() : step === 1 ? _sCalIds() : _sCalDone();
+  con.innerHTML = r.c; bot.innerHTML = r.b;
+  void con.offsetWidth; con.classList.add('ob-slide');
+  setTimeout(function(){ var i=con.querySelector('input'); if(i) i.focus(); },300);
+}
+
+function _sCalApi() {
+  var saved = _obLoad().apiKey || '';
+  return {
+    c: '<div class="ob-form">' +
+       '<div class="ob-step-row"><div class="ob-dots">' +
+       '<div class="ob-dot ob-dot-on"></div><div class="ob-dot"></div></div></div>' +
+       '<h2 class="ob-h2">API Key</h2>' +
+       '<p class="ob-p2">Your Google Calendar API key.</p>' +
+       '<div class="ob-field"><label class="ob-lbl">API KEY</label>' +
+       '<div class="ob-inp-wrap"><input type="password" id="ob-cs-api" class="ob-inp" placeholder="AIzaSy\u2026" value="'+_obEsc(saved)+'" autocomplete="off" spellcheck="false"/>' +
+       '<button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-cs-api\',this)">'+_eyeIcon(false)+'</button></div>' +
+       '<div class="ob-err" id="ob-cs-api-err"></div></div></div>',
+    b: '<div class="ob-row"><div class="ob-row-right">' +
+       '<button class="ob-btn-p" onclick="_obCalNext()">Next <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+       '</div></div>'
+  };
+}
+
+function _sCalIds() {
+  var saved = _obLoad(); var c0=(saved.calendars&&saved.calendars[0])||''; var c1=(saved.calendars&&saved.calendars[1])||'';
+  return {
+    c: '<div class="ob-form">' +
+       '<div class="ob-step-row"><div class="ob-dots">' +
+       '<div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div></div></div>' +
+       '<h2 class="ob-h2">Calendars</h2>' +
+       '<p class="ob-p2">Your Google Calendar IDs.</p>' +
+       '<div class="ob-field"><label class="ob-lbl">PRIMARY <span style="color:var(--red)">*</span></label>' +
+       '<input type="text" id="ob-cs-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc(c0)+'" autocomplete="off" spellcheck="false"/>' +
+       '<div class="ob-err" id="ob-cs-cal0-err"></div></div>' +
+       '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">SECONDARY <span class="ob-opt">optional</span></label>' +
+       '<input type="text" id="ob-cs-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc(c1)+'" autocomplete="off" spellcheck="false"/></div></div>',
+    b: '<div class="ob-row">' +
+       '<button class="ob-btn-g" onclick="_obCalRender(0)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>' +
+       '<div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Save <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>'
+  };
+}
+
+function _sCalDone() {
+  return {
+    c: '<div class="ob-done">' +
+       '<div class="ob-check-wrap"><div class="ob-ring r1"></div><div class="ob-ring r2"></div>' +
+       '<div class="ob-check-circle"><svg viewBox="0 0 48 48" fill="none" width="40" height="40"><path class="ob-check-path" d="M12 24l9 9 15-15" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>' +
+       '<h2 class="ob-done-h">Saved!</h2><p class="ob-p2">Your settings have been updated.</p></div>',
+    b: '<button class="ob-btn-p ob-btn-full" onclick="_obCalFinish()">Done <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'
+  };
+}
+
+function _obCalNext() {
+  if (_obCalStep === 0) {
+    var v = ((document.getElementById('ob-cs-api')||{}).value||'').trim();
+    var e = document.getElementById('ob-cs-api-err');
+    if (!v) { _obErr(e,'API key required.'); return; }
+    if (!v.startsWith('AIza')) { _obErr(e,'Should start with "AIza".'); return; }
+    _obClear(e);
+    var d=_obLoad(); d.apiKey=v; _obSave(d);
+    _obCalRender(1);
+  } else if (_obCalStep === 1) {
+    var v0 = ((document.getElementById('ob-cs-cal0')||{}).value||'').trim();
+    var v1 = ((document.getElementById('ob-cs-cal1')||{}).value||'').trim();
+    var e0 = document.getElementById('ob-cs-cal0-err');
+    if (!v0) { _obErr(e0,'Primary calendar required.'); return; }
+    if (!v0.includes('@')) { _obErr(e0,'Must contain @.'); return; }
+    _obClear(e0);
+    var d=_obLoad(); d.calendars=[v0]; if(v1&&v1.includes('@')) d.calendars.push(v1);
+    _obSave(d);
+    _obCalRender(2);
+  }
+}
+
+function _obCalClose() {
+  var o=document.getElementById('ob-overlay');
+  if(o){o.classList.add('ob-out');setTimeout(function(){o.remove();},380);}
+}
+
+function _obCalFinish() {
+  _obCalClose();
+  setTimeout(function(){if(typeof awInit==='function') awInit();},300);
+}

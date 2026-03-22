@@ -340,6 +340,36 @@
   .tbtn span{font-size:11px;font-weight:500;letter-spacing:.01em}
   .tb-line{display:none}
 
+  /* ── Splash screen ── */
+  #splash{
+    position:fixed;inset:0;z-index:99999;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg);
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  #splash.out{opacity:0;transform:scale(1.04);pointer-events:none}
+  #splash-inner{display:flex;flex-direction:column;align-items:center;gap:12px}
+  #splash-logo{
+    animation:splash-pop .5s cubic-bezier(.34,1.56,.64,1) both;
+    filter:drop-shadow(0 8px 24px rgba(99,102,241,.5));
+  }
+  #splash-logo svg{border-radius:16px}
+  @keyframes splash-pop{
+    from{opacity:0;transform:scale(.7) translateY(10px)}
+    to{opacity:1;transform:scale(1) translateY(0)}
+  }
+  #splash-name{
+    font-size:28px;font-weight:800;letter-spacing:-.04em;
+    color:var(--lbl);
+    animation:splash-fade .4s .15s ease both;
+    font-family:-apple-system,"SF Pro Display",sans-serif;
+  }
+  #splash-sub{
+    font-size:14px;color:var(--lbl3);
+    animation:splash-fade .4s .25s ease both;
+  }
+  @keyframes splash-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
   /* ── Install banner ── */
   #ib{display:none;position:fixed;
     bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 10px);
@@ -359,6 +389,24 @@
   </style>
 </head>
 <body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div id="splash-inner">
+    <div id="splash-logo">
+      <svg viewBox="0 0 48 48" fill="none" width="72" height="72">
+        <rect width="48" height="48" rx="13" fill="url(#sg)"/>
+        <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/>
+        <defs><linearGradient id="sg" x1="0" y1="0" x2="48" y2="48">
+          <stop stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/>
+        </linearGradient></defs>
+      </svg>
+    </div>
+    <div id="splash-name">Calendar</div>
+    <div id="splash-sub">by Shortcut™</div>
+  </div>
+</div>
+
 <div id="app">
 
   <!-- NAVBAR -->
@@ -381,7 +429,7 @@
   <!-- VIEW: AGENDA -->
   <div id="v-agenda" class="view on">
     <div class="agenda-widget">
-      <div id="aw-compact"><div class="aw-state"><span class="aw-spinner"></span>Loading…</div></div>
+      <div id="aw-compact"><div class="aw-state"><span class="aw-spinner"></span><span data-i18n="loading">Loading…</span></div></div>
       <div class="aw-header" style="display:none">
         <span class="aw-title"></span>
         <span class="aw-last-updated" id="aw-last-updated"></span>
@@ -395,7 +443,7 @@
     <div id="wk-hdr">
       <div id="wk-month-row">
         <div id="wk-month-lbl">…</div>
-        <button class="wk-today-btn" id="wk-today-btn" onclick="wkGoToday()">Today</button>
+        <button class="wk-today-btn" id="wk-today-btn" onclick="wkGoToday()"> Today</button>
       </div>
       <div id="wk-days"></div>
     </div>
@@ -428,14 +476,19 @@
             <option value="fr">Français</option>
           </select>
         </div>
-        <button class="acc-row" onclick="showSettings()">
+        <button class="acc-row" onclick="showCalSettings()">
           <span class="acc-row-ico">📅</span><span class="acc-row-lbl">Calendar API &amp; Calendars</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="acc-row" id="acc-refresh-btn" onclick="accRefresh()">
           <span class="acc-row-ico" id="acc-refresh-ico">🔄</span>
-          <span class="acc-row-lbl">Refresh calendar</span>
+          <span class="acc-row-lbl" data-i18n="refreshBtn">Refresh calendar</span>
           <span id="acc-refresh-status" class="acc-row-status"></span>
+        </button>
+        <button class="acc-row" onclick="accUpdateApp()">
+          <span class="acc-row-ico">⬆️</span>
+          <span class="acc-row-lbl" data-i18n="updateAppBtn">Update app</span>
+          <span id="acc-update-status" class="acc-row-status"></span>
         </button>
       </div>
       <p id="acc-upd"></p>
@@ -453,20 +506,20 @@
           <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
           <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
         </svg>
-        <span>Agenda</span>
+        <span data-i18n="tabAgenda">Agenda</span>
       </button>
       <button class="tbtn" id="tb-1" onclick="goTab(1)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="3"/>
           <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
         </svg>
-        <span>Week</span>
+        <span data-i18n="tabWeek">Week</span>
       </button>
       <button class="tbtn" id="tb-2" onclick="goTab(2)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
         </svg>
-        <span>Account</span>
+        <span data-i18n="tabAccount">Account</span>
       </button>
     </div>
   </nav>
@@ -619,6 +672,19 @@ function appShowWeek()   { goTab(1); }
 window.addEventListener('load', function() {
   goTab(0);
   _applyProfile();
+  _applyI18n();
+  // Dismiss splash after min 1.2s
+  var splashDone = false;
+  function _hideSplash() {
+    if (splashDone) return; splashDone = true;
+    var s = document.getElementById('splash');
+    if (s) { s.classList.add('out'); setTimeout(function(){ s.remove(); }, 450); }
+  }
+  setTimeout(_hideSplash, 1200);
+  // Also hide when first data arrives
+  var _splashObs = setInterval(function(){
+    if (typeof awLastUpdated !== 'undefined' && awLastUpdated) { clearInterval(_splashObs); _hideSplash(); }
+  }, 100);
 });
 
 /* ═══════════════════════════════════════
@@ -649,8 +715,46 @@ function accSetLang(lang) {
     var d = JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
     d.lang = lang; localStorage.setItem('shortcut_config', JSON.stringify(d));
   } catch(e){}
-  // Reload to apply
-  location.reload();
+  // Apply without reload
+  _applyI18n();
+  // Also re-render agenda compact (day labels, today pill, etc.)
+  if (window._awByDay && typeof awRenderCompact === 'function') {
+    var today = typeof awToday === 'function' ? awToday() : new Date().toISOString().slice(0,10);
+    awRenderCompact(window._awByDay, today);
+  }
+  // Invalidate week pages so they re-render with new locale
+  _wkDirty = true;
+}
+
+function showCalSettings() {
+  // Open a dedicated settings sheet (not the onboarding welcome)
+  if (document.getElementById('ob-overlay')) return;
+  if (typeof _obOpenCalSettings === 'function') { _obOpenCalSettings(); return; }
+  // Fallback: open onboarding at step 1
+  if (typeof showSettings === 'function') showSettings();
+}
+
+function accUpdateApp() {
+  var st = document.getElementById('acc-update-status');
+  if (st) st.textContent = '⌛ Clearing…';
+  // Clear all SW caches except keep localStorage (config stays)
+  var prom = 'caches' in window
+    ? caches.keys().then(function(keys) { return Promise.all(keys.map(function(k){ return caches.delete(k); })); })
+    : Promise.resolve();
+  prom.then(function() {
+    // Re-register SW with new cache
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(regs) {
+        return Promise.all(regs.map(function(r){ return r.unregister(); }));
+      }).then(function() {
+        if (st) st.textContent = '✅ Done!';
+        setTimeout(function(){ location.reload(true); }, 800);
+      });
+    } else {
+      if (st) st.textContent = '✅ Done!';
+      setTimeout(function(){ location.reload(true); }, 800);
+    }
+  });
 }
 
 function accEditProfile() {
@@ -737,6 +841,55 @@ function appRefresh() {
   if(typeof awInit==='function') awInit();
 }
 
+
+// ── i18n for HTML ────────────────────────────────────────────────────────────
+var _HTML_STRINGS = {
+  en: {
+    tabAgenda:'Agenda', tabWeek:'Week', tabAccount:'Account',
+    loading:'Loading…', today:'Today',
+    settingsTitle:'Calendar API & Calendars',
+    refreshBtn:'Refresh calendar',
+    langLabel:'Language',
+    updateAppBtn:'Update app',
+    byShortcut:'by Shortcut™',
+    accSub:'by Shortcut™ · © 2026 Ogust'1',
+  },
+  fr: {
+    tabAgenda:'Agenda', tabWeek:'Semaine', tabAccount:'Compte',
+    loading:'Chargement…', today:'Aujourd'hui',
+    settingsTitle:'API & Agendas',
+    refreshBtn:'Actualiser l'agenda',
+    langLabel:'Langue',
+    updateAppBtn:'Mettre à jour l'app',
+    byShortcut:'by Shortcut™',
+    accSub:'by Shortcut™ · © 2026 Ogust'1',
+  }
+};
+
+function _applyI18n() {
+  var lang = 'en';
+  try { var d=JSON.parse(localStorage.getItem('shortcut_config')||'null'); lang=(d&&d.lang)||'en'; } catch(e){}
+  var s = _HTML_STRINGS[lang] || _HTML_STRINGS.en;
+  // data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(function(el) {
+    var key = el.dataset.i18n;
+    if (s[key]) el.textContent = s[key];
+  });
+  // Today button in week view
+  var tb = document.getElementById('wk-today-btn');
+  if (tb) tb.textContent = s.today;
+  // Navbar subtitle
+  var sub = document.querySelector('.nb-sub');
+  if (sub) sub.textContent = s.byShortcut;
+  // Lang selector value
+  var sel = document.getElementById('acc-lang');
+  if (sel) sel.value = lang;
+  // Account rows dynamic
+  var refreshLbl = document.querySelector('#acc-refresh-btn .acc-row-lbl');
+  if (refreshLbl) refreshLbl.textContent = s.refreshBtn;
+  var settingsLbl = document.querySelector('button.acc-row[onclick="showCalSettings()"] .acc-row-lbl');
+  if (settingsLbl) settingsLbl.textContent = s.settingsTitle;
+}
 
 function _applyProfile() {
   try {
