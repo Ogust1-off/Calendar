@@ -537,17 +537,48 @@
   <button class="ib-x" onclick="dismissBanner()">×</button>
 </div>
 
+<script>
+/* SPLASH — déclaré en premier, avant tous les scripts */
+(function() {
+  var done = false;
+  window._hideSplash = function() {
+    if (done) return; done = true;
+    var s = document.getElementById('splash');
+    if (!s) return;
+    s.classList.add('out');
+    setTimeout(function() { if (s.parentNode) s.remove(); }, 450);
+  };
+
+  // Si pas de config : supprimer le splash immédiatement (avant même le DOM ready)
+  // car l'onboarding va s'afficher
+  try {
+    var cfg = JSON.parse(localStorage.getItem('shortcut_config') || 'null');
+    if (!(cfg && cfg.apiKey && cfg.calendars && cfg.calendars[0])) {
+      // Pas configuré — supprimer le splash dès que le DOM est prêt
+      document.addEventListener('DOMContentLoaded', function() {
+        var s = document.getElementById('splash');
+        if (s) s.remove();
+        done = true;
+      });
+    } else {
+      // Configuré — laisser le splash, il sera dismiss par awRender() ou après 3s max
+      document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(window._hideSplash, 3000);
+      });
+    }
+  } catch(e) {
+    document.addEventListener('DOMContentLoaded', function() {
+      var s = document.getElementById('splash');
+      if (s) s.remove();
+      done = true;
+    });
+  }
+})();
+</script>
 <script src="Asset/JS/onboarding.js"></script>
 <script src="Asset/JS/agenda_b.js"></script>
 <script>
 'use strict';
-/* ── Global splash dismiss — must be defined before agenda_b.js runs ── */
-var _splashDone = false;
-window._hideSplash = function() {
-  if (_splashDone) return; _splashDone = true;
-  var s = document.getElementById('splash');
-  if (s) { s.classList.add('out'); setTimeout(function(){ if (s.parentNode) s.remove(); }, 450); }
-};
 /* ═══════════════════════════════════════
    WEEK VIEW — day-by-day time grid
 ═══════════════════════════════════════ */
@@ -685,19 +716,6 @@ window.addEventListener('load', function() {
   goTab(0);
   _applyProfile();
   _applyI18n();
-
-  // Splash: only show if calendar is already configured
-  var _hasCfg = (function(){
-    try { var d=JSON.parse(localStorage.getItem('shortcut_config')||'null'); return !!(d&&d.apiKey&&d.calendars&&d.calendars[0]); } catch(e){ return false; }
-  })();
-
-  var s = document.getElementById('splash');
-  if (!_hasCfg) {
-    if (s) s.remove();
-  } else {
-    // Show for exactly 3s then dismiss — simple and reliable
-    setTimeout(window._hideSplash, 3000);
-  }
 });
 
 /* ═══════════════════════════════════════
