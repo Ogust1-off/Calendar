@@ -30,10 +30,10 @@ function awLoadConfigVars() {
   return !!(AW_API_KEY && AW_CALENDAR_ID);
 }
 
-// Grid config: show hours from AW_HOUR_START to AW_HOUR_END
-const AW_HOUR_START  = 7;
-const AW_HOUR_END    = 18.5;
-const AW_PX_PER_HOUR = 40; // height in px for one hour slot
+// Grid config: 0h–24h, 60px per hour (Apple Calendar style)
+const AW_HOUR_START  = 0;
+const AW_HOUR_END    = 24;
+const AW_PX_PER_HOUR = 60;
 
 // ── 🎨 COULEURS PAR MATIÈRE ──────────────────────────────────────────────────
 const AW_COLOR_MAP = [
@@ -436,76 +436,66 @@ function awLayoutColumns(timedItems) {
 
 // Time-grid event block — true side-by-side only when same start time
 function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackDepth = 0, isTopStacked = true, visibleHeight = null, nextCoverStart = null) {
-  const now       = awIsNow(ev.start, ev.end);
-  const past      = !now && awIsPast(ev.end);
-  const fullName  = ev.summary || '(Sans titre)';
-  const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
-  const loc       = ev.location ? ev.location.split(',')[0].trim() : '';
-  const color     = ev.cal2 ? AW_CAL2_COLOR : awColorFor(shortName);
+  const now      = awIsNow(ev.start, ev.end);
+  const past     = !now && awIsPast(ev.end);
+  const fullName = ev.summary || '(Sans titre)';
+  const loc      = ev.location ? ev.location.split(',')[0].trim() : '';
+  const color    = ev.cal2 ? AW_CAL2_COLOR : awColorFor(fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName);
 
   const colorHex = {
-    blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
-    amber:'#f59e0b', rose:'#f43f5e', cyan:'#06b6d4', orange:'#f97316', grey:'#94a3b8',
+    blue:'#1a73e8', violet:'#7c3aed', emerald:'#0f9d58',
+    amber:'#f59e0b', rose:'#d93025', cyan:'#00bcd4', orange:'#f57c00', grey:'#607d8b',
     lime: AW_CAL2_COLOR_HEX,
   };
-  const accent = colorHex[color] || '#3b82f6';
-  const isLM = window.matchMedia('(prefers-color-scheme: light)').matches;
+  const accent = colorHex[color] || '#1a73e8';
 
-  const bgAlpha    = isLM ? '33' : '44';
-  const bg = `${accent}${bgAlpha}`;
-  const glowColor = now ? `${accent}33` : 'transparent';
-  const borderColor = accent;
-  // Colors handled by CSS classes (.aw-gev-name, .aw-gev-time, .aw-gev-loc) with prefers-color-scheme
-  const textColor   = 'var(--aw-ev-text, rgba(255,255,255,0.92))';
-  const timeColor   = 'var(--aw-ev-time, rgba(255,255,255,0.6))';
-  const locColor    = 'var(--aw-ev-loc,  rgba(255,255,255,0.45))';
-
-  const startH  = awTimeToHours(ev.start);
-  const endH    = awTimeToHours(ev.end);
-  const clampS  = Math.max(startH, AW_HOUR_START);
-  const clampE  = Math.min(endH,   AW_HOUR_END);
+  const startH = awTimeToHours(ev.start);
+  const endH   = awTimeToHours(ev.end);
+  const clampS = Math.max(startH, AW_HOUR_START);
+  const clampE = Math.min(endH,   AW_HOUR_END);
   if (clampS >= clampE) return '';
 
   const top    = (clampS - AW_HOUR_START) * AW_PX_PER_HOUR;
-  const height = Math.max((clampE - clampS) * AW_PX_PER_HOUR - 2, 18);
+  const height = Math.max((clampE - clampS) * AW_PX_PER_HOUR - 1, 18);
   const pct    = now ? awProgress(ev.start, ev.end) : 0;
 
   let leftStyle, rightStyle;
-
   if (sameStart && totalCols > 1) {
-    const INDENT   = 12;
+    const INDENT   = 8;
     const base     = stackDepth * INDENT + 2;
     const colWidth = `calc((100% - ${base}px) / ${totalCols})`;
     leftStyle  = `calc(${base}px + ${col} * ${colWidth})`;
-    rightStyle = col < totalCols - 1
-      ? `calc(${totalCols - col - 1} * ${colWidth})`
-      : `2px`;
+    rightStyle = col < totalCols - 1 ? `calc(${totalCols - col - 1} * ${colWidth})` : `2px`;
   } else {
-    const INDENT = 12;
+    const INDENT = 8;
     leftStyle  = `${col * INDENT + 2}px`;
     rightStyle = `2px`;
   }
+  const zIndex = sameStart ? 2 + stackDepth : 2 + col;
 
-  const zIndex   = sameStart ? 2 + stackDepth : 2 + col;
-  const HIDE_MIN = 45 / 60;
+  // What to show based on available height
+  const HIDE_MIN    = 45 / 60;
   const coveredSoon = nextCoverStart !== null && (nextCoverStart - awTimeToHours(ev.start)) < HIDE_MIN;
-  const showTime = height >= 28 && (sameStart || isTopStacked) && !coveredSoon;
-  const showLoc  = height >= 44 && loc && (sameStart || isTopStacked) && !coveredSoon;
+  const showTime    = height >= 30 && (sameStart || isTopStacked) && !coveredSoon;
+  const showLoc     = height >= 52 && loc && (sameStart || isTopStacked) && !coveredSoon;
+  const timeStr     = `${awFmtTime(ev.start)} – ${awFmtTime(ev.end)}`;
 
-  const { mapUrl } = awParseDesc(ev.description || '');
-
-  const CLOCK_GEV = `<svg class="aw-gev-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
-  const PIN_GEV   = `<svg class="aw-gev-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>`;
+  // Apple Calendar style: solid color background, white text, left accent bar
+  const isLM = window.matchMedia('(prefers-color-scheme: light)').matches;
+  const bgColor   = isLM ? `${accent}22` : `${accent}38`;
+  const textClr   = isLM ? accent         : '#ffffff';
+  const subClr    = isLM ? `${accent}bb`  : 'rgba(255,255,255,0.72)';
+  const barColor  = accent;
 
   return `<div class="aw-gev${now ? ' aw-gev-now' : ''}${past ? ' aw-gev-past' : ''}"
     data-color="${color}" data-ev="${idx}"
-    style="top:${top}px;height:${height}px;left:${leftStyle};right:${rightStyle};z-index:${zIndex};cursor:pointer;background:${bg};${now ? `box-shadow:0 2px 10px ${glowColor};` : ''}"
+    style="top:${top}px;height:${height}px;left:${leftStyle};right:${rightStyle};z-index:${zIndex};
+      cursor:pointer;background:${bgColor};border-left:2.5px solid ${barColor};"
     onclick="awPopOpen(this,${idx})">
-    <div class="aw-gev-accent" style="background:${borderColor}"></div>
-    <div class="aw-gev-name">${shortName}</div>
-    ${showTime ? `<div class="aw-gev-time">${CLOCK_GEV}${awFmtTime(ev.start)} \u2013 ${awFmtTime(ev.end)}</div>` : ''}
-    ${showLoc  ? `<div class="aw-gev-loc">${PIN_GEV}${loc}</div>` : ''}
-    ${now      ? `<div class="aw-gev-progress"><div class="aw-gev-progress-bar" style="width:${pct}%;background:${borderColor}"></div></div>` : ''}
+    <div class="aw-gev-name" style="color:${textClr}">${fullName}</div>
+    ${showTime ? `<div class="aw-gev-time" style="color:${subClr}">${timeStr}</div>` : ''}
+    ${showLoc  ? `<div class="aw-gev-loc"  style="color:${subClr}">${loc}</div>` : ''}
+    ${now ? `<div class="aw-gev-progress"><div class="aw-gev-progress-bar" style="width:${pct}%;background:${barColor}"></div></div>` : ''}
   </div>`;
 }
 
@@ -1047,13 +1037,13 @@ setInterval(() => {
 
 function awRenderDay(ds, container) {
   if (!container) return;
-  const byDay  = window._awByDay || {};
-  const today  = awToday();
+  const byDay   = window._awByDay || {};
+  const today   = awToday();
   const isToday = ds === today;
   const isWE    = awIsWeekend(ds);
   const isPast  = ds < today;
 
-  const gridH = (AW_HOUR_END - AW_HOUR_START) * AW_PX_PER_HOUR;
+  const gridH = (AW_HOUR_END - AW_HOUR_START) * AW_PX_PER_HOUR; // 24 * 60 = 1440px
   const items  = byDay[ds] || [];
   const timed  = items.filter(({ev}) => ev.start.length > 10);
   const laid   = awLayoutColumns(timed);
@@ -1061,59 +1051,64 @@ function awRenderDay(ds, container) {
   // Now-line
   const now  = new Date();
   const nowH = now.getHours() + now.getMinutes() / 60;
-  const showNow = isToday && nowH >= AW_HOUR_START && nowH <= AW_HOUR_END;
-  const topNow  = (nowH - AW_HOUR_START) * AW_PX_PER_HOUR;
+  const showNow = isToday;
+  const topNow  = nowH * AW_PX_PER_HOUR;
 
-  let html = `<div class="aw-tgrid-scroll awd-scroll">`;
-  html += `<div class="aw-tgrid awd-tgrid" style="--grid-h:${gridH}px">`;
+  let html = `<div class="awd-scroll">`;
+  html += `<div class="awd-tgrid" style="height:${gridH}px">`;
 
-  // ── Hour gutter + single-column body ──
-  html += `<div class="aw-tgrid-bottom awd-bottom">`;
-
-  html += `<div class="aw-tgutter">`;
-  for (let h = AW_HOUR_START; h <= AW_HOUR_END; h++) {
-    const top = (h - AW_HOUR_START) * AW_PX_PER_HOUR;
-    html += `<div class="aw-thour" style="top:${top}px">${awPad(h)}:00</div>`;
+  // Hour gutter
+  html += `<div class="awd-gutter">`;
+  for (let h = 0; h <= 24; h++) {
+    const top = h * AW_PX_PER_HOUR;
+    if (h === 0) {
+      html += `<div class="awd-hour" style="top:${top}px"></div>`;
+    } else {
+      html += `<div class="awd-hour" style="top:${top}px">${awPad(h)}:00</div>`;
+    }
   }
   html += `</div>`;
 
-  // Single day column
-  html += `<div class="awd-daycol-wrap">`;
-  html += `<div class="aw-tgrid-body awd-body" style="height:${gridH}px">`;
+  // Day column
+  html += `<div class="awd-col-area">`;
 
   // Hour lines
-  html += `<div class="aw-hlines">`;
-  for (let h = AW_HOUR_START; h <= AW_HOUR_END; h++) {
-    const top = (h - AW_HOUR_START) * AW_PX_PER_HOUR;
-    html += `<div class="aw-hline" style="top:${top}px"></div>`;
+  for (let h = 0; h <= 24; h++) {
+    const top = h * AW_PX_PER_HOUR;
+    html += `<div class="awd-hline" style="top:${top}px"></div>`;
   }
-  html += `</div>`;
 
   // Now line
   if (showNow) {
-    html += `<div class="aw-now-line" style="top:${topNow}px;left:0;right:0;width:100%">
-      <div class="aw-now-dot"></div>
+    html += `<div class="awd-now-line" style="top:${topNow}px">
+      <div class="awd-now-dot"></div>
     </div>`;
   }
 
-  // Events — single column
-  html += `<div class="awd-col${isToday ? ' today' : ''}${isWE ? ' we' : ''}${isPast && !isToday ? ' past' : ''}">`;
+  // Events
   html += laid.map(({ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart}) =>
     awGridEvHtml(ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart)
   ).join('');
-  html += `</div>`;
 
-  html += `</div></div></div></div>`;
+  html += `</div></div></div>`;
 
   container.innerHTML = html;
 
-  // Scroll to now or first event
-  if (showNow) {
-    const scrollEl = container.querySelector('.awd-scroll');
-    if (scrollEl) scrollEl.scrollTop = Math.max(0, topNow - 80);
-  } else if (timed.length > 0) {
-    const firstH = awTimeToHours(timed[0].ev.start);
-    const scrollEl = container.querySelector('.awd-scroll');
-    if (scrollEl) scrollEl.scrollTop = Math.max(0, (firstH - AW_HOUR_START) * AW_PX_PER_HOUR - 40);
+  // Auto-scroll: centre sur les heures actives (7h par défaut, now si aujourd'hui)
+  const scrollEl = container.querySelector('.awd-scroll');
+  if (scrollEl) {
+    let targetH;
+    if (isToday) {
+      // Centre sur l'heure actuelle, décalé d'un peu en haut
+      targetH = nowH * AW_PX_PER_HOUR - scrollEl.clientHeight * 0.35;
+    } else if (timed.length > 0) {
+      // Premier event du jour
+      const firstH = awTimeToHours(timed[0].ev.start);
+      targetH = firstH * AW_PX_PER_HOUR - scrollEl.clientHeight * 0.25;
+    } else {
+      // Pas d'events: centre sur 8h
+      targetH = 8 * AW_PX_PER_HOUR - scrollEl.clientHeight * 0.25;
+    }
+    scrollEl.scrollTop = Math.max(0, targetH);
   }
 }

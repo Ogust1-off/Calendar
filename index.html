@@ -351,22 +351,69 @@
     overflow:hidden; display:flex; flex-direction:column;
   }
 
-  /* One-day grid CSS additions */
+  /* One-day grid — 0h to 24h */
   .awd-scroll {
     flex:1; overflow-y:auto; overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 8px);
   }
-  .awd-tgrid { min-width:0; }
-  .awd-bottom { display:flex; flex:1; }
-  .awd-daycol-wrap { flex:1; min-width:0; position:relative; }
-  .awd-body { position:relative; }
-  .awd-col {
-    position:absolute; inset:0;
-    /* single column — no grid needed */
+  /* Outer grid wrapper: relative, full height */
+  .awd-tgrid {
+    display:flex; position:relative;
   }
-  /* Override the 7-col grid to 1 col */
-  .awd-col .aw-gev { left:2px !important; right:2px !important; }
+  /* Hour gutter */
+  .awd-gutter {
+    width:52px; flex-shrink:0; position:relative;
+    border-right:0.5px solid var(--sys-sep);
+  }
+  .awd-hour {
+    position:absolute; right:8px;
+    font-size:10px; font-weight:400; color:var(--sys-label3);
+    font-variant-numeric:tabular-nums;
+    transform:translateY(-50%); white-space:nowrap;
+    line-height:1; user-select:none;
+  }
+  /* Day column area */
+  .awd-col-area {
+    flex:1; position:relative; min-width:0;
+  }
+  /* Hour separator lines */
+  .awd-hline {
+    position:absolute; left:0; right:0; height:0.5px;
+    background:var(--sys-sep2);
+  }
+  /* Now line — red */
+  .awd-now-line {
+    position:absolute; left:0; right:0; height:2px;
+    background:var(--sys-red); z-index:10; pointer-events:none;
+  }
+  .awd-now-dot {
+    position:absolute; left:-4px; top:-4px;
+    width:10px; height:10px; border-radius:50%;
+    background:var(--sys-red);
+  }
+  /* Event blocks — override for single-column layout */
+  .awd-col-area .aw-gev {
+    border-radius:4px;
+    border-top:none; border-bottom:none; border-right:none;
+    /* padding adjusted for denser content */
+    padding:3px 6px 3px 10px !important;
+    overflow:hidden;
+  }
+  .awd-col-area .aw-gev-accent { display:none; } /* we use border-left instead */
+  .awd-col-area .aw-gev-name {
+    font-size:11px; font-weight:600; line-height:1.3;
+    white-space:normal; overflow:hidden;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+  }
+  .awd-col-area .aw-gev-time {
+    font-size:10px; margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .awd-col-area .aw-gev-loc {
+    font-size:10px; margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
 
   /* ─────────────────────────────────────────
      VIEW: ACCOUNT
