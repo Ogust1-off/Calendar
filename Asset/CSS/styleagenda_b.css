@@ -44,12 +44,12 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-skipped-row:last-child { border-bottom: none; }
 .aw-skipped-label { font-size: 12px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.aw-skipped-label.today { color: rgb(235, 76, 70); }/*Old var(--accent)*/
+.aw-skipped-label.today { color: var(--sys-red, #ff453a); }/*Old var(--accent)*/
 .aw-skipped-today-pill {
   font-size: 9px; font-weight: 600;
-  color: rgb(235, 76, 70);/*Old var(--accent)*/
-  background: rgba(235, 76, 70,0.1);/*Old rgba(96,165,250,0.1)*/
-  border: 1px solid rgba(235, 76, 70,0.2);/*Old rgba(96,165,250,0.2)*/
+  color: var(--sys-red, #ff453a);/*Old var(--accent)*/
+  background: rgba(255,69,58,0.1);/*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(255,69,58,0.2);/*Old rgba(96,165,250,0.2)*/
   padding: 1px 6px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase;
 }
 .aw-skipped-msg { font-size: 11px; color: var(--faint); font-style: italic; }
@@ -61,7 +61,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   background: rgba(255,255,255,0.02);
 }
 .aw-compact-day-label { font-size: 12px; font-weight: 600; text-transform: capitalize; color: var(--muted); }
-.aw-compact-day-label.today { color: rgb(235, 76, 70); }/*Old var(--accent)*/
+.aw-compact-day-label.today { color: var(--sys-red, #ff453a); }/*Old var(--accent)*/
 
 /* ── Inline row info lines (Formatuer / Groupe) ── */
 .aw-row-info {
@@ -102,15 +102,14 @@ Copyright © 2026 Ogust'1. All rights reserved.
 @media (prefers-color-scheme: light) {
   /* Synchronise les variables CSS avec le mode clair */
   :root {
-    --glass-bg:    rgba(255,255,255,0.75);
-    --glass-border: rgba(0,0,0,0.07);
-    --accent:      #2563eb;
-    --bg:          #eef0f5;
-    --border:      rgba(0,0,0,0.07);
-    --border-hi:   rgba(255,255,255,0.95);
-    --text:        rgba(10,12,20,0.88);
-    --muted:       rgba(10,12,20,0.46);
-    --faint:       rgba(10,12,20,0.28);
+    --sys-red: #ff3b30;
+    --accent:  #007aff;
+    --bg:      #f2f2f7;
+    --border:  rgba(0,0,0,0.12);
+    --border-hi: rgba(0,0,0,0.20);
+    --text:    rgba(0,0,0,0.88);
+    --muted:   rgba(0,0,0,0.50);
+    --faint:   rgba(0,0,0,0.30);
   }
   .aw-row-badge--group {
     background: rgba(0,0,0,0.04);
@@ -164,7 +163,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   position: absolute;
   z-index: 999;
   width: 260px;
-  background: rgba(22,26,40,0.92);
+  background: rgba(22,26,40,0.88);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 18px;
   box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -255,9 +254,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-today-pill {
   font-size: 9px; font-weight: 600;
-  color: rgb(235, 76, 70); /*Old var(--accent)*/
-  background: rgba(235, 76, 70,0.1); /*Old rgba(96,165,250,0.1)*/
-  border: 1px solid rgba(235, 76, 70,0.2); /*Old rgba(96,165,250,0.2)*/
+  color: var(--sys-red, #ff453a); /*Old var(--accent)*/
+  background: rgba(255,69,58,0.1); /*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(255,69,58,0.2); /*Old rgba(96,165,250,0.2)*/
   padding: 1px 7px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase;
 }
 
@@ -342,9 +341,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
 /* "This Week" accent pill */
 .aw-cal-this-week-pill {
   font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-  color: rgb(235, 76, 70); /*Old var(--accent)*/
-  background: rgba(235, 76, 70,0.1);/*Old rgba(96,165,250,0.1)*/
-  border: 1px solid rgba(235, 76, 70,0.2);/*Old rgba(96,165,250,0.2)*/
+  color: var(--sys-red, #ff453a); /*Old var(--accent)*/
+  background: rgba(255,69,58,0.1);/*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(255,69,58,0.2);/*Old rgba(96,165,250,0.2)*/
   padding: 2px 8px; border-radius: 99px;
 }
 
@@ -395,6 +394,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
 /* Bottom row: gutter + body */
 .aw-tgrid-bottom {
   display: flex;
+  min-height: var(--grid-h);
   height: var(--grid-h);
 }
 
@@ -458,7 +458,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-tday-num.today {
   color: #fff;
-  background: rgb(235, 76, 70); /*Old var(--accent)*/
+  background: var(--sys-red, #ff453a); /*Old var(--accent)*/
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 700;
@@ -482,7 +482,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
 .aw-now-line {
   position: absolute;
   height: 2px;
-  background: rgb(235, 83, 78); /*Old #f87171*/
+  background: var(--sys-red, #ff453a); /*Old #f87171*/
   z-index: 5;
   pointer-events: none;
 }
@@ -491,7 +491,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   left: -4px; top: -4px;
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: rgb(235, 83, 78); /*Old #f87171*/
+  background: var(--sys-red, #ff453a); /*Old #f87171*/
 }
 
 /* Day columns */
@@ -686,22 +686,22 @@ Copyright © 2026 Ogust'1. All rights reserved.
   .aw-cal-today-btn:disabled { opacity: 0.35; }
 
   .aw-cal-this-week-pill {
-    color: rgb(235, 83, 78); /*Old #2563eb;*/
-    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
-    border-color: rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
-  .aw-now-line { background: rgb(235, 76, 70); }/*Old: #dc2626*/
-  .aw-now-dot  { background: rgb(235, 76, 70); }/*Old: #dc2626*/
+    color: var(--sys-red, #ff453a); /*Old #2563eb;*/
+    background: rgba(255,69,58,0.08); /*Old rgba(37,99,235,0.08)*/
+    border-color: rgba(255,69,58,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-now-line { background: var(--sys-red, #ff453a); }/*Old: #dc2626*/
+  .aw-now-dot  { background: var(--sys-red, #ff453a); }/*Old: #dc2626*/
   .aw-today-pill {
-    color: rgb(235, 83, 78); /*Old #2563eb;*/
-    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
-    border-color: rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
-  .aw-compact-day-label.today { color: rgb(235, 83, 78) } /*Old #2563eb;*/
-  .aw-skipped-label.today { color: rgb(235, 83, 78); } /*Old #2563eb;*/
+    color: var(--sys-red, #ff453a); /*Old #2563eb;*/
+    background: rgba(255,69,58,0.08); /*Old rgba(37,99,235,0.08)*/
+    border-color: rgba(255,69,58,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-compact-day-label.today { color: var(--sys-red, #ff453a) } /*Old #2563eb;*/
+  .aw-skipped-label.today { color: var(--sys-red, #ff453a); } /*Old #2563eb;*/
   .aw-skipped-today-pill {
-    color: rgb(235, 83, 78); /*Old #2563eb;*/
-    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
-    border: 1px solid rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
-  .aw-tday-num.today { background: rgb(235, 76, 70); }/*Old: #2563eb*/
+    color: var(--sys-red, #ff453a); /*Old #2563eb;*/
+    background: rgba(255,69,58,0.08); /*Old rgba(37,99,235,0.08)*/
+    border: 1px solid rgba(255,69,58,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-tday-num.today { background: var(--sys-red, #ff453a); }/*Old: #2563eb*/
   .agenda-widget .aw-progress-bar { background: rgba(37,99,235,0.45); }
   .aw-tdays::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
 
