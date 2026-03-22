@@ -2,95 +2,29 @@
 Copyright © 2026 Ogust'1. All rights reserved.
 */
 
-// ── i18n ──────────────────────────────────────────────────────────────────────
-const _I18N = {
-  en: {
-    loading: 'Loading…',
-    allDay: _T('allDay'),
-    inProgress: 'In progress',
-    completed: 'COMPLETED',
-    startingSoon: 'STARTING SOON',
-    left: 'left',
-    justUpdated: _T('justUpdated'),
-    updatedSAgo: s => `Updated ${s}s ago`,
-    updatedMAgo: m => `Updated ${m}min ago`,
-    updatedM30Ago: m => `Updated ${m}min 30s ago`,
-    offline: _T('offline'),
-    updateFailed: _T('updateFailed'),
-    configureMsg: _T('configureMsg'),
-    unableLoad: e => `Unable to load.<br><small style="opacity:.5">${e}</small>`,
-    noMoreToday: _T('noMoreToday'),
-    noUpcoming: _T('noUpcoming'),
-    enjoyBreak: _T('enjoyBreak'),
-    haveGreatWe: _T('haveGreatWe'),
-    nextClass: 'Next class',
-    today: 'Today',
-    locate: ''+_T('locate')+'',
-    joinVideo: v => `↗ Join ${v}`,
-    in: s => `in ${s}`,
-    elapsed: p => `${p}% elapsed`,
-  },
-  fr: {
-    loading: 'Chargement…',
-    allDay: 'Toute la journée',
-    inProgress: 'En cours',
-    completed: 'TERMINÉ',
-    startingSoon: 'BIENTÔT',
-    left: 'restant',
-    justUpdated: 'Mis à jour',
-    updatedSAgo: s => `Mis à jour il y a ${s}s`,
-    updatedMAgo: m => `Mis à jour il y a ${m}min`,
-    updatedM30Ago: m => `Mis à jour il y a ${m}min 30s`,
-    offline: 'Hors ligne',
-    updateFailed: 'Échec de mise à jour',
-    configureMsg: 'Veuillez configurer votre agenda dans les réglages.',
-    unableLoad: e => `Impossible de charger.<br><small style="opacity:.5">${e}</small>`,
-    noMoreToday: 'Plus de cours aujourd’hui',
-    noUpcoming: 'Aucun cours à venir',
-    enjoyBreak: 'Profitez-en !',
-    haveGreatWe: 'Bon week-end !',
-    nextClass: 'Prochain cours',
-    today: 'Aujourd’hui',
-    locate: '↗ Localiser',
-    joinVideo: v => `↗ Rejoindre ${v}`,
-    in: s => `dans ${s}`,
-    elapsed: p => `${p}% écoulé`,
-  }
-};
-function _getLang() {
-  try { var d=JSON.parse(localStorage.getItem('shortcut_config')||'null'); return (d&&d.lang)||'en'; } catch(e){ return 'en'; }
-}
-function _T(key, ...args) {
-  var lang = _getLang();
-  var t = (_I18N[lang]||_I18N.en)[key];
-  if (typeof t === 'function') return t(...args);
-  return t || (_I18N.en[key] || key);
-}
-
-// ── Config from localStorage ──────────────────────────────────────────────────
+// Config lue depuis localStorage
 function _getCfg() {
   try { return JSON.parse(localStorage.getItem('shortcut_config') || 'null'); } catch(e) { return null; }
 }
 function _loadCfg() {
   var c = _getCfg(); if (!c) return false;
-  AW_API_KEY      = c.apiKey      || '';
-  AW_CALENDAR_ID  = c.calendars && c.calendars[0] ? c.calendars[0] : '';
-  AW_CALENDAR_ID_2= c.calendars && c.calendars[1] ? c.calendars[1] : '';
-  AW_ICAL_URL     = c.icalUrl     || '';
+  AW_API_KEY       = c.apiKey      || '';
+  AW_CALENDAR_ID   = c.calendars && c.calendars[0] ? c.calendars[0] : '';
+  AW_CALENDAR_ID_2 = c.calendars && c.calendars[1] ? c.calendars[1] : '';
+  AW_ICAL_URL      = c.icalUrl || '';
   return !!(AW_API_KEY && AW_CALENDAR_ID);
 }
-
 let AW_API_KEY      = '';
 let AW_CALENDAR_ID  = '';
-let AW_CALENDAR_ID_2= '';
+let AW_CALENDAR_ID_2 = '';
 const AW_CAL2_COLOR = 'lime';
 let AW_ICAL_URL     = '';
 const AW_FETCH_DAYS  = 49;
 
-// Grid config: 0–24h, px/hour set dynamically in awRenderDay
+// Grid 0-24h, px/heure calculé dynamiquement dans awRenderDay
 const AW_HOUR_START  = 0;
 const AW_HOUR_END    = 24;
-let   AW_PX_PER_HOUR = 60; // overridden per render
+let   AW_PX_PER_HOUR = 60;
 
 // ── 🎨 COULEURS PAR MATIÈRE ──────────────────────────────────────────────────
 const AW_COLOR_MAP = [
@@ -115,7 +49,7 @@ function awToday() { return awDateStr(new Date()); }
 
 function awFmtTime(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 function awFmtRemaining(end) {
   const ms = new Date(end) - Date.now();
@@ -152,14 +86,14 @@ function awFmtDuration(start, end) {
 }
 function awFmtDayLabel(dateStr, long = false) {
   const d = new Date(dateStr + 'T00:00:00');
-  const s = d.toLocaleDateString('en-EN', long
+  const s = d.toLocaleDateString('en-GB', long
     ? { weekday: 'long', day: 'numeric', month: 'long' }
     : { weekday: 'short', day: 'numeric', month: 'short' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function awWeekdayShort(dateStr) {
   return new Date(dateStr + 'T00:00:00')
-    .toLocaleDateString('en-EN', { weekday: 'short' })
+    .toLocaleDateString('en-GB', { weekday: 'short' })
     .replace(/^./, c => c.toUpperCase());
 }
 function awDayNum(dateStr) { return new Date(dateStr + 'T00:00:00').getDate(); }
@@ -368,7 +302,7 @@ function awRowHtml(ev, idx = -1) {
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
     group     ? `<span class="aw-row-badge aw-row-badge--group">${group}</span>` : '',
-    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">'+_T('inProgress')+'</span>` : '',
+    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">In progress</span>` : '',
   ].filter(Boolean).join('');
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
@@ -392,17 +326,17 @@ function awRowHtml(ev, idx = -1) {
       <div class="aw-name">${shortName}${badges ? `<span class="aw-row-badges">${badges}</span>` : ''}</div>
       ${ev.location ? `<div class="aw-meta">${PIN}${ev.location}${mapUrl ? ' <a class="aw-map-link" href="' + mapUrl + '" target="_blank" rel="noopener">↗ Locate</a>' : ''}</div>` : ''}
       ${teacher     ? `<div class="aw-meta">${PERSON_SVG}${teacher}</div>` : ''}
-      ${visioUrl    ? `<div class="aw-meta">${VISIO_SVG}<a class="aw-map-link" href="${visioUrl}" target="_blank" rel="noopener">'+_T('joinVideo',visioLabel)+'</a></div>` : ''}
+      ${visioUrl    ? `<div class="aw-meta">${VISIO_SVG}<a class="aw-map-link" href="${visioUrl}" target="_blank" rel="noopener">↗ Join ${visioLabel}</a></div>` : ''}
       ${transport   ? `<div class="aw-meta">${TRAIN_SVG}${transport.url ? `<a class="aw-map-link" href="${transport.url}" target="_blank" rel="noopener">↗ ${transport.text}</a>` : transport.text}</div>` : ''}
       ${now         ? `<div class="aw-progress" style="background:${accent}${isLM?'18':'22'}"><div class="aw-progress-bar" data-ev-bar="${idx}" style="width:${pct}%;background:${accent}"></div></div>` : ''}
     </div>
     <div class="aw-time">
       ${allDay
-        ? '<span class="aw-time-single">'+_T('allDay')+'</span>'
-        : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur ? ` <span style="opacity:.4;font-size:9px">(${dur})</span>` : ''}</span>`
+        ? '<span class="aw-time-single">All day</span>'
+        : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur ? ' <span style="opacity:.4;font-size:9px">('+dur+')</span>' : ''}</span>`
       }
-      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent};margin-top:2px">in ${awFmtRemaining(ev.start)}</div>` : ''}
-      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent};margin-top:2px">${awFmtRemaining(ev.end)} '+_T('left')+'</div>` : ''}
+      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">in ${awFmtRemaining(ev.start)}</div>` : ''}
+      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} left</div>` : ''}
     </div>
   </div>`;
 }
@@ -582,9 +516,9 @@ function awUpdateTimer() {
   const mins = Math.floor(rounded / 60);
   const remSecs = rounded % 60;
   el.textContent = secs < 10 ? 'Just updated'
-    : secs < 60 ? _T('updatedSAgo', secs)
-    : remSecs === 0 ? _T('updatedMAgo', mins)
-    : _T('updatedM30Ago', mins);
+    : secs < 60 ? `Updated ${secs}s ago`
+    : remSecs === 0 ? `Updated ${mins}min ago`
+    : `Updated ${mins}min 30s ago`;
 }
 
 function awPopOpen(el, idx) {
@@ -633,7 +567,7 @@ function awPopOpen(el, idx) {
   }
   pop.innerHTML = `
     <div class="aw-pop-accent" style="background:${accent}"></div>
-    <button class="aw-pop-close" onclick="awPopClose()" aria-label="Close">
+    <button class="aw-pop-close" onclick="awPopClose()" aria-label="Fermer">
       <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
         <path d="M1 1l10 10M11 1L1 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
@@ -642,7 +576,7 @@ function awPopOpen(el, idx) {
       <div class="aw-pop-title">${fullName}</div>
       <div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span>${ev.start.length === 10 ? _T('allDay') : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
+        <span>${ev.start.length === 10 ? 'All day' : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
       </div>
       ${ev.location ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
@@ -664,11 +598,11 @@ function awPopOpen(el, idx) {
         ${typeBadge ? `<span class="aw-pop-tag" style="border-color:${accent};color:${accent}">${typeBadge}</span>` : ''}
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
         ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
-        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">'+_T('completed')+'</span>` : ''}
-        ${startsSoon ? `<span class="aw-pop-tag">'+_T('startingSoon')+'</span>` : ''}
+        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
+        ${startsSoon ? `<span class="aw-pop-tag">STARTING SOON</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
         ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
-        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">'+_T('completed')+'</span>` : ''}
+        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
         <div class="aw-pop-progress-label" style="justify-content:flex-end;gap:4px">
@@ -686,27 +620,23 @@ function awPopOpen(el, idx) {
 
   document.body.appendChild(pop);
 
-  // Always fixed. On mobile: bottom sheet. On desktop: float near event.
   pop.style.position = 'fixed';
   pop.style.zIndex   = '9999';
-
   if (window.innerWidth < 600) {
-    pop.style.left          = '10px';
-    pop.style.right         = '10px';
-    pop.style.bottom        = 'calc(49px + env(safe-area-inset-bottom,0px) + 10px)';
-    pop.style.top           = 'auto';
-    pop.style.width         = 'auto';
-    pop.style.maxWidth      = 'none';
-    pop.style.borderRadius  = '20px';
+    pop.style.left         = '10px';
+    pop.style.right        = '10px';
+    pop.style.bottom       = 'calc(49px + env(safe-area-inset-bottom,0px) + 10px)';
+    pop.style.top          = 'auto';
+    pop.style.width        = 'auto';
+    pop.style.maxWidth     = 'none';
+    pop.style.borderRadius = '20px';
     pop.style.transformOrigin = 'bottom center';
   } else {
-    const rect   = el.getBoundingClientRect();
-    const popW   = 260, m = 10;
-    // Prefer right side, fall back to left
+    const rect = el.getBoundingClientRect();
+    const popW = 260, m = 10;
     let left = rect.right + m;
     if (left + popW > window.innerWidth - m) left = rect.left - popW - m;
     if (left < m) left = m;
-    // Align top with event, clamp to screen
     let top = rect.top;
     requestAnimationFrame(() => {
       const popH = pop.offsetHeight;
@@ -829,7 +759,7 @@ function awRenderCompact(byDay, today) {
 
   html += `<div class="aw-compact-day-hd">
     <span class="aw-compact-day-label${isToday ? ' today' : ''}">${dayLabel}</span>
-    ${isToday ? '<span class="aw-today-pill">'+_T('today')+'</span>' : ''}
+    ${isToday ? '<span class="aw-today-pill">Today</span>' : ''}
   </div>`;
 
   html += targetDay.items.map((ev) => {
@@ -863,12 +793,12 @@ function awRenderCalendar(byDay, today) {
 
   // "March 2026" — if week spans two months show "Mar – Apr 2026"
   const monthLabel = (() => {
-    const month0 = d0.toLocaleDateString('en-EN', { month: 'long' });
+    const month0 = d0.toLocaleDateString('en-GB', { month: 'long' });
     const year0  = d0.getFullYear();
     if (d0.getMonth() === d6.getMonth()) {
       return `<strong>${month0}</strong> <span class="aw-cal-year">${year0}</span>`;
     }
-    const month6 = d6.toLocaleDateString('en-EN', { month: 'short' });
+    const month6 = d6.toLocaleDateString('en-GB', { month: 'short' });
     const year6  = d6.getFullYear();
     const yearSuffix = year0 === year6 ? ` <span class="aw-cal-year">${year6}</span>` : ` <span class="aw-cal-year">${year0}</span> \u2013 <span class="aw-cal-year">${year6}</span>`;
     return `<strong>${month0.slice(0,3)} \u2013 ${month6}</strong>${yearSuffix}`;
@@ -988,7 +918,6 @@ function awRender(events) {
   const byDay = {};
   awEvCache = events;
   awLastUpdated = Date.now();
-  // Dismiss splash as soon as first data is rendered
   if (typeof window._hideSplash === 'function') window._hideSplash();
   awUpdateTimer();
   events.forEach((ev, i) => { const d = ev.start.slice(0, 10); (byDay[d] = byDay[d] || []).push({ ev, i }); });
@@ -1022,10 +951,6 @@ let awIsOnline = navigator.onLine;
 async function awInit() {
   if (!_loadCfg()) {
     if (typeof showOnboarding === 'function') showOnboarding();
-    else {
-      const c = document.getElementById('aw-compact');
-      if (c) c.innerHTML = '<div class="aw-state">Please configure your calendar in Settings.</div>';
-    }
     return;
   }
   if (!navigator.onLine) { awScheduleReload(); return; }
@@ -1112,71 +1037,54 @@ setInterval(() => {
     el.textContent = 'in ' + awFmtRemaining(ev.start);
   });
 }, 1000);
-
-// ── ONE-DAY TIME GRID ─────────────────────────────────────────────────────────
-// Renders a single-day version of the time grid.
-// Uses AW_PX_PER_HOUR computed dynamically so 11 hours fit in the viewport.
+// ── ONE-DAY GRID VIEW ──────────────────────────────────────────────────────
 function awRenderDay(ds, container) {
   if (!container) return;
-
   const byDay   = window._awByDay || {};
   const today   = awToday();
   const isToday = ds === today;
 
-  // Compute px/hour so exactly 11 hours fit in the visible area
+  // Responsive: 11 heures visibles
   const HOURS_VIS = 11;
-  const availH = window.innerHeight
-    - (document.getElementById('navbar')  ? document.getElementById('navbar').offsetHeight  : 56)
-    - (document.getElementById('wk-nav')  ? document.getElementById('wk-nav').offsetHeight  : 76)
-    - 49;  // tab bar
+  const navH = document.getElementById('nb') ? document.getElementById('nb').offsetHeight : 56;
+  const wkH  = document.getElementById('wk-hdr') ? document.getElementById('wk-hdr').offsetHeight : 80;
+  const availH = window.innerHeight - navH - wkH - 49;
   AW_PX_PER_HOUR = Math.max(48, Math.round(availH / HOURS_VIS));
 
   const HOURS = 24;
   const gridH = HOURS * AW_PX_PER_HOUR;
+  const items  = byDay[ds] || [];
+  const timed  = items.filter(({ev}) => ev.start.length > 10);
+  const laid   = awLayoutColumns(timed);
+  const now    = new Date();
+  const nowH   = now.getHours() + now.getMinutes() / 60;
 
-  const items = byDay[ds] || [];
-  const timed = items.filter(function(x){ return x.ev.start.length > 10; });
-  const laid  = awLayoutColumns(timed);
-
-  const now  = new Date();
-  const nowH = now.getHours() + now.getMinutes() / 60;
-
-  var html = '<div class="awd-grid" style="height:' + gridH + 'px">';
-
-  // Hour gutter (skip 00:00 label)
+  let html = '<div class="awd-grid" style="height:' + gridH + 'px">';
   html += '<div class="awd-gutter">';
-  for (var h = 1; h < HOURS; h++) {
-    html += '<div class="awd-hour-lbl" style="top:' + (h * AW_PX_PER_HOUR) + 'px">'
-          + (h < 10 ? '0' : '') + h + ':00</div>';
+  for (let h = 1; h < HOURS; h++) {
+    html += '<div class="awd-hour-lbl" style="top:' + (h * AW_PX_PER_HOUR) + 'px">' + String(h).padStart(2,'0') + ':00</div>';
   }
-  html += '</div>';
-
-  // Day column
-  html += '<div class="awd-col">';
-  for (var h2 = 0; h2 <= HOURS; h2++) {
-    var cls = (h2 % 6 === 0) ? 'awd-hline major' : 'awd-hline';
-    html += '<div class="' + cls + '" style="top:' + (h2 * AW_PX_PER_HOUR) + 'px"></div>';
+  html += '</div><div class="awd-col">';
+  for (let h = 0; h <= HOURS; h++) {
+    const cls = (h % 6 === 0) ? 'awd-hline major' : 'awd-hline';
+    html += '<div class="' + cls + '" style="top:' + (h * AW_PX_PER_HOUR) + 'px"></div>';
   }
   if (isToday) {
     html += '<div class="awd-now" style="top:' + (nowH * AW_PX_PER_HOUR) + 'px"><div class="awd-now-dot"></div></div>';
   }
-  html += laid.map(function(item) {
-    return awGridEvHtml(item.ev, item.i, item.col, item.totalCols,
-      item.sameStart, item.stackDepth, item.isTopStacked,
-      item.visibleHeight, item.nextCoverStart);
-  }).join('');
+  html += laid.map(({ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart}) =>
+    awGridEvHtml(ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart)
+  ).join('');
   html += '</div></div>';
-
   container.innerHTML = html;
 
-  // Initial scroll position
-  var scrollTo;
+  // Scroll to shared position or smart default
+  let scrollTo;
   if (typeof window._wkScrollTop === 'number') {
-    // Use the shared scroll position (set by user scrolling another day)
     scrollTo = window._wkScrollTop;
   } else if (isToday) {
     scrollTo = nowH * AW_PX_PER_HOUR - availH * 0.38;
-    window._wkScrollTop = Math.max(0, scrollTo); // share as default
+    window._wkScrollTop = Math.max(0, scrollTo);
   } else if (timed.length > 0) {
     scrollTo = awTimeToHours(timed[0].ev.start) * AW_PX_PER_HOUR - availH * 0.25;
   } else {
@@ -1184,16 +1092,12 @@ function awRenderDay(ds, container) {
   }
   container.scrollTop = Math.max(0, scrollTo);
 
-  // When the user scrolls this day, sync ALL other rendered day pages immediately
+  // Sync scroll across all day pages
   container.addEventListener('scroll', function() {
-    var top = container.scrollTop;
+    const top = container.scrollTop;
     window._wkScrollTop = top;
-    // Propagate to all other rendered .wk-grid-host elements
-    var others = document.querySelectorAll('.wk-grid-host');
-    others.forEach(function(host) {
-      if (host !== container && host.children.length > 0) {
-        host.scrollTop = top;
-      }
+    document.querySelectorAll('.wk-grid-host').forEach(function(host) {
+      if (host !== container && host.children.length > 0) host.scrollTop = top;
     });
   }, { passive: true });
 }
