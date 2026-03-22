@@ -126,13 +126,11 @@
 
     .nav-spacer { flex: 1; }
 
-    /* Last updated pill */
+    /* Nav last updated */
     #nav-updated {
       font-size: 11px; color: var(--faint); font-style: italic;
-      white-space: nowrap;
+      white-space: nowrap; margin-right: 4px;
     }
-
-    /* Nav action buttons */
     .nav-btn {
       width: 34px; height: 34px; border-radius: 10px; border: none;
       background: var(--surface-2);
@@ -146,29 +144,6 @@
     .nav-btn:hover  { background: var(--border-hi); color: var(--text); }
     .nav-btn:active { transform: scale(0.9); }
     .nav-btn svg    { width: 16px; height: 16px; }
-
-    /* Segment control: Agenda / Calendar */
-    .nav-segment {
-      display: flex; align-items: center;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px; padding: 3px; gap: 2px;
-    }
-    .nav-seg-btn {
-      padding: 5px 13px; border-radius: 7px; border: none;
-      background: transparent; color: var(--muted);
-      font-size: 13px; font-weight: 500;
-      font-family: inherit; cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.18s, color 0.18s;
-      white-space: nowrap;
-    }
-    .nav-seg-btn.active {
-      background: var(--accent);
-      color: #fff;
-      box-shadow: 0 2px 8px rgba(37,99,235,0.3);
-    }
-
     /* ── Scrollable Content Area ── */
     #app-scroll {
       flex: 1; overflow-y: auto; overflow-x: hidden;
@@ -227,8 +202,12 @@
     /* Header de la widget caché — remplacé par notre navbar */
     #calendar .aw-header { display: none !important; }
 
-    /* Vue complète always visible, pas de toggle */
+    /* Vue complète — cachée par défaut, visible uniquement quand .open */
     #calendar .aw-full {
+      max-height: 0;
+      overflow: hidden;
+    }
+    #calendar .aw-full.open {
       max-height: none !important;
       overflow: visible !important;
     }
@@ -319,13 +298,7 @@
 
     <div class="nav-spacer"></div>
 
-    <span id="nav-updated" id="aw-last-updated"></span>
-
-    <!-- Segment: Agenda / Week -->
-    <div class="nav-segment" id="nav-segment">
-      <button class="nav-seg-btn active" id="seg-agenda" onclick="appShowAgenda()">Agenda</button>
-      <button class="nav-seg-btn"        id="seg-week"   onclick="appShowWeek()">Semaine</button>
-    </div>
+    <span id="nav-updated"></span>
 
     <!-- Settings -->
     <button class="nav-btn" onclick="showSettings()" aria-label="Paramètres">
@@ -414,31 +387,22 @@
 var appCalendarOpen = false;
 
 function appShowAgenda() {
-  document.getElementById('seg-agenda').classList.add('active');
-  document.getElementById('seg-week').classList.remove('active');
-  // Close calendar if open
   var full    = document.getElementById('aw-full');
   var compact = document.getElementById('aw-compact');
-  if (full && compact) {
-    full.classList.remove('open');
-    compact.style.display = 'block';
-  }
-  appCalendarOpen = false;
-  tabSelect(0, true);
+  if (full)    { full.classList.remove('open'); }
+  if (compact) { compact.style.display = 'block'; }
+  // Scroll to top
+  var scroll = document.getElementById('app-scroll');
+  if (scroll) scroll.scrollTop = 0;
 }
 
 function appShowWeek() {
-  document.getElementById('seg-week').classList.add('active');
-  document.getElementById('seg-agenda').classList.remove('active');
-  // Open calendar
   var full    = document.getElementById('aw-full');
   var compact = document.getElementById('aw-compact');
-  if (full && compact) {
-    full.classList.add('open');
-    compact.style.display = 'none';
-  }
-  appCalendarOpen = true;
-  tabSelect(1, true);
+  if (full)    { full.classList.add('open'); }
+  if (compact) { compact.style.display = 'none'; }
+  var scroll = document.getElementById('app-scroll');
+  if (scroll) scroll.scrollTop = 0;
 }
 
 var currentTab = 0;
