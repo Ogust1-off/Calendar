@@ -80,7 +80,7 @@
   /* ── Views ── */
   .view{display:none;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
-    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 4px)}
+    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 32px)}
   .view.on{display:block}
   #v-week.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
 
@@ -160,6 +160,9 @@
     display:flex;flex-direction:column;align-items:center;gap:5px;
     padding:4px 0;cursor:pointer;border-radius:10px;
     -webkit-tap-highlight-color:transparent;transition:background .1s;
+    /* Reset native button appearance */
+    appearance:none;-webkit-appearance:none;
+    background:none;border:none;font-family:inherit;
   }
   .wk-mini:active{background:var(--fill)}
   /* Day-of-week letter */
@@ -211,7 +214,7 @@
   /* Day grid container (written by awRenderDay) */
   .wk-grid-host{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;scroll-behavior:auto;
-    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 8px)}
+    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 32px)}
 
   /* Grid layout */
   .awd-grid{display:flex;position:relative}
@@ -292,12 +295,14 @@
   #tb{
     position:fixed;bottom:0;
     left:0;right:0;
-    height:calc(var(--tb) + env(safe-area-inset-bottom,0px));
+    height:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 4px);
     padding-bottom:env(safe-area-inset-bottom,0px);
     display:flex;align-items:flex-start;justify-content:center;
     z-index:200;
-    /* No bg here — pill has its own glass */
-    background:none;border-top:none;
+    /* Glass background to fully cover content below */
+    background:var(--glass);
+    backdrop-filter:var(--gblur);-webkit-backdrop-filter:var(--gblur);
+    border-top:.5px solid var(--gbdr);
   }
   /* Glass pill */
   #tb-pill{
@@ -796,6 +801,10 @@ function accEditName() {
 
 // Agenda hover tooltip (for cut-off items)
 function _initAgendaTooltips() {
+  // Desktop-only: don't show tooltip on touch devices (causes double popup)
+  var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  if (isTouch) return;
+
   var compact = document.getElementById('aw-compact'); if (!compact) return;
   var tip = document.getElementById('agenda-tip');
   if (!tip) {
@@ -807,7 +816,6 @@ function _initAgendaTooltips() {
     var ev = e.target.closest('.aw-event'); if (!ev) return;
     var name = ev.querySelector('.aw-name');
     if (!name) return;
-    // Only show if text is clipped
     if (name.scrollWidth <= name.offsetWidth + 2) return;
     var idx = parseInt(ev.dataset.ev);
     var evObj = typeof awEvCache!=='undefined' ? awEvCache[idx] : null;
