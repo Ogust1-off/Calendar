@@ -332,9 +332,12 @@ function awRowHtml(ev, idx = -1) {
       ${now         ? `<div class="aw-progress" style="background:${accent}${isLM?'18':'22'}"><div class="aw-progress-bar" data-ev-bar="${idx}" style="width:${pct}%;background:${accent}"></div></div>` : ''}
     </div>
     <div class="aw-time">
-      <span>${allDay ? 'All day' : CLOCK_SVG + awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end) + (dur ? ` <span style="opacity:.45">(${dur})</span>` : '')}</span>
-      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">in ${awFmtRemaining(ev.start)}</div>` : ''}
-      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} left</div>` : ''}
+      ${allDay
+        ? '<span class="aw-time-single">All day</span>'
+        : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur ? ` <span style="opacity:.4;font-size:9px">(${dur})</span>` : ''}</span>`
+      }
+      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent};margin-top:2px">in ${awFmtRemaining(ev.start)}</div>` : ''}
+      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent};margin-top:2px">${awFmtRemaining(ev.end)} left</div>` : ''}
     </div>
   </div>`;
 }
@@ -1099,9 +1102,11 @@ function awRenderDay(ds, container) {
 
   container.innerHTML = html;
 
-  // Scroll: center on now (today) or first event
+  // Scroll: use shared position if set, otherwise compute smart default
   var scrollTo;
-  if (isToday) {
+  if (typeof window._wkScrollTop === 'number') {
+    scrollTo = window._wkScrollTop;
+  } else if (isToday) {
     scrollTo = nowH * AW_PX_PER_HOUR - availH * 0.38;
   } else if (timed.length > 0) {
     scrollTo = awTimeToHours(timed[0].ev.start) * AW_PX_PER_HOUR - availH * 0.25;
@@ -1109,4 +1114,9 @@ function awRenderDay(ds, container) {
     scrollTo = 7 * AW_PX_PER_HOUR;
   }
   container.scrollTop = Math.max(0, scrollTo);
+
+  // Save scroll on user interaction (shared across day pages)
+  container.addEventListener('scroll', function() {
+    window._wkScrollTop = container.scrollTop;
+  }, { passive: true });
 }

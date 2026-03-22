@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,orientation=portrait"/>
   <title>Calendar · Shortcut</title>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -45,6 +45,11 @@
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{height:100%;background:var(--bg);color-scheme:dark light}
+  @media(orientation:landscape){
+    body::after{content:'Rotate to portrait';position:fixed;inset:0;
+      background:var(--bg);color:var(--lbl2);display:flex;align-items:center;justify-content:center;
+      font-size:17px;font-weight:500;z-index:99999;text-align:center;}
+  }
   body{height:100%;background:var(--bg);color:var(--lbl);
     font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
@@ -102,8 +107,14 @@
     padding:1px 7px!important;border-radius:99px!important}
 
   /* Event rows */
-  #v-agenda .aw-event{padding:13px 18px!important;border-bottom:.5px solid var(--sep2)!important;
+  #v-agenda .aw-event{padding:12px 18px!important;border-bottom:.5px solid var(--sep2)!important;
     background:var(--bg2)!important;transition:background .1s!important}
+  /* Two-line time column */
+  .aw-time{display:flex;flex-direction:column;align-items:flex-end;gap:0;
+    font-size:12px;color:var(--lbl2);font-variant-numeric:tabular-nums;flex-shrink:0;min-width:52px;text-align:right}
+  .aw-time-start{font-size:12px;color:var(--lbl2);font-weight:500;line-height:1.3}
+  .aw-time-end{font-size:11px;color:var(--lbl3);line-height:1.3}
+  .aw-time-single{font-size:12px;color:var(--lbl2)}
   #v-agenda .aw-event:active{background:var(--bg3)!important}
   #v-agenda .aw-event:last-child{border-bottom:none!important}
   #v-agenda .aw-skipped-row{padding:7px 18px!important;background:var(--bg)!important}
@@ -250,7 +261,7 @@
   .acc-page{padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:28px}
   .acc-hero{display:flex;flex-direction:column;align-items:center;gap:12px}
   .acc-icon{width:78px;height:78px;border-radius:50%;overflow:hidden;
-    box-shadow:0 0 0 3px rgba(255,255,255,.1),0 4px 20px rgba(0,0,0,.25)}
+    box-shadow:0 0 0 3px rgba(255,255,255,.1),0 4px 20px rgba(0,0,0,.25);position:relative}
   .acc-icon img{width:100%;height:100%;object-fit:cover;display:block}
   /* Navbar avatar — round when profile pic set */
   #nb-avatar-wrap.has-photo{border-radius:50%!important}
@@ -268,26 +279,66 @@
   .acc-row-lbl{flex:1}
   .acc-row-chv{width:12px;height:12px;color:var(--lbl3);flex-shrink:0}
   #acc-upd{font-size:12px;color:var(--lbl3)}
+  .acc-row-static{cursor:default!important}
+  .acc-row-static:active{background:none!important}
+  .acc-select{background:none;border:none;color:var(--tint);font-size:14px;font-family:inherit;
+    outline:none;cursor:pointer;text-align:right;flex-shrink:0;-webkit-appearance:auto}
+  .acc-row-status{font-size:12px;color:var(--lbl3);flex-shrink:0}
+  /* Tappable avatar */
+  #acc-avatar-wrap{cursor:pointer;transition:opacity .15s}
+  #acc-avatar-wrap:active{opacity:.75}
 
-  /* ── Tab bar ── */
-  #tb{position:fixed;bottom:0;
-    left:env(safe-area-inset-left,0);right:env(safe-area-inset-right,0);
+  /* ── Tab bar — Liquid Glass pill (iPhone style) ── */
+  #tb{
+    position:fixed;bottom:0;
+    left:0;right:0;
     height:calc(var(--tb) + env(safe-area-inset-bottom,0px));
     padding-bottom:env(safe-area-inset-bottom,0px);
-    display:flex;align-items:flex-start;
-    background:var(--glass);backdrop-filter:var(--gblur);-webkit-backdrop-filter:var(--gblur);
-    border-top:.5px solid var(--gbdr);z-index:200}
-  .tbtn{flex:1;height:var(--tb);display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:2px;
+    display:flex;align-items:flex-start;justify-content:center;
+    z-index:200;
+    /* No bg here — pill has its own glass */
+    background:none;border-top:none;
+  }
+  /* Glass pill */
+  #tb-pill{
+    display:flex;align-items:center;
+    background:rgba(30,30,32,.75);
+    backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);
+    border:.5px solid rgba(255,255,255,.14);
+    border-radius:99px;
+    box-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);
+    margin-top:8px;
+    padding:4px 6px;
+    gap:2px;
+    height:calc(var(--tb) - 10px);
+  }
+  @media(prefers-color-scheme:light){
+    #tb-pill{
+      background:rgba(240,240,245,.78);
+      border-color:rgba(255,255,255,.9);
+      box-shadow:0 8px 32px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.8);
+    }
+  }
+  .tbtn{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    padding:0 18px;height:100%;min-width:72px;
     border:none;background:none;cursor:pointer;color:var(--lbl3);
     font-family:inherit;-webkit-tap-highlight-color:transparent;
-    transition:color .15s,transform .1s}
+    border-radius:99px;
+    transition:color .2s,background .2s,transform .1s;
+    position:relative;
+  }
   .tbtn:active{transform:scale(.88)}
-  .tbtn.on{color:var(--tint)}
-  .tbtn svg{width:24px;height:24px}
+  .tbtn.on{
+    color:var(--tint);
+    background:rgba(10,132,255,.15);
+  }
+  @media(prefers-color-scheme:light){
+    .tbtn.on{background:rgba(0,122,255,.12);}
+  }
+  .tbtn svg{width:22px;height:22px}
   .tbtn span{font-size:10px;font-weight:500;letter-spacing:.01em}
-  .tb-line{position:absolute;top:0;height:.5px;background:var(--tint);
-    transition:left .2s cubic-bezier(.4,0,.2,1),width .2s}
+  .tb-line{display:none}
 
   /* ── Install banner ── */
   #ib{display:none;position:fixed;
@@ -355,20 +406,36 @@
   <div id="v-account" class="view">
     <div class="acc-page">
       <div class="acc-hero">
-        <div class="acc-icon" id="acc-avatar-wrap">
+        <div class="acc-icon" id="acc-avatar-wrap" onclick="accEditProfile()">
           <img id="acc-avatar-img" src="Asset/Picture/icon-180.png" alt=""/>
+          <div id="acc-avatar-edit" style="position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
         </div>
-        <div class="acc-name" id="acc-display-name">Calendar</div>
+        <div id="acc-name-wrap">
+          <div class="acc-name" id="acc-display-name" onclick="accEditName()">Calendar</div>
+        </div>
+        <input type="file" id="acc-photo-input" accept="image/*" style="display:none" onchange="accChangePhoto(this)"/>
         <div class="acc-sub">by Shortcut™ · © 2026 Ogust'1</div>
       </div>
+      <!-- Settings card -->
       <div class="acc-rows">
+        <div class="acc-row acc-row-static">
+          <span class="acc-row-ico">🌐</span>
+          <span class="acc-row-lbl">Language</span>
+          <select class="acc-select" id="acc-lang" onchange="accSetLang(this.value)">
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+          </select>
+        </div>
         <button class="acc-row" onclick="showSettings()">
-          <span class="acc-row-ico">⚙️</span><span class="acc-row-lbl">Calendar Settings</span>
+          <span class="acc-row-ico">📅</span><span class="acc-row-lbl">Calendar API &amp; Calendars</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button class="acc-row" onclick="appRefresh()">
-          <span class="acc-row-ico">🔄</span><span class="acc-row-lbl">Refresh</span>
-          <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <button class="acc-row" id="acc-refresh-btn" onclick="accRefresh()">
+          <span class="acc-row-ico" id="acc-refresh-ico">🔄</span>
+          <span class="acc-row-lbl">Refresh calendar</span>
+          <span id="acc-refresh-status" class="acc-row-status"></span>
         </button>
       </div>
       <p id="acc-upd"></p>
@@ -378,29 +445,30 @@
   <!-- aw-full: required by awRenderCalendar (hidden, not used in this shell) -->
   <div style="display:none" aria-hidden="true"><div id="aw-full"></div></div>
 
-  <!-- TAB BAR -->
+  <!-- TAB BAR — Liquid Glass pill -->
   <nav id="tb">
-    <div class="tb-line" id="tb-line"></div>
-    <button class="tbtn on" id="tb-0" onclick="goTab(0)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
-        <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
-      </svg>
-      <span>Agenda</span>
-    </button>
-    <button class="tbtn" id="tb-1" onclick="goTab(1)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="3"/>
-        <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
-      </svg>
-      <span>Week</span>
-    </button>
-    <button class="tbtn" id="tb-2" onclick="goTab(2)">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-      </svg>
-      <span>Account</span>
-    </button>
+    <div id="tb-pill">
+      <button class="tbtn on" id="tb-0" onclick="goTab(0)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
+          <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+        <span>Agenda</span>
+      </button>
+      <button class="tbtn" id="tb-1" onclick="goTab(1)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="3"/>
+          <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+        </svg>
+        <span>Week</span>
+      </button>
+      <button class="tbtn" id="tb-2" onclick="goTab(2)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span>Account</span>
+      </button>
+    </div>
   </nav>
 </div>
 
@@ -427,8 +495,11 @@ function wkInit(byDay, today) {
   if (!_wkCur || !_wkDates.includes(_wkCur)) _wkCur=today;
 
   _wkDates=[];
-  var base=new Date(today+'T00:00:00');
-  for (var i=0;i<49;i++) { var d=new Date(base); d.setDate(base.getDate()+i); _wkDates.push(_ds(d)); }
+  // Include past days of current week
+  var _td=new Date(today+'T00:00:00');
+  var _dow=_td.getDay();
+  var _wkStart=new Date(_td); _wkStart.setDate(_td.getDate()-(_dow===0?6:_dow-1));
+  for (var i=0;i<56;i++) { var d=new Date(_wkStart); d.setDate(_wkStart.getDate()+i); _wkDates.push(_ds(d)); }
 
   var strip=document.getElementById('wk-strip');
   if (!strip) return;
@@ -445,6 +516,8 @@ function wkInit(byDay, today) {
   wkUpdateHdr();
 
   var t;
+  // Close pop on horizontal swipe
+  strip.addEventListener('touchstart', function() { if(typeof awPopClose==='function') awPopClose(); }, {passive:true});
   strip.addEventListener('scroll', function() {
     clearTimeout(t);
     t=setTimeout(function() {
@@ -452,6 +525,7 @@ function wkInit(byDay, today) {
       var idx=Math.round(s.scrollLeft/s.offsetWidth);
       if (_wkDates[idx] && _wkDates[idx]!==_wkCur) {
         _wkCur=_wkDates[idx]; wkUpdateHdr(); wkPrefetch(_wkCur);
+        // Reset shared scroll position when changing days via mini-strip tap
       }
     }, 60);
   }, {passive:true});
@@ -538,7 +612,6 @@ function goTab(i) {
   }
 }
 
-function appRefresh() { _wkDirty=true; if(typeof awInit==='function') awInit(); }
 function forceRefresh() { appRefresh(); }
 function appShowAgenda() { goTab(0); }
 function appShowWeek()   { goTab(1); }
@@ -547,6 +620,123 @@ window.addEventListener('load', function() {
   goTab(0);
   _applyProfile();
 });
+
+/* ═══════════════════════════════════════
+   ACCOUNT FUNCTIONS
+═══════════════════════════════════════ */
+function accRefresh() {
+  var btn = document.getElementById('acc-refresh-btn');
+  var ico = document.getElementById('acc-refresh-ico');
+  var st  = document.getElementById('acc-refresh-status');
+  if (ico) ico.textContent = '⏳';
+  if (st)  st.textContent = 'Updating…';
+  _wkDirty = true;
+  if (typeof awInit === 'function') {
+    awInit().then ? awInit().then(function(){
+      if (ico) ico.textContent = '✅';
+      if (st)  st.textContent = 'Done!';
+      setTimeout(function(){ if(ico) ico.textContent='🔄'; if(st) st.textContent=''; }, 2500);
+    }) : setTimeout(function(){
+      if (ico) ico.textContent = '✅';
+      if (st)  st.textContent = 'Done!';
+      setTimeout(function(){ if(ico) ico.textContent='🔄'; if(st) st.textContent=''; }, 2500);
+    }, 1200);
+  }
+}
+
+function accSetLang(lang) {
+  try {
+    var d = JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+    d.lang = lang; localStorage.setItem('shortcut_config', JSON.stringify(d));
+  } catch(e){}
+  // Reload to apply
+  location.reload();
+}
+
+function accEditProfile() {
+  // Show edit overlay then open file picker
+  var ed = document.getElementById('acc-avatar-edit');
+  if (ed) { ed.style.display='flex'; setTimeout(function(){ ed.style.display='none'; },300); }
+  document.getElementById('acc-photo-input').click();
+}
+
+function accChangePhoto(input) {
+  var file = input.files[0]; if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var dataUrl = e.target.result;
+    try { var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{}; d.photo=dataUrl; localStorage.setItem('shortcut_config',JSON.stringify(d)); } catch(ex){}
+    _applyProfile();
+  };
+  reader.readAsDataURL(file);
+}
+
+function accEditName() {
+  var el = document.getElementById('acc-display-name');
+  if (!el) return;
+  var cur = el.textContent;
+  var inp = document.createElement('input');
+  inp.type='text'; inp.value=cur; inp.className='acc-name-inp';
+  inp.style.cssText='font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--lbl);background:none;border:none;border-bottom:2px solid var(--tint);outline:none;width:160px;text-align:center;font-family:inherit';
+  el.replaceWith(inp); inp.focus(); inp.select();
+  function save(){
+    var v=inp.value.trim()||cur;
+    var div=document.createElement('div'); div.className='acc-name'; div.id='acc-display-name';
+    div.onclick=accEditName; div.textContent=v; inp.replaceWith(div);
+    try { var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{}; d.displayName=v; localStorage.setItem('shortcut_config',JSON.stringify(d)); } catch(ex){}
+    _applyProfile();
+  }
+  inp.addEventListener('blur', save);
+  inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){ e.preventDefault(); save(); } });
+}
+
+// Agenda hover tooltip (for cut-off items)
+function _initAgendaTooltips() {
+  var compact = document.getElementById('aw-compact'); if (!compact) return;
+  var tip = document.getElementById('agenda-tip');
+  if (!tip) {
+    tip = document.createElement('div'); tip.id='agenda-tip';
+    tip.style.cssText='position:fixed;z-index:8000;background:rgba(28,28,30,.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:.5px solid rgba(255,255,255,.15);border-radius:10px;padding:7px 11px;font-size:13px;color:rgba(255,255,255,.9);max-width:220px;pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 4px 20px rgba(0,0,0,.4)';
+    document.body.appendChild(tip);
+  }
+  compact.addEventListener('mouseover', function(e) {
+    var ev = e.target.closest('.aw-event'); if (!ev) return;
+    var name = ev.querySelector('.aw-name');
+    if (!name) return;
+    // Only show if text is clipped
+    if (name.scrollWidth <= name.offsetWidth + 2) return;
+    var idx = parseInt(ev.dataset.ev);
+    var evObj = typeof awEvCache!=='undefined' ? awEvCache[idx] : null;
+    if (!evObj) { tip.textContent = name.textContent; }
+    else {
+      var full = evObj.summary || '';
+      tip.innerHTML = '<strong style="display:block;margin-bottom:3px">'+full+'</strong>';
+      if (evObj.location) tip.innerHTML += '<span style="opacity:.6;font-size:11px">'+evObj.location.split(',')[0]+'</span>';
+    }
+    var r = ev.getBoundingClientRect();
+    tip.style.left = Math.min(r.left, window.innerWidth-230)+'px';
+    tip.style.top  = (r.top - tip.offsetHeight - 6)+'px';
+    tip.style.opacity='1';
+  });
+  compact.addEventListener('mouseout', function(e) {
+    if (!e.target.closest('.aw-event')) tip.style.opacity='0';
+  });
+}
+
+// Lang init
+(function(){
+  try {
+    var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+    var sel=document.getElementById('acc-lang');
+    if (sel && d.lang) sel.value=d.lang;
+  } catch(e){}
+})();
+
+function appRefresh() {
+  _wkDirty=true;
+  if(typeof awInit==='function') awInit();
+}
+
 
 function _applyProfile() {
   try {
@@ -577,6 +767,8 @@ setInterval(function() {
     var el=document.getElementById(id);
     if (src&&el&&src.textContent!==el.textContent) { el.textContent=src.textContent; el.style.color=src.style.color||''; }
   });
+  // Tooltips
+  _initAgendaTooltips();
   // New data
   if (typeof awLastUpdated!=='undefined' && window._awByDay && awLastUpdated!==_lastTs) {
     _lastTs=awLastUpdated;
