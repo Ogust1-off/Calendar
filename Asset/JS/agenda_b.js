@@ -988,6 +988,8 @@ function awRender(events) {
   const byDay = {};
   awEvCache = events;
   awLastUpdated = Date.now();
+  // Dismiss splash as soon as first data is rendered
+  if (typeof window._hideSplash === 'function') window._hideSplash();
   awUpdateTimer();
   events.forEach((ev, i) => { const d = ev.start.slice(0, 10); (byDay[d] = byDay[d] || []).push({ ev, i }); });
   window._awByDay = byDay;

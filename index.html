@@ -541,6 +541,13 @@
 <script src="Asset/JS/agenda_b.js"></script>
 <script>
 'use strict';
+/* ── Global splash dismiss — must be defined before agenda_b.js runs ── */
+var _splashDone = false;
+window._hideSplash = function() {
+  if (_splashDone) return; _splashDone = true;
+  var s = document.getElementById('splash');
+  if (s) { s.classList.add('out'); setTimeout(function(){ if (s.parentNode) s.remove(); }, 450); }
+};
 /* ═══════════════════════════════════════
    WEEK VIEW — day-by-day time grid
 ═══════════════════════════════════════ */
@@ -686,25 +693,10 @@ window.addEventListener('load', function() {
 
   var s = document.getElementById('splash');
   if (!_hasCfg) {
-    // No config — remove splash immediately, onboarding will show
     if (s) s.remove();
   } else {
-    // Config present — show splash, dismiss when data arrives or after 3s max
-    var splashDone = false;
-    function _hideSplash() {
-      if (splashDone) return; splashDone = true;
-      if (s) { s.classList.add('out'); setTimeout(function(){ if(s.parentNode) s.remove(); }, 450); }
-    }
-    // Safety timeout — never block the app more than 3s
-    setTimeout(_hideSplash, 3000);
-    // Dismiss as soon as data is rendered
-    var _splashObs = setInterval(function(){
-      if (typeof awLastUpdated !== 'undefined' && awLastUpdated) { clearInterval(_splashObs); _hideSplash(); }
-    }, 100);
-    // Also dismiss if onboarding opens (shouldn't happen if config is set, but just in case)
-    var _splashObOb = setInterval(function(){
-      if (document.getElementById('ob-overlay')) { clearInterval(_splashObOb); _hideSplash(); }
-    }, 200);
+    // Show for exactly 3s then dismiss — simple and reliable
+    setTimeout(window._hideSplash, 3000);
   }
 });
 
