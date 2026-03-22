@@ -1,62 +1,44 @@
-# Shortcut™ — Agenda ECAM
-> © 2026 Ogust'1
+# Calendar by Shortcut™
+
+Your ECAM schedule, always with you.
 
 ---
 
-## 📲 Installer sur iPhone
+## Install on iPhone
 
-1. Héberge les fichiers sur **GitHub Pages** (gratuit, voir ci-dessous)
-2. Ouvre le lien dans **Safari**
-3. Partager ⎙ → **"Sur l'écran d'accueil"**
+1. Open the app link in **Safari** (not Chrome)
+2. Tap the **Share** button ⎙
+3. Tap **"Add to Home Screen"**
+4. Tap **Add** — the app appears on your home screen
 
----
-
-## 🚀 Mise en ligne sur GitHub Pages
-
-### Première fois
-1. Va sur [github.com](https://github.com) → New repository
-2. Nom : `shortcut-agenda`, coche **Public**
-3. Click **"uploading an existing file"** → glisse tout le contenu du dossier
-4. Settings → Pages → Branch: **main** → Save
-5. Ton URL : `https://TON-USERNAME.github.io/shortcut-agenda/`
+> The app works offline once installed.
 
 ---
 
-## 🔄 Mettre à jour l'app
+## First launch
 
-### Option A — Via GitHub.com (le plus simple, sans rien installer)
+On first open, the app will ask you for two things:
 
-1. Va sur ton repo GitHub dans le navigateur
-2. Clique sur le fichier à modifier (ex: `Asset/JS/agenda_b.js`)
-3. Clique l'icône ✏️ (Edit this file)
-4. Fais tes modifications
-5. Clique **"Commit changes"** → OK
-6. ✅ L'app se met à jour en 1-2 minutes pour tout le monde
+**1. A Google Calendar API key**
+- Go to [console.cloud.google.com](https://console.cloud.google.com)
+- Create a project → APIs & Services → Credentials → Create API Key
+- Restrict it to the **Google Calendar API**
 
-### Option B — En remplaçant un fichier entier
+**2. Your calendar ID(s)**
+- Open Google Calendar on desktop
+- ⚙️ Settings → click your calendar → "Integrate calendar"
+- Copy the **Calendar ID**
 
-1. Va sur ton repo → clique le fichier
-2. Clique l'icône ✏️ → **"Delete file"** puis confirme
-3. Reviens dans le dossier → **"Add file"** → **"Upload files"**
-4. Glisse le nouveau fichier → **"Commit changes"**
-
-### Option C — GitHub Desktop (si tu veux travailler en local)
-1. Télécharge [GitHub Desktop](https://desktop.github.com)
-2. Clone ton repo
-3. Modifie les fichiers localement
-4. Dans GitHub Desktop : **"Commit to main"** → **"Push origin"**
+Your credentials are stored only on your device and never sent anywhere.
 
 ---
 
-## ⚙️ Modifier la config (clés API, calendriers)
+## Share with others
 
-Dans l'app, appuie sur l'icône ⚙️ en haut à droite.
-Les données sont stockées localement sur chaque appareil.
+Send them the app link. Each person sets up their own calendar on first launch.
 
 ---
 
-## 🤝 Partager avec des amis
+## Settings
 
-Envoie juste le lien GitHub Pages.
-Ils ouvrent dans Safari → Partager → Sur l'écran d'accueil.
-Chacun entre ses propres clés API au premier lancement.
+Tap the **⚙️** icon in the top-right corner to update your calendars or API key at any time.

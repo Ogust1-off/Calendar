@@ -58,7 +58,7 @@ function awToday() { return awDateStr(new Date()); }
 
 function awFmtTime(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 function awFmtRemaining(end) {
   const ms = new Date(end) - Date.now();
@@ -95,14 +95,14 @@ function awFmtDuration(start, end) {
 }
 function awFmtDayLabel(dateStr, long = false) {
   const d = new Date(dateStr + 'T00:00:00');
-  const s = d.toLocaleDateString('en-EN', long
+  const s = d.toLocaleDateString('en-GB', long
     ? { weekday: 'long', day: 'numeric', month: 'long' }
     : { weekday: 'short', day: 'numeric', month: 'short' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function awWeekdayShort(dateStr) {
   return new Date(dateStr + 'T00:00:00')
-    .toLocaleDateString('en-EN', { weekday: 'short' })
+    .toLocaleDateString('en-GB', { weekday: 'short' })
     .replace(/^./, c => c.toUpperCase());
 }
 function awDayNum(dateStr) { return new Date(dateStr + 'T00:00:00').getDate(); }
@@ -340,7 +340,7 @@ function awRowHtml(ev, idx = -1) {
       ${now         ? `<div class="aw-progress" style="background:${accent}${isLM?'18':'22'}"><div class="aw-progress-bar" data-ev-bar="${idx}" style="width:${pct}%;background:${accent}"></div></div>` : ''}
     </div>
     <div class="aw-time">
-      <span>${allDay ? 'Journ\u00e9e' : CLOCK_SVG + awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end) + (dur ? ` <span style="opacity:.45">(${dur})</span>` : '')}</span>
+      <span>${allDay ? 'All day' : CLOCK_SVG + awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end) + (dur ? ` <span style="opacity:.45">(${dur})</span>` : '')}</span>
       ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">in ${awFmtRemaining(ev.start)}</div>` : ''}
       ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} left</div>` : ''}
     </div>
@@ -573,7 +573,7 @@ function awPopOpen(el, idx) {
       <div class="aw-pop-title">${fullName}</div>
       <div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span>${ev.start.length === 10 ? 'Journ\u00e9e enti\u00e8re' : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
+        <span>${ev.start.length === 10 ? 'All day' : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
       </div>
       ${ev.location ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
@@ -709,7 +709,7 @@ function awRenderCompact(byDay, today) {
     html += shown.map(ds => {
       const isToday = ds === today;
       const label   = awFmtDayLabel(ds, true);
-      const msg     = 'No more events today';
+      const msg     = 'No events';
       return `<div class="aw-skipped-row">
         <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class="aw-skipped-today-pill">Today</span>' : ''}</span>
         <span class="aw-skipped-msg">${msg}</span>
@@ -729,14 +729,14 @@ function awRenderCompact(byDay, today) {
     if (isWE) {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u{1F33F}</div>
-        <div class="aw-empty-title">Bon week-end !</div>
-        <div class="aw-empty-sub">Prochain cours : ${nextMonday}</div>
+        <div class="aw-empty-title">Have a great weekend!</div>
+        <div class="aw-empty-sub">Next class: ${nextMonday}</div>
       </div>`;
     } else {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u2705</div>
-        <div class="aw-empty-title">Aucun cours \u00e0 venir</div>
-        <div class="aw-empty-sub">Profites-en !</div>
+        <div class="aw-empty-title">No upcoming classes</div>
+        <div class="aw-empty-sub">Enjoy the break!</div>
       </div>`;
     }
     compact.innerHTML = html;
@@ -782,12 +782,12 @@ function awRenderCalendar(byDay, today) {
 
   // "March 2026" — if week spans two months show "Mar – Apr 2026"
   const monthLabel = (() => {
-    const month0 = d0.toLocaleDateString('en-EN', { month: 'long' });
+    const month0 = d0.toLocaleDateString('en-GB', { month: 'long' });
     const year0  = d0.getFullYear();
     if (d0.getMonth() === d6.getMonth()) {
       return `<strong>${month0}</strong> <span class="aw-cal-year">${year0}</span>`;
     }
-    const month6 = d6.toLocaleDateString('en-EN', { month: 'short' });
+    const month6 = d6.toLocaleDateString('en-GB', { month: 'short' });
     const year6  = d6.getFullYear();
     const yearSuffix = year0 === year6 ? ` <span class="aw-cal-year">${year6}</span>` : ` <span class="aw-cal-year">${year0}</span> \u2013 <span class="aw-cal-year">${year6}</span>`;
     return `<strong>${month0.slice(0,3)} \u2013 ${month6}</strong>${yearSuffix}`;
@@ -1040,75 +1040,49 @@ function awRenderDay(ds, container) {
   const byDay   = window._awByDay || {};
   const today   = awToday();
   const isToday = ds === today;
-  const isWE    = awIsWeekend(ds);
-  const isPast  = ds < today;
 
-  const gridH = (AW_HOUR_END - AW_HOUR_START) * AW_PX_PER_HOUR; // 24 * 60 = 1440px
-  const items  = byDay[ds] || [];
-  const timed  = items.filter(({ev}) => ev.start.length > 10);
-  const laid   = awLayoutColumns(timed);
+  const PX_H  = 60;
+  const HOURS = 24;
+  const gridH = HOURS * PX_H; // 1440px
 
-  // Now-line
-  const now  = new Date();
-  const nowH = now.getHours() + now.getMinutes() / 60;
-  const showNow = isToday;
-  const topNow  = nowH * AW_PX_PER_HOUR;
+  const items = byDay[ds] || [];
+  const timed = items.filter(({ev}) => ev.start.length > 10);
+  const laid  = awLayoutColumns(timed);
 
-  let html = `<div class="awd-scroll">`;
-  html += `<div class="awd-tgrid" style="height:${gridH}px">`;
+  const now    = new Date();
+  const nowH   = now.getHours() + now.getMinutes() / 60;
+  const topNow = nowH * PX_H;
+
+  let html = `<div class="awd-grid" style="height:${gridH}px">`;
 
   // Hour gutter
   html += `<div class="awd-gutter">`;
-  for (let h = 0; h <= 24; h++) {
-    const top = h * AW_PX_PER_HOUR;
-    if (h === 0) {
-      html += `<div class="awd-hour" style="top:${top}px"></div>`;
-    } else {
-      html += `<div class="awd-hour" style="top:${top}px">${awPad(h)}:00</div>`;
-    }
+  for (let h = 1; h < HOURS; h++) {
+    html += `<div class="awd-hour-lbl" style="top:${h * PX_H}px">${String(h).padStart(2,'0')}:00</div>`;
   }
   html += `</div>`;
 
   // Day column
-  html += `<div class="awd-col-area">`;
-
-  // Hour lines
-  for (let h = 0; h <= 24; h++) {
-    const top = h * AW_PX_PER_HOUR;
-    html += `<div class="awd-hline" style="top:${top}px"></div>`;
+  html += `<div class="awd-col">`;
+  for (let h = 0; h <= HOURS; h++) {
+    const cls = (h % 6 === 0) ? 'awd-hline major' : 'awd-hline';
+    html += `<div class="${cls}" style="top:${h * PX_H}px"></div>`;
   }
-
-  // Now line
-  if (showNow) {
-    html += `<div class="awd-now-line" style="top:${topNow}px">
-      <div class="awd-now-dot"></div>
-    </div>`;
+  if (isToday) {
+    html += `<div class="awd-now" style="top:${topNow}px"><div class="awd-now-dot"></div></div>`;
   }
-
-  // Events
   html += laid.map(({ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart}) =>
     awGridEvHtml(ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart)
   ).join('');
-
-  html += `</div></div></div>`;
+  html += `</div></div>`;
 
   container.innerHTML = html;
 
-  // Auto-scroll: centre sur les heures actives (7h par défaut, now si aujourd'hui)
-  const scrollEl = container.querySelector('.awd-scroll');
-  if (scrollEl) {
-    let targetH;
-    if (isToday) {
-      // Centre sur l'heure actuelle, décalé d'un peu en haut
-      targetH = nowH * AW_PX_PER_HOUR - scrollEl.clientHeight * 0.35;
-    } else if (timed.length > 0) {
-      // Premier event du jour
-      const firstH = awTimeToHours(timed[0].ev.start);
-      targetH = firstH * AW_PX_PER_HOUR - scrollEl.clientHeight * 0.25;
-    } else {
-      // Pas d'events: centre sur 8h
-      targetH = 8 * AW_PX_PER_HOUR - scrollEl.clientHeight * 0.25;
-    }
-    scrollEl.scrollTop = Math.max(0, targetH);
-  }
+  // Smart scroll
+  const scrollTarget = isToday
+    ? Math.max(0, topNow - container.clientHeight * 0.38)
+    : timed.length > 0
+      ? Math.max(0, awTimeToHours(timed[0].ev.start) * PX_H - container.clientHeight * 0.25)
+      : 7 * PX_H;
+  container.scrollTop = scrollTarget;
 }

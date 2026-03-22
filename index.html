@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>Calendar by Shortcut™</title>
+  <title>Calendar · Shortcut</title>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Calendar"/>
@@ -14,504 +14,355 @@
   <link rel="apple-touch-icon" sizes="180x180" href="Asset/Picture/icon-180.png"/>
   <link rel="apple-touch-icon" sizes="152x152" href="Asset/Picture/icon-152.png"/>
   <link rel="apple-touch-icon" sizes="120x120" href="Asset/Picture/icon-120.png"/>
-  <link rel="icon" type="image/png" sizes="32x32" href="Asset/Picture/icon-32.png"/>
+  <link rel="icon" sizes="32x32" href="Asset/Picture/icon-32.png"/>
   <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
   <style>
-
-  /* ─────────────────────────────────────────
-     Design tokens — Apple system palette
-  ───────────────────────────────────────── */
+  /* ── System tokens ── */
   :root {
-    /* iOS dark system colors */
-    --sys-bg:          #000000;
-    --sys-bg2:         #1c1c1e;
-    --sys-bg3:         #2c2c2e;
-    --sys-label:       rgba(255,255,255,1.00);
-    --sys-label2:      rgba(255,255,255,0.60);
-    --sys-label3:      rgba(255,255,255,0.30);
-    --sys-label4:      rgba(255,255,255,0.18);
-    --sys-sep:         rgba(255,255,255,0.10);
-    --sys-sep2:        rgba(255,255,255,0.06);
-    --sys-tint:        #0a84ff;
-    --sys-red:         #ff453a;
-    --sys-fill:        rgba(255,255,255,0.08);
-    --sys-fill2:       rgba(255,255,255,0.05);
-
-    /* Shortcut brand accent */
-    --accent:          #0a84ff;
-    --accent-soft:     rgba(10,132,255,0.18);
-    --accent-border:   rgba(10,132,255,0.35);
-
-    /* Aliases for agenda widget compat */
-    --bg:              var(--sys-bg);
-    --border:          var(--sys-sep);
-    --border-hi:       rgba(255,255,255,0.20);
-    --text:            var(--sys-label);
-    --muted:           var(--sys-label2);
-    --faint:           var(--sys-label3);
-
-    /* Layout */
-    --navbar-h:        52px;
-    --tab-h:           49px;
-    --safe-top:        env(safe-area-inset-top, 0px);
-    --safe-bottom:     env(safe-area-inset-bottom, 0px);
-
-    /* Liquid glass */
-    --glass:           rgba(28,28,30,0.72);
-    --glass-blur:      blur(40px) saturate(180%);
-    --glass-border:    rgba(255,255,255,0.12);
+    --bg:        #000;
+    --bg2:       #1c1c1e;
+    --bg3:       #2c2c2e;
+    --bg4:       #3a3a3c;
+    --label:     rgba(255,255,255,.92);
+    --label2:    rgba(255,255,255,.55);
+    --label3:    rgba(255,255,255,.28);
+    --sep:       rgba(255,255,255,.11);
+    --sep2:      rgba(255,255,255,.06);
+    --fill:      rgba(255,255,255,.08);
+    --fill2:     rgba(255,255,255,.05);
+    --tint:      #0a84ff;
+    --tint-soft: rgba(10,132,255,.18);
+    --red:       #ff453a;
+    --glass:     rgba(28,28,30,.8);
+    --glass-blur:blur(32px) saturate(180%);
+    --glass-bdr: rgba(255,255,255,.12);
+    /* compat */
+    --text:  var(--label);
+    --muted: var(--label2);
+    --faint: var(--label3);
+    --border:var(--sep);
+    --border-hi:rgba(255,255,255,.22);
+    --accent:var(--tint);
+    --sys-red:var(--red);
+    --navbar-h:52px;
+    --tab-h:49px;
+    --safe-top:env(safe-area-inset-top,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
   }
-
-  @media (prefers-color-scheme: light) {
-    :root {
-      --sys-bg:        #f2f2f7;
-      --sys-bg2:       #ffffff;
-      --sys-bg3:       #efeff4;
-      --sys-label:     rgba(0,0,0,0.88);
-      --sys-label2:    rgba(0,0,0,0.50);
-      --sys-label3:    rgba(0,0,0,0.30);
-      --sys-label4:    rgba(0,0,0,0.12);
-      --sys-sep:       rgba(0,0,0,0.12);
-      --sys-sep2:      rgba(0,0,0,0.06);
-      --sys-tint:      #007aff;
-      --sys-red:       #ff3b30;
-      --sys-fill:      rgba(0,0,0,0.06);
-      --sys-fill2:     rgba(0,0,0,0.04);
-      --accent:        #007aff;
-      --accent-soft:   rgba(0,122,255,0.12);
-      --accent-border: rgba(0,122,255,0.28);
-      --bg:            var(--sys-bg);
-      --border:        var(--sys-sep);
-      --border-hi:     rgba(0,0,0,0.20);
-      --text:          var(--sys-label);
-      --muted:         var(--sys-label2);
-      --faint:         var(--sys-label3);
-      --glass:         rgba(242,242,247,0.78);
-      --glass-blur:    blur(40px) saturate(200%);
-      --glass-border:  rgba(255,255,255,0.85);
+  @media(prefers-color-scheme:light){
+    :root{
+      --bg:#f2f2f7; --bg2:#fff; --bg3:#efeff4; --bg4:#e5e5ea;
+      --label:rgba(0,0,0,.88); --label2:rgba(0,0,0,.50); --label3:rgba(0,0,0,.28);
+      --sep:rgba(0,0,0,.10); --sep2:rgba(0,0,0,.05);
+      --fill:rgba(0,0,0,.06); --fill2:rgba(0,0,0,.04);
+      --tint:#007aff; --tint-soft:rgba(0,122,255,.12);
+      --red:#ff3b30;
+      --glass:rgba(242,242,247,.82);
+      --glass-bdr:rgba(255,255,255,.88);
+      --text:rgba(0,0,0,.88); --muted:rgba(0,0,0,.50); --faint:rgba(0,0,0,.28);
+      --border:rgba(0,0,0,.10); --border-hi:rgba(0,0,0,.20);
+      --accent:#007aff; --sys-red:#ff3b30;
     }
   }
 
-  /* ─────────────────────────────────────────
-     Reset
-  ───────────────────────────────────────── */
-  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
-  html { height:100%; background:var(--sys-bg); color-scheme:dark light; }
-  body {
-    height:100%;
-    background:var(--sys-bg);
-    color:var(--sys-label);
+  /* ── Reset ── */
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{height:100%;background:var(--bg);color-scheme:dark light;}
+  body{
+    height:100%;background:var(--bg);color:var(--label);
     font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    -webkit-text-size-adjust:100%;
-    overscroll-behavior:none;
-    overflow:hidden;
+    -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
+    overscroll-behavior:none;overflow:hidden;
   }
 
-  /* ─────────────────────────────────────────
-     App shell
-  ───────────────────────────────────────── */
-  #app {
-    position:fixed; inset:0;
-    display:flex; flex-direction:column;
-    height:100%; height:100dvh;
+  /* ── Shell ── */
+  #app{
+    position:fixed;inset:0;display:flex;flex-direction:column;
+    height:100%;height:100dvh;
   }
 
-  /* ─────────────────────────────────────────
-     Nav bar — true iOS nav bar style
-  ───────────────────────────────────────── */
-  #navbar {
+  /* ── Nav bar ── */
+  #navbar{
     flex-shrink:0;
-    display:flex; align-items:flex-end;
     padding:0 16px 10px;
     padding-top:calc(var(--safe-top) + 4px);
+    display:flex;align-items:flex-end;gap:10px;
     background:var(--glass);
-    backdrop-filter:var(--glass-blur);
-    -webkit-backdrop-filter:var(--glass-blur);
-    border-bottom:0.5px solid var(--glass-border);
-    z-index:100;
-    gap:8px;
+    backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+    border-bottom:.5px solid var(--glass-bdr);
+    z-index:200;
   }
+  .nb-brand{display:flex;align-items:center;gap:10px;flex:1;text-decoration:none;min-width:0;}
+  .nb-icon{width:32px;height:32px;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.3);}
+  .nb-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+  .nb-name{font-size:17px;font-weight:600;letter-spacing:-.025em;color:var(--label);line-height:1.15;white-space:nowrap;}
+  .nb-sub{font-size:11px;color:var(--label3);display:block;font-weight:400;}
+  #nb-upd{font-size:11px;color:var(--label3);white-space:nowrap;flex-shrink:0;}
+  .nb-btn{
+    width:32px;height:32px;border-radius:50%;border:none;
+    background:var(--fill);color:var(--label2);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;
+    transition:opacity .15s,transform .1s;
+  }
+  .nb-btn:active{opacity:.55;transform:scale(.9);}
+  .nb-btn svg{width:15px;height:15px;}
 
-  /* App icon + title */
-  .nb-brand {
-    display:flex; align-items:center; gap:10px; flex:1; min-width:0;
-    text-decoration:none;
-  }
-  .nb-icon {
-    width:32px; height:32px; border-radius:8px;
-    overflow:hidden; flex-shrink:0;
-    box-shadow:0 1px 4px rgba(0,0,0,0.3);
-  }
-  .nb-icon img { width:100%; height:100%; object-fit:cover; display:block; }
-  .nb-text { min-width:0; }
-  .nb-title {
-    font-size:17px; font-weight:600; letter-spacing:-0.02em;
-    color:var(--sys-label); line-height:1.15;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .nb-sub {
-    font-size:11px; color:var(--sys-label3);
-    letter-spacing:0; font-weight:400;
-    white-space:nowrap;
-  }
-
-  #nb-updated {
-    font-size:11px; color:var(--sys-label3);
-    white-space:nowrap; flex-shrink:0;
-  }
-
-  /* Nav icon button */
-  .nb-btn {
-    width:32px; height:32px; border-radius:50%;
-    border:none; background:var(--sys-fill);
-    color:var(--sys-label2);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; flex-shrink:0;
-    -webkit-tap-highlight-color:transparent;
-    transition:opacity .15s, transform .1s;
-  }
-  .nb-btn:active { opacity:.55; transform:scale(.9); }
-  .nb-btn svg { width:15px; height:15px; }
-
-  /* ─────────────────────────────────────────
-     Views
-  ───────────────────────────────────────── */
-  .view {
-    display:none; flex:1;
-    overflow-y:auto; overflow-x:hidden;
+  /* ── Views ── */
+  .view{
+    display:none;flex:1;min-height:0;
+    overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     overscroll-behavior-y:contain;
-    /* room for tab bar */
-    padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 2px);
+    padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 4px);
   }
-  .view.on { display:block; }
-  #view-week.on { display:flex; flex-direction:column; overflow:hidden; padding-bottom:0; }
+  .view.on{display:block;}
+  #view-week.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0;}
 
-  /* ─────────────────────────────────────────
-     VIEW: AGENDA — compact original, polished
-  ───────────────────────────────────────── */
-
-  /* Strip the widget's own chrome */
-  #view-agenda .agenda-widget {
-    background:none!important; border:none!important;
-    box-shadow:none!important; backdrop-filter:none!important;
-    margin:0!important; overflow:visible!important;
+  /* ────────────────────────────────────────
+     AGENDA VIEW — original compact, polished
+  ──────────────────────────────────────── */
+  #view-agenda .agenda-widget{
+    background:none!important;border:none!important;box-shadow:none!important;
+    backdrop-filter:none!important;margin:0!important;overflow:visible!important;
   }
-  #view-agenda .aw-header { display:none!important; }
+  #view-agenda .aw-header{display:none!important;}
 
-  /* Day header — sticky, iOS-style grouped section header */
-  #view-agenda .aw-compact-day-hd {
-    position:sticky!important; top:0!important; z-index:40!important;
-    display:flex!important; align-items:center!important; gap:8px!important;
-    padding:6px 20px 5px!important;
+  /* Sticky section header */
+  #view-agenda .aw-compact-day-hd{
+    position:sticky!important;top:0!important;z-index:40!important;
+    display:flex!important;align-items:center!important;gap:8px!important;
+    padding:6px 18px 5px!important;
     background:var(--glass)!important;
-    backdrop-filter:var(--glass-blur)!important;
-    -webkit-backdrop-filter:var(--glass-blur)!important;
-    border-bottom:0.5px solid var(--sys-sep)!important;
-    border-top:none!important;
-    margin-top:0!important;
-    box-shadow:none!important;
+    backdrop-filter:var(--glass-blur)!important;-webkit-backdrop-filter:var(--glass-blur)!important;
+    border-bottom:.5px solid var(--sep)!important;
+    border-top:none!important;margin-top:0!important;box-shadow:none!important;
   }
-  #view-agenda .aw-compact-day-label {
-    font-size:13px!important; font-weight:600!important;
-    text-transform:capitalize!important;
-    color:var(--sys-label2)!important;
-    letter-spacing:-.01em!important;
-  }
-  #view-agenda .aw-compact-day-label.today { color:var(--sys-red)!important; }
-  #view-agenda .aw-today-pill {
-    font-size:9px!important; font-weight:700!important; letter-spacing:.06em!important;
-    text-transform:uppercase!important;
-    color:var(--sys-red)!important;
-    background:rgba(255,69,58,.12)!important;
-    border:1px solid rgba(255,69,58,.25)!important;
-    padding:1px 7px!important; border-radius:99px!important;
-  }
+  #view-agenda .aw-compact-day-label{font-size:13px!important;font-weight:600!important;text-transform:capitalize!important;color:var(--label2)!important;letter-spacing:-.01em!important;}
+  #view-agenda .aw-compact-day-label.today{color:var(--red)!important;}
+  #view-agenda .aw-today-pill{font-size:9px!important;font-weight:700!important;letter-spacing:.06em!important;text-transform:uppercase!important;color:var(--red)!important;background:rgba(255,69,58,.12)!important;border:1px solid rgba(255,69,58,.25)!important;padding:1px 7px!important;border-radius:99px!important;}
   @media(prefers-color-scheme:light){
-    #view-agenda .aw-today-pill { color:var(--sys-red)!important; background:rgba(255,59,48,.10)!important; border-color:rgba(255,59,48,.22)!important; }
-    #view-agenda .aw-compact-day-label.today { color:var(--sys-red)!important; }
+    #view-agenda .aw-today-pill{color:var(--red)!important;background:rgba(255,59,48,.10)!important;border-color:rgba(255,59,48,.22)!important;}
+    #view-agenda .aw-compact-day-label.today{color:var(--red)!important;}
   }
-
   /* Event row */
-  #view-agenda .aw-event {
-    padding:13px 20px!important;
-    border-bottom:0.5px solid var(--sys-sep2)!important;
-    background:var(--sys-bg2)!important;
-    transition:background .1s!important;
-  }
-  #view-agenda .aw-event:active { background:var(--sys-bg3)!important; }
-  #view-agenda .aw-event:last-child { border-bottom:none!important; }
+  #view-agenda .aw-event{padding:13px 18px!important;border-bottom:.5px solid var(--sep2)!important;background:var(--bg2)!important;transition:background .1s!important;}
+  #view-agenda .aw-event:active{background:var(--bg3)!important;}
+  #view-agenda .aw-event:last-child{border-bottom:none!important;}
+  #view-agenda .aw-skipped-row{padding:7px 18px!important;background:var(--bg)!important;}
+  #view-agenda .aw-skipped-list{border-bottom:.5px solid var(--sep)!important;}
+  #view-agenda .aw-empty-state{background:var(--bg2)!important;}
 
-  /* Skipped / empty days */
-  #view-agenda .aw-skipped-row { padding:7px 20px!important; background:var(--sys-bg)!important; }
-  #view-agenda .aw-skipped-list { border-bottom:0.5px solid var(--sys-sep)!important; }
-  #view-agenda .aw-empty-state { background:var(--sys-bg2)!important; border-radius:0!important; }
+  /* ────────────────────────────────────────
+     WEEK VIEW — day grid, swipe navigation
+  ──────────────────────────────────────── */
 
-  /* Section background — rows sit on a white/dark card */
-  #view-agenda .aw-skipped-list + .aw-compact-day-hd,
-  #view-agenda > #calendar-agenda > #aw-compact > .aw-compact-day-hd:first-child {
-    margin-top:0!important;
-  }
-
-  /* ─────────────────────────────────────────
-     VIEW: SEMAINE — time grid, 1 day at a time
-  ───────────────────────────────────────── */
-  #view-week { overflow:hidden; padding-bottom:0; flex-direction:column; }
-  #view-week.on { display:flex; }
-
-  /* Week header — month label + 7-day strip like Apple Calendar */
-  #wk-nav {
+  /* Week header */
+  #wk-nav{
     flex-shrink:0;
     background:var(--glass);
-    backdrop-filter:var(--glass-blur);
-    -webkit-backdrop-filter:var(--glass-blur);
-    border-bottom:0.5px solid var(--glass-border);
-    z-index:10;
+    backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+    border-bottom:.5px solid var(--glass-bdr);
+    z-index:100;
   }
-
-  /* Top row: month label */
-  #wk-month-row {
-    display:flex; align-items:center; justify-content:space-between;
+  #wk-month-row{
+    display:flex;align-items:center;justify-content:space-between;
     padding:10px 16px 4px;
   }
-  #wk-month-label {
-    font-size:17px; font-weight:700; letter-spacing:-.025em;
-    color:var(--sys-label);
-  }
-  #wk-month-label span { font-weight:400; color:var(--sys-label2); }
-  .wk-today-jump {
-    height:28px; padding:0 12px; border-radius:99px; border:none;
-    background:var(--accent-soft); color:var(--accent);
-    font-size:12px; font-weight:500; font-family:inherit; cursor:pointer;
+  #wk-month-lbl{font-size:18px;font-weight:700;letter-spacing:-.03em;color:var(--label);}
+  #wk-month-lbl span{font-weight:400;color:var(--label2);}
+  .wk-jump{
+    height:28px;padding:0 12px;border-radius:99px;border:none;
+    background:var(--tint-soft);color:var(--tint);
+    font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
-    transition:opacity .15s, transform .1s;
+    transition:opacity .15s,transform .1s;
   }
-  .wk-today-jump:active { opacity:.7; transform:scale(.95); }
-  .wk-today-jump.active-today { background:var(--accent); color:#fff; }
+  .wk-jump:active{opacity:.7;transform:scale(.95);}
+  .wk-jump.on{background:var(--tint);color:#fff;}
 
-  /* Day strip: 7 days mini */
-  #wk-day-strip {
-    display:grid; grid-template-columns:repeat(7,1fr);
-    padding:4px 8px 10px; gap:0;
-  }
-  .wk-mini-day {
-    display:flex; flex-direction:column; align-items:center; gap:4px;
-    padding:4px 2px; border-radius:10px; cursor:pointer;
+  /* 7-day mini strip */
+  #wk-strip-days{display:grid;grid-template-columns:repeat(7,1fr);padding:3px 8px 8px;}
+  .wk-mini{
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:3px 2px;border-radius:9px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     transition:background .12s;
   }
-  .wk-mini-day:active { background:var(--sys-fill); }
-  .wk-mini-dow {
-    font-size:10px; font-weight:500; letter-spacing:.04em; text-transform:uppercase;
-    color:var(--sys-label3);
+  .wk-mini:active{background:var(--fill);}
+  .wk-mini-dow{font-size:10px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--label3);}
+  .wk-mini-num{
+    width:28px;height:28px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:400;color:var(--label2);
+    font-variant-numeric:tabular-nums;transition:background .15s,color .15s;
   }
-  .wk-mini-num {
-    width:30px; height:30px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    font-size:15px; font-weight:400; color:var(--sys-label2);
-    font-variant-numeric:tabular-nums;
-    transition:background .15s, color .15s;
-  }
-  /* Today ring */
-  .wk-mini-day.is-today .wk-mini-num {
-    color:var(--sys-red); font-weight:600;
-  }
-  /* Selected day — filled circle */
-  .wk-mini-day.is-selected .wk-mini-num {
-    background:var(--accent); color:#fff; font-weight:600;
-  }
-  /* Today + selected */
-  .wk-mini-day.is-today.is-selected .wk-mini-num {
-    background:var(--sys-red); color:#fff;
-  }
-  /* Dot under day if has events */
-  .wk-mini-dot {
-    width:4px; height:4px; border-radius:50%;
-    background:var(--sys-label3);
-    visibility:hidden;
-  }
-  .wk-mini-day.has-events .wk-mini-dot { visibility:visible; }
-  .wk-mini-day.is-selected .wk-mini-dot { background:var(--accent); }
-  .wk-mini-day.is-today.is-selected .wk-mini-dot { background:var(--sys-red); }
+  .wk-mini.is-today .wk-mini-num{color:var(--red);font-weight:600;}
+  .wk-mini.is-sel .wk-mini-num{background:var(--tint);color:#fff;font-weight:600;}
+  .wk-mini.is-today.is-sel .wk-mini-num{background:var(--red);}
+  .wk-mini-dot{width:4px;height:4px;border-radius:50%;background:var(--label3);visibility:hidden;}
+  .wk-mini.has-ev .wk-mini-dot{visibility:visible;}
+  .wk-mini.is-sel .wk-mini-dot{background:var(--tint);}
+  .wk-mini.is-today.is-sel .wk-mini-dot{background:var(--red);}
 
-  /* Swipe strip */
-  #wk-strip {
-    flex:1; display:flex;
-    overflow-x:auto; overflow-y:hidden;
+  /* Scroll-snap page strip */
+  #wk-pages{
+    flex:1;min-height:0;
+    display:flex;
+    overflow-x:auto;overflow-y:hidden;
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
   }
-  #wk-strip::-webkit-scrollbar { display:none; }
+  #wk-pages::-webkit-scrollbar{display:none;}
 
-  /* Each day page */
-  .wk-page {
-    flex:0 0 100%; scroll-snap-align:start;
-    overflow:hidden; display:flex; flex-direction:column;
+  /* Each day page — CRITICAL: must allow vertical scroll */
+  .wk-page{
+    flex:0 0 100%;scroll-snap-align:start;
+    min-height:0;display:flex;flex-direction:column;
   }
 
-  /* One-day grid — 0h to 24h */
-  .awd-scroll {
-    flex:1; overflow-y:auto; overflow-x:hidden;
+  /* ── Time grid ── */
+  /* Scrollable container for the time grid */
+  .awd-scroll{
+    flex:1;min-height:0;
+    overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
+    /* Fast momentum scroll */
+    scroll-behavior:auto;
     padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 8px);
   }
-  /* Outer grid wrapper: relative, full height */
-  .awd-tgrid {
-    display:flex; position:relative;
+
+  /* Grid: gutter + column side by side */
+  .awd-grid{
+    display:flex;
+    position:relative;
+    min-height:1440px; /* 24 * 60px */
   }
+
   /* Hour gutter */
-  .awd-gutter {
-    width:52px; flex-shrink:0; position:relative;
-    border-right:0.5px solid var(--sys-sep);
+  .awd-gutter{
+    width:52px;flex-shrink:0;
+    position:relative;
+    border-right:.5px solid var(--sep);
+    background:var(--bg);
   }
-  .awd-hour {
-    position:absolute; right:8px;
-    font-size:10px; font-weight:400; color:var(--sys-label3);
+  .awd-hour-lbl{
+    position:absolute;right:7px;
+    font-size:10px;font-weight:400;color:var(--label3);
     font-variant-numeric:tabular-nums;
-    transform:translateY(-50%); white-space:nowrap;
-    line-height:1; user-select:none;
+    transform:translateY(-50%);
+    white-space:nowrap;line-height:1;user-select:none;
   }
+
   /* Day column area */
-  .awd-col-area {
-    flex:1; position:relative; min-width:0;
+  .awd-col{
+    flex:1;min-width:0;
+    position:relative;
+    background:var(--bg2);
   }
-  /* Hour separator lines */
-  .awd-hline {
-    position:absolute; left:0; right:0; height:0.5px;
-    background:var(--sys-sep2);
+  .awd-hline{
+    position:absolute;left:0;right:0;height:.5px;
+    background:var(--sep2);pointer-events:none;
   }
-  /* Now line — red */
-  .awd-now-line {
-    position:absolute; left:0; right:0; height:2px;
-    background:var(--sys-red); z-index:10; pointer-events:none;
+  .awd-hline.major{background:var(--sep);}
+
+  /* Now indicator */
+  .awd-now{
+    position:absolute;left:0;right:0;height:2px;
+    background:var(--red);z-index:10;pointer-events:none;
   }
-  .awd-now-dot {
-    position:absolute; left:-4px; top:-4px;
-    width:10px; height:10px; border-radius:50%;
-    background:var(--sys-red);
-  }
-  /* Event blocks — override for single-column layout */
-  .awd-col-area .aw-gev {
-    border-radius:4px;
-    border-top:none; border-bottom:none; border-right:none;
-    /* padding adjusted for denser content */
-    padding:3px 6px 3px 10px !important;
-    overflow:hidden;
-  }
-  .awd-col-area .aw-gev-accent { display:none; } /* we use border-left instead */
-  .awd-col-area .aw-gev-name {
-    font-size:11px; font-weight:600; line-height:1.3;
-    white-space:normal; overflow:hidden;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
-  }
-  .awd-col-area .aw-gev-time {
-    font-size:10px; margin-top:1px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .awd-col-area .aw-gev-loc {
-    font-size:10px; margin-top:1px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  .awd-now-dot{
+    position:absolute;left:-5px;top:-4px;
+    width:10px;height:10px;border-radius:50%;background:var(--red);
   }
 
-  /* ─────────────────────────────────────────
-     VIEW: ACCOUNT
-  ───────────────────────────────────────── */
-  .acc-page { padding:28px 20px 24px; display:flex; flex-direction:column; align-items:center; gap:28px; }
-  .acc-hero { display:flex; flex-direction:column; align-items:center; gap:12px; }
-  .acc-icon {
-    width:80px; height:80px; border-radius:22px; overflow:hidden;
-    box-shadow:0 4px 16px rgba(0,0,0,0.25);
+  /* Event blocks */
+  .aw-gev{
+    border-radius:4px!important;
+    border-top:none!important;border-bottom:none!important;border-right:none!important;
+    padding:3px 5px 3px 9px!important;
+    overflow:hidden!important;
   }
-  .acc-icon img { width:100%; height:100%; object-fit:cover; display:block; }
-  .acc-name { font-size:24px; font-weight:700; letter-spacing:-.04em; color:var(--sys-label); }
-  .acc-sub  { font-size:13px; color:var(--sys-label3); }
+  .aw-gev-accent{display:none!important;}
+  .aw-gev-name{
+    font-size:11px!important;font-weight:600!important;line-height:1.3!important;
+    white-space:normal!important;
+    display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+  }
+  .aw-gev-time{font-size:10px!important;margin-top:1px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  .aw-gev-loc{font-size:10px!important;margin-top:1px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+  .aw-gev:hover{filter:brightness(1.12)!important;}
+  .aw-gev-past{opacity:.4!important;filter:saturate(.3)!important;}
 
-  /* Grouped table view — iOS style */
-  .acc-group { width:100%; }
-  .acc-group-label {
-    font-size:12px; font-weight:400; letter-spacing:.04em; text-transform:uppercase;
-    color:var(--sys-label2); padding:0 6px 6px; margin-bottom:0;
+  /* ── Account ── */
+  .acc-page{padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:28px;}
+  .acc-hero{display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .acc-icon{width:80px;height:80px;border-radius:22px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.25);}
+  .acc-icon img{width:100%;height:100%;object-fit:cover;display:block;}
+  .acc-name{font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--label);}
+  .acc-sub{font-size:13px;color:var(--label3);}
+  .acc-section{width:100%;}
+  .acc-section-lbl{font-size:12px;font-weight:400;letter-spacing:.04em;text-transform:uppercase;color:var(--label2);padding:0 6px 6px;}
+  .acc-rows{background:var(--bg2);border-radius:10px;overflow:hidden;border:.5px solid var(--sep);}
+  .acc-row{
+    display:flex;align-items:center;gap:12px;
+    padding:13px 16px;border:none;background:none;
+    color:var(--label);font-size:16px;font-family:inherit;
+    cursor:pointer;text-align:left;width:100%;
+    border-bottom:.5px solid var(--sep2);
+    -webkit-tap-highlight-color:transparent;transition:background .1s;
   }
-  .acc-rows {
-    background:var(--sys-bg2); border-radius:10px;
-    overflow:hidden; border:0.5px solid var(--sys-sep);
-  }
-  .acc-row {
-    display:flex; align-items:center; gap:12px;
-    padding:12px 16px; border:none; background:none;
-    color:var(--sys-label); font-size:16px; font-family:inherit;
-    cursor:pointer; text-align:left; width:100%;
-    border-bottom:0.5px solid var(--sys-sep2);
-    -webkit-tap-highlight-color:transparent;
-    transition:background .1s;
-  }
-  .acc-row:last-child { border-bottom:none; }
-  .acc-row:active { background:var(--sys-bg3); }
-  .acc-row-ico { font-size:18px; flex-shrink:0; }
-  .acc-row-lbl { flex:1; }
-  .acc-row-chev { width:12px; height:12px; color:var(--sys-label3); flex-shrink:0; }
-  #acc-updated { font-size:12px; color:var(--sys-label3); }
+  .acc-row:last-child{border-bottom:none;}
+  .acc-row:active{background:var(--bg3);}
+  .acc-row-ico{font-size:18px;flex-shrink:0;}
+  .acc-row-lbl{flex:1;}
+  .acc-row-chv{width:12px;height:12px;color:var(--label3);flex-shrink:0;}
+  #acc-upd{font-size:12px;color:var(--label3);}
 
-  /* ─────────────────────────────────────────
-     Tab bar — iOS style
-  ───────────────────────────────────────── */
-  #tabbar {
-    position:fixed; bottom:0;
-    left:env(safe-area-inset-left,0); right:env(safe-area-inset-right,0);
+  /* ── Tab bar ── */
+  #tabbar{
+    position:fixed;bottom:0;
+    left:env(safe-area-inset-left,0);right:env(safe-area-inset-right,0);
     height:calc(var(--tab-h) + var(--safe-bottom));
     padding-bottom:var(--safe-bottom);
-    display:flex; align-items:flex-start;
+    display:flex;align-items:flex-start;
     background:var(--glass);
-    backdrop-filter:var(--glass-blur);
-    -webkit-backdrop-filter:var(--glass-blur);
-    border-top:0.5px solid var(--glass-border);
-    z-index:100;
-  }
-  .tb-btn {
-    flex:1; height:var(--tab-h);
-    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
-    border:none; background:none; cursor:pointer;
-    color:var(--sys-label3); font-family:inherit;
-    -webkit-tap-highlight-color:transparent;
-    transition:color .15s, transform .1s;
-  }
-  .tb-btn:active { transform:scale(.88); }
-  .tb-btn.on { color:var(--accent); }
-  .tb-btn svg { width:24px; height:24px; }
-  .tb-btn span { font-size:10px; font-weight:500; letter-spacing:.01em; }
-
-  /* Selection indicator — thin top line Apple style */
-  .tb-indicator {
-    position:absolute; top:0; height:0.5px;
-    background:var(--accent);
-    transition:left .22s cubic-bezier(.4,0,.2,1), width .22s;
-  }
-
-  /* ─────────────────────────────────────────
-     Install banner
-  ───────────────────────────────────────── */
-  #install-banner {
-    display:none; position:fixed;
-    bottom:calc(var(--tab-h) + var(--safe-bottom) + 10px);
-    left:16px; right:16px;
-    background:var(--glass); backdrop-filter:var(--glass-blur); -webkit-backdrop-filter:var(--glass-blur);
-    border:0.5px solid var(--glass-border);
-    border-radius:14px; padding:12px 16px;
-    gap:12px; align-items:center; color:var(--sys-label);
-    box-shadow:0 4px 24px rgba(0,0,0,.3);
+    backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+    border-top:.5px solid var(--glass-bdr);
     z-index:200;
+  }
+  .tb{
+    flex:1;height:var(--tab-h);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    border:none;background:none;cursor:pointer;color:var(--label3);font-family:inherit;
+    -webkit-tap-highlight-color:transparent;transition:color .15s,transform .1s;
+  }
+  .tb:active{transform:scale(.88);}
+  .tb.on{color:var(--tint);}
+  .tb svg{width:24px;height:24px;}
+  .tb span{font-size:10px;font-weight:500;letter-spacing:.01em;}
+  .tb-line{position:absolute;top:0;height:.5px;background:var(--tint);transition:left .2s cubic-bezier(.4,0,.2,1),width .2s;}
+
+  /* ── Install banner ── */
+  #install-banner{
+    display:none;position:fixed;
+    bottom:calc(var(--tab-h) + var(--safe-bottom) + 10px);
+    left:16px;right:16px;
+    background:var(--glass);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+    border:.5px solid var(--glass-bdr);border-radius:14px;padding:12px 16px;
+    gap:12px;align-items:center;color:var(--label);
+    box-shadow:0 4px 24px rgba(0,0,0,.3);z-index:300;
     animation:rise .3s cubic-bezier(.34,1.4,.64,1);
   }
-  #install-banner.on { display:flex; }
-  @keyframes rise { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-  .ib-ico  { font-size:24px; flex-shrink:0; }
-  .ib-text { flex:1; }
-  .ib-text strong { display:block; font-size:14px; font-weight:600; margin-bottom:2px; }
-  .ib-text small  { font-size:12px; color:var(--sys-label2); }
-  .ib-close { background:none; border:none; color:var(--sys-label3); font-size:22px; cursor:pointer; padding:0 4px; line-height:1; }
-
+  #install-banner.on{display:flex;}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+  .ib-ico{font-size:24px;flex-shrink:0;}
+  .ib-text{flex:1;}
+  .ib-text strong{display:block;font-size:14px;font-weight:600;margin-bottom:2px;}
+  .ib-text small{font-size:12px;color:var(--label2);}
+  .ib-close{background:none;border:none;color:var(--label3);font-size:22px;cursor:pointer;padding:0 4px;line-height:1;}
   </style>
 </head>
 <body>
@@ -521,13 +372,10 @@
   <header id="navbar">
     <a class="nb-brand" href="#">
       <div class="nb-icon"><img src="Asset/Picture/icon-180.png" alt=""/></div>
-      <div class="nb-text">
-        <div class="nb-title">Calendar</div>
-        <div class="nb-sub">by Shortcut™</div>
-      </div>
+      <div><div class="nb-name">Calendar <span class="nb-sub">by Shortcut™</span></div></div>
     </a>
-    <span id="nb-updated"></span>
-    <button class="nb-btn" onclick="showSettings()" aria-label="Réglages">
+    <span id="nb-upd"></span>
+    <button class="nb-btn" onclick="showSettings()" aria-label="Settings">
       <svg viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
         <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -535,11 +383,11 @@
     </button>
   </header>
 
-  <!-- VIEW: AGENDA -->
+  <!-- VIEW: AGENDA (compact, original) -->
   <div id="view-agenda" class="view on">
     <div id="calendar-agenda" class="agenda-widget">
       <div id="aw-compact">
-        <div class="aw-state"><span class="aw-spinner"></span>Chargement…</div>
+        <div class="aw-state"><span class="aw-spinner"></span>Loading…</div>
       </div>
       <div class="aw-header" style="display:none">
         <span class="aw-title"></span>
@@ -549,21 +397,21 @@
     </div>
   </div>
 
-  <!-- VIEW: SEMAINE — time grid, one day at a time -->
+  <!-- VIEW: WEEK (day-by-day time grid) -->
   <div id="view-week" class="view">
-    <!-- Week header: month + 7-day mini strip -->
+    <!-- Header: month + 7-day mini strip -->
     <div id="wk-nav">
       <div id="wk-month-row">
-        <div id="wk-month-label">…</div>
-        <button class="wk-today-jump" id="wk-today-btn" onclick="wkGoToday()">Aujourd'hui</button>
+        <div id="wk-month-lbl">…</div>
+        <button class="wk-jump" id="wk-today-btn" onclick="wkGoToday()">Today</button>
       </div>
-      <div id="wk-day-strip"></div>
+      <div id="wk-strip-days"></div>
     </div>
-    <!-- Swipe strip: one page per day -->
-    <div id="wk-strip"></div>
+    <!-- Snap pages -->
+    <div id="wk-pages"></div>
   </div>
 
-  <!-- VIEW: COMPTE -->
+  <!-- VIEW: ACCOUNT -->
   <div id="view-account" class="view">
     <div class="acc-page">
       <div class="acc-hero">
@@ -571,22 +419,21 @@
         <div class="acc-name">Calendar</div>
         <div class="acc-sub">by Shortcut™ · © 2026 Ogust'1</div>
       </div>
-      <div class="acc-group">
-        <div class="acc-group-label">Calendrier</div>
+      <div class="acc-section">
         <div class="acc-rows">
           <button class="acc-row" onclick="showSettings()">
             <span class="acc-row-ico">⚙️</span>
-            <span class="acc-row-lbl">Paramètres</span>
-            <svg class="acc-row-chev" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="acc-row-lbl">Calendar Settings</span>
+            <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <button class="acc-row" onclick="appRefresh()">
             <span class="acc-row-ico">🔄</span>
-            <span class="acc-row-lbl">Actualiser</span>
-            <svg class="acc-row-chev" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="acc-row-lbl">Refresh</span>
+            <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
       </div>
-      <p id="acc-updated"></p>
+      <p id="acc-upd"></p>
     </div>
   </div>
 
@@ -595,25 +442,25 @@
 
   <!-- TAB BAR -->
   <nav id="tabbar">
-    <div class="tb-indicator" id="tb-ind"></div>
-    <button class="tb-btn on" id="tb-0" onclick="goTab(0)">
+    <div class="tb-line" id="tb-line"></div>
+    <button class="tb on" id="tb-0" onclick="goTab(0)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
         <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
       </svg>
       <span>Agenda</span>
     </button>
-    <button class="tb-btn" id="tb-1" onclick="goTab(1)">
+    <button class="tb" id="tb-1" onclick="goTab(1)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
       </svg>
-      <span>Semaine</span>
+      <span>Week</span>
     </button>
-    <button class="tb-btn" id="tb-2" onclick="goTab(2)">
+    <button class="tb" id="tb-2" onclick="goTab(2)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
       </svg>
-      <span>Compte</span>
+      <span>Account</span>
     </button>
   </nav>
 </div>
@@ -622,8 +469,8 @@
 <div id="install-banner">
   <div class="ib-ico">📲</div>
   <div class="ib-text">
-    <strong>Installer l'app</strong>
-    <small>Partager ⎙ → Sur l'écran d'accueil</small>
+    <strong>Install the app</strong>
+    <small>Share ⎙ → Add to Home Screen</small>
   </div>
   <button class="ib-close" onclick="dismissBanner()">×</button>
 </div>
@@ -632,166 +479,119 @@
 <script src="Asset/JS/agenda_b.js"></script>
 <script>
 'use strict';
-/* ════════════════════════════════════════════
-   HELPERS
-════════════════════════════════════════════ */
-var COLOR_HEX = {
-  blue:'#3b82f6',violet:'#8b5cf6',emerald:'#10b981',
-  amber:'#f59e0b',rose:'#f43f5e',cyan:'#06b6d4',
-  orange:'#f97316',grey:'#94a3b8',lime:'#84cc16'
-};
-function colorFor(n){
-  var MAP=[['math','blue'],['physique','cyan'],['informatique','violet'],
-    ['sciences ind','amber'],['anglais','emerald'],['sport','rose'],
-    ['culture','orange'],['proj','grey']];
-  var COLS=['blue','violet','emerald','amber','rose','cyan','orange','grey'];
-  var s=n.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  for(var i=0;i<MAP.length;i++) if(s.includes(MAP[i][0])) return MAP[i][1];
-  var w=s.split(/[\s\-]/)[0],h=0;
-  for(var j=0;j<w.length;j++) h=(h*31+w.charCodeAt(j))>>>0;
-  return COLS[h%COLS.length];
-}
-function fmtTime(iso){ return new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}); }
-function fmtDur(s,e){ var ms=new Date(e)-new Date(s),h=~~(ms/3600000),m=~~(ms%3600000/60000);
-  return h?m?h+'h'+String(m).padStart(2,'0'):h+'h':m+'min'; }
-function dateStr(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function teacher(desc){
-  if(!desc) return '';
-  var b=desc.match(/Formateur[^:]*:([\s\S]*?)(?:Participants|---|$)/i);
-  if(!b) return '';
-  return ((b[1].match(/[A-ZÀÂÄ][A-ZÀÂÄ\s\-]{2,}[a-zàâä][a-zàâä\-]+/g)||[])
-    .filter(function(n){return n.length>3&&!n.includes('@');})).join(', ');
-}
-function mapUrl(desc){
-  if(!desc) return '';
-  var m=desc.match(/https?:\/\/(?:www\.)?openstreetmap\.[^\s]+/i)||desc.match(/https?:\/\/maps\.[^\s]+/i);
-  return m?m[0]:'';
-}
+/* ════════════════════════════════════════
+   WEEK VIEW — time grid, one day at a time
+════════════════════════════════════════ */
+var _wkByDay=null,_wkToday=null,_wkDates=[],_wkCur=null,_wkDirty=false;
 
-/* ════════════════════════════════════════════
-   WEEK VIEW — day-by-day with scroll-snap
-════════════════════════════════════════════ */
-var _wkByDay=null, _wkToday=null, _wkDates=[], _wkCur=null, _wkDirty=false;
+function dsStr(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
 
 function wkInit(byDay,today){
   _wkByDay=byDay; _wkToday=today;
-  if(!_wkCur) _wkCur=today;
+  if(!_wkCur||!_wkDates.includes(_wkCur)) _wkCur=today;
+
+  // 49 days from today
   _wkDates=[];
   var base=new Date(today+'T00:00:00');
   for(var i=0;i<49;i++){
-    var d=new Date(base); d.setDate(base.getDate()+i);
-    _wkDates.push(dateStr(d));
+    var d=new Date(base); d.setDate(base.getDate()+i); _wkDates.push(dsStr(d));
   }
-  var strip=document.getElementById('wk-strip');
-  if(!strip) return;
-  strip.innerHTML='';
-  // Create empty page shells — fill lazily on snap
+
+  // Build page shells
+  var pages=document.getElementById('wk-pages');
+  if(!pages) return;
+  pages.innerHTML='';
   _wkDates.forEach(function(ds){
-    var page=document.createElement('div');
-    page.className='wk-page'; page.dataset.date=ds;
-    var grid=document.createElement('div');
-    grid.className='wk-day-grid'; grid.dataset.date=ds;
-    page.appendChild(grid);
-    strip.appendChild(page);
+    var p=document.createElement('div');
+    p.className='wk-page'; p.dataset.date=ds;
+    var g=document.createElement('div');
+    g.className='wk-day-grid awd-scroll'; g.dataset.date=ds;
+    p.appendChild(g);
+    pages.appendChild(p);
   });
+
   wkSnap(_wkCur,false,true);
   wkUpdateNav();
+
+  // Scroll listener
   var t;
-  strip.addEventListener('scroll',function(){
+  pages.addEventListener('scroll',function(){
     clearTimeout(t);
     t=setTimeout(function(){
-      var s=document.getElementById('wk-strip'); if(!s) return;
+      var s=document.getElementById('wk-pages'); if(!s) return;
       var idx=Math.round(s.scrollLeft/s.offsetWidth);
       if(_wkDates[idx]&&_wkDates[idx]!==_wkCur){
-        _wkCur=_wkDates[idx];
-        wkUpdateNav();  // rebuilds mini-strip + month label
-        wkRenderAround(_wkCur);
+        _wkCur=_wkDates[idx]; wkUpdateNav(); wkPrefetch(_wkCur);
       }
     },60);
   },{passive:true});
+
   _wkDirty=false;
 }
 
-function wkRenderAround(ds){
+function wkPrefetch(ds){
   var idx=_wkDates.indexOf(ds);
-  [-1,0,1].forEach(function(delta){
-    var i=idx+delta;
-    if(i>=0&&i<_wkDates.length) wkRenderIfEmpty(_wkDates[i]);
+  [-1,0,1].forEach(function(d){
+    var i=idx+d;
+    if(i>=0&&i<_wkDates.length) wkRenderGrid(_wkDates[i]);
   });
 }
 
-function wkRenderIfEmpty(ds){
-  var strip=document.getElementById('wk-strip'); if(!strip) return;
-  var grid=strip.querySelector('.wk-page[data-date="'+ds+'"] .wk-day-grid');
+function wkRenderGrid(ds){
+  var pages=document.getElementById('wk-pages'); if(!pages) return;
+  var grid=pages.querySelector('.wk-page[data-date="'+ds+'"] .wk-day-grid');
   if(!grid||grid.children.length>0) return;
   if(typeof awRenderDay==='function') awRenderDay(ds,grid);
 }
 
 function wkSnap(ds,smooth,render){
-  var strip=document.getElementById('wk-strip'); if(!strip) return;
+  var pages=document.getElementById('wk-pages'); if(!pages) return;
   var idx=_wkDates.indexOf(ds); if(idx<0) return;
-  strip.scrollTo({left:idx*strip.offsetWidth,behavior:smooth?'smooth':'instant'});
-  if(render) wkRenderAround(ds);
+  pages.scrollTo({left:idx*pages.offsetWidth,behavior:smooth?'smooth':'instant'});
+  if(render) wkPrefetch(ds);
 }
 
 function wkUpdateNav(){
-  if(!_wkCur||!_wkToday) return;
+  if(!_wkCur) return;
   var byDay=window._awByDay||{};
-
-  // ── Month label ──────────────────────────────────────────────────
   var d=new Date(_wkCur+'T00:00:00');
-  var mo=d.toLocaleDateString('fr-FR',{month:'long'});
+
+  // Month label
+  var mo=d.toLocaleDateString('en-GB',{month:'long'});
   mo=mo[0].toUpperCase()+mo.slice(1);
-  var yr=d.getFullYear();
-  var mlEl=document.getElementById('wk-month-label');
-  if(mlEl) mlEl.innerHTML='<strong>'+mo+'</strong> <span>'+yr+'</span>';
+  var ml=document.getElementById('wk-month-lbl');
+  if(ml) ml.innerHTML='<strong>'+mo+'</strong> <span>'+d.getFullYear()+'</span>';
 
-  // Today button state
   var tb=document.getElementById('wk-today-btn');
-  if(tb) tb.classList.toggle('active-today',_wkCur===_wkToday);
+  if(tb) tb.classList.toggle('on',_wkCur===_wkToday);
 
-  // ── 7-day mini strip ─────────────────────────────────────────────
-  // Show the 7 days of the week containing _wkCur (Mon–Sun)
-  var dow=d.getDay(); // 0=Sun
-  var monday=new Date(d);
-  monday.setDate(d.getDate()-(dow===0?6:dow-1)); // go to Monday
-
-  var stripEl=document.getElementById('wk-day-strip');
-  if(!stripEl) return;
-  stripEl.innerHTML='';
-
-  var DOW_SHORT=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
-  for(var i=0;i<7;i++){
-    var day=new Date(monday); day.setDate(monday.getDate()+i);
-    var ds=dateStr(day);
-    var isToday=(ds===_wkToday);
-    var isSelected=(ds===_wkCur);
-    var hasEvs=((byDay[ds]||[]).length>0);
-
-    var cls='wk-mini-day';
-    if(isToday)    cls+=' is-today';
-    if(isSelected) cls+=' is-selected';
-    if(hasEvs)     cls+=' has-events';
-
+  // 7-day strip — week of _wkCur
+  var dow=d.getDay();
+  var mon=new Date(d); mon.setDate(d.getDate()-(dow===0?6:dow-1));
+  var strip=document.getElementById('wk-strip-days');
+  if(!strip) return;
+  strip.innerHTML='';
+  ['M','T','W','T','F','S','S'].forEach(function(letter,i){
+    var day=new Date(mon); day.setDate(mon.getDate()+i);
+    var ds=dsStr(day);
+    var isT=(ds===_wkToday), isSel=(ds===_wkCur);
+    var hasEv=((byDay[ds]||[]).length>0);
+    var cls='wk-mini'+(isT?' is-today':'')+(isSel?' is-sel':'')+(hasEv?' has-ev':'');
     var btn=document.createElement('button');
-    btn.className=cls;
-    btn.dataset.date=ds;
-    btn.innerHTML=
-      '<span class="wk-mini-dow">'+DOW_SHORT[i]+'</span>'+
-      '<span class="wk-mini-num">'+day.getDate()+'</span>'+
-      '<span class="wk-mini-dot"></span>';
-    btn.addEventListener('click',(function(date){
-      return function(){ _wkCur=date; wkSnap(_wkCur,true,true); wkUpdateNav(); };
-    })(ds));
-    stripEl.appendChild(btn);
-  }
+    btn.className=cls; btn.dataset.date=ds;
+    btn.innerHTML='<span class="wk-mini-dow">'+letter+'</span><span class="wk-mini-num">'+day.getDate()+'</span><span class="wk-mini-dot"></span>';
+    (function(date){ btn.addEventListener('click',function(){ _wkCur=date; wkSnap(_wkCur,true,true); wkUpdateNav(); }); })(ds);
+    strip.appendChild(btn);
+  });
 }
 
 function wkGoToday(){ _wkCur=_wkToday; wkSnap(_wkCur,true,true); wkUpdateNav(); }
 
-/* ════════════════════════════════════════════
+/* ════════════════════════════════════════
    TABS
-════════════════════════════════════════════ */
+════════════════════════════════════════ */
 var VIDS=['view-agenda','view-week','view-account'];
 var TIDS=['tb-0','tb-1','tb-2'];
 var _tab=0;
@@ -800,28 +600,16 @@ function goTab(i){
   _tab=i;
   VIDS.forEach(function(id,j){
     var el=document.getElementById(id); if(!el) return;
-    if(j===i){
-      el.classList.add('on');
-      el.style.display=(id==='view-week'?'flex':'block');
-    } else {
-      el.classList.remove('on'); el.style.display='none';
-    }
+    if(j===i){ el.classList.add('on'); el.style.display=(id==='view-week'?'flex':'block'); }
+    else{ el.classList.remove('on'); el.style.display='none'; }
   });
   TIDS.forEach(function(id,j){ var el=document.getElementById(id); if(el) el.classList.toggle('on',j===i); });
-  // indicator
-  var bar=document.getElementById('tabbar'), ind=document.getElementById('tb-ind');
-  if(bar&&ind){ var w=bar.offsetWidth/3; ind.style.left=(i*w)+'px'; ind.style.width=w+'px'; }
-  // build week strip on first open or if dirty
-  if(i===1&&_wkByDay&&(_wkDirty||!document.getElementById('wk-strip').children.length)){
+  var bar=document.getElementById('tabbar'), line=document.getElementById('tb-line');
+  if(bar&&line){ var w=bar.offsetWidth/3; line.style.left=(i*w)+'px'; line.style.width=w+'px'; }
+  if(i===1&&_wkByDay&&(_wkDirty||!document.getElementById('wk-pages').children.length)){
     wkInit(_wkByDay,_wkToday);
   } else if(i===1&&_wkCur){
-    wkSnap(_wkCur,false);
-  }
-  // scroll agenda to today
-  if(i===0){
-    var today=(typeof awToday==='function')?awToday():new Date().toISOString().slice(0,10);
-    var hdr=document.querySelector('#aw-compact [data-date="'+today+'"], #aw-compact .aw-compact-day-hd');
-    if(hdr){ document.getElementById('view-agenda').scrollTop=hdr.offsetTop||0; }
+    wkSnap(_wkCur,false,false);
   }
 }
 
@@ -832,34 +620,26 @@ function forceRefresh(){  appRefresh(); }
 
 window.addEventListener('load',function(){ goTab(0); });
 
-/* Sync data → week view + labels */
+/* Sync data */
 var _lastTs=0;
 setInterval(function(){
-  // Sync "last updated" label
+  // Sync label
   var src=document.getElementById('aw-last-updated');
-  ['nb-updated','acc-updated'].forEach(function(id){
+  ['nb-upd','acc-upd'].forEach(function(id){
     var el=document.getElementById(id);
     if(src&&el&&src.textContent!==el.textContent){ el.textContent=src.textContent; el.style.color=src.style.color||''; }
   });
-  // Rebuild week when new data arrives
+  // Rebuild week on new data
   if(typeof awLastUpdated!=='undefined'&&window._awByDay&&awLastUpdated!==_lastTs){
     _lastTs=awLastUpdated;
     var today=(typeof awToday==='function')?awToday():new Date().toISOString().slice(0,10);
     _wkToday=today; _wkByDay=window._awByDay; _wkDirty=true;
     if(_tab===1) wkInit(_wkByDay,_wkToday);
   }
-  // Update progress bars
-  document.querySelectorAll('[data-pb]').forEach(function(el){
-    var ev=typeof awEvCache!=='undefined'?awEvCache[parseInt(el.dataset.pb)]:null;
-    if(!ev) return;
-    var n=Date.now();
-    if(new Date(ev.start)>n||new Date(ev.end)<n) return;
-    el.style.width=Math.min(100,~~((n-new Date(ev.start))/(new Date(ev.end)-new Date(ev.start))*100))+'%';
-  });
-  // Color scheme change → rebuild week
+  // Color scheme change
   var lm=window.matchMedia('(prefers-color-scheme:light)').matches;
-  if(typeof _lmLast==='undefined') _lmLast=lm;
-  if(lm!==_lmLast){ _lmLast=lm; _wkDirty=true; if(_tab===1&&_wkByDay) wkInit(_wkByDay,_wkToday); }
+  if(typeof _lmL==='undefined') _lmL=lm;
+  if(lm!==_lmL){ _lmL=lm; _wkDirty=true; if(_tab===1&&_wkByDay) wkInit(_wkByDay,_wkToday); }
 },700);
 
 /* ── SW ── */
