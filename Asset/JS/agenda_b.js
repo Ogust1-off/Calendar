@@ -1121,12 +1121,16 @@ function awRenderDay(ds, container) {
   const today   = awToday();
   const isToday = ds === today;
 
-  // Responsive: fit exactly 11 visible hours in the scroll container height
+  // Responsive: fit 11 hours in the visible scroll area
+  // Use window.innerHeight as fallback when container not yet laid out
   const HOURS_VISIBLE = 11;
-  const containerH    = container.clientHeight || window.innerHeight * 0.72;
-  const PX_H          = Math.round(containerH / HOURS_VISIBLE);
-  // Also update global so awGridEvHtml uses the same value
-  AW_PX_PER_HOUR      = PX_H;
+  const navbarH = document.getElementById('navbar') ? document.getElementById('navbar').offsetHeight : 56;
+  const wkNavH  = document.getElementById('wk-nav')  ? document.getElementById('wk-nav').offsetHeight  : 80;
+  const tabH    = 49;
+  const availH  = window.innerHeight - navbarH - wkNavH - tabH - 10;
+  const PX_H    = Math.max(50, Math.round(availH / HOURS_VISIBLE));
+  // Update global so awGridEvHtml uses the same scale
+  AW_PX_PER_HOUR = PX_H;
 
   const HOURS = 24;
   const gridH = HOURS * PX_H;
