@@ -556,12 +556,13 @@ function _obOpenCalSettings() {
   el.innerHTML =
     '<div id="ob-sheet">' +
     '<div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>' +
+    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>' +
     '<button class="ob-x" onclick="_obCalClose()" aria-label="Close">\u00d7</button>' +
     '<div id="ob-cal-content"></div>' +
     '<div id="ob-cal-bottom"></div>' +
     '</div>';
   document.body.appendChild(el);
-  requestAnimationFrame(function(){ el.classList.add('ob-in'); _obCalRender(0); });
+  requestAnimationFrame(function(){ el.classList.add('ob-in'); _obCalRender(0); _obInitDrag(el); });
 }
 
 var _obCalStep = 0; // 0=apikey, 1=calendars, 2=done
@@ -649,7 +650,14 @@ function _obCalNext() {
 
 function _obCalClose() {
   var o=document.getElementById('ob-overlay');
-  if(o){o.classList.add('ob-out');setTimeout(function(){o.remove();},380);}
+  if(o){o.classList.add('ob-out');setTimeout(function(){
+    o.remove();
+    // If still no valid config, show unconfigured state
+    var cfg=_obLoad();
+    if(!(cfg.apiKey&&cfg.calendars&&cfg.calendars[0])){
+      if(typeof _obShowUnconfigured==='function')_obShowUnconfigured();
+    }
+  },380);}
 }
 
 function _obCalFinish() {
