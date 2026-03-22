@@ -678,18 +678,34 @@ window.addEventListener('load', function() {
   goTab(0);
   _applyProfile();
   _applyI18n();
-  // Dismiss splash after min 1.2s
-  var splashDone = false;
-  function _hideSplash() {
-    if (splashDone) return; splashDone = true;
-    var s = document.getElementById('splash');
-    if (s) { s.classList.add('out'); setTimeout(function(){ s.remove(); }, 450); }
+
+  // Splash: only show if calendar is already configured
+  var _hasCfg = (function(){
+    try { var d=JSON.parse(localStorage.getItem('shortcut_config')||'null'); return !!(d&&d.apiKey&&d.calendars&&d.calendars[0]); } catch(e){ return false; }
+  })();
+
+  var s = document.getElementById('splash');
+  if (!_hasCfg) {
+    // No config — remove splash immediately, onboarding will show
+    if (s) s.remove();
+  } else {
+    // Config present — show splash, dismiss when data arrives or after 3s max
+    var splashDone = false;
+    function _hideSplash() {
+      if (splashDone) return; splashDone = true;
+      if (s) { s.classList.add('out'); setTimeout(function(){ if(s.parentNode) s.remove(); }, 450); }
+    }
+    // Safety timeout — never block the app more than 3s
+    setTimeout(_hideSplash, 3000);
+    // Dismiss as soon as data is rendered
+    var _splashObs = setInterval(function(){
+      if (typeof awLastUpdated !== 'undefined' && awLastUpdated) { clearInterval(_splashObs); _hideSplash(); }
+    }, 100);
+    // Also dismiss if onboarding opens (shouldn't happen if config is set, but just in case)
+    var _splashObOb = setInterval(function(){
+      if (document.getElementById('ob-overlay')) { clearInterval(_splashObOb); _hideSplash(); }
+    }, 200);
   }
-  setTimeout(_hideSplash, 1200);
-  // Also hide when first data arrives
-  var _splashObs = setInterval(function(){
-    if (typeof awLastUpdated !== 'undefined' && awLastUpdated) { clearInterval(_splashObs); _hideSplash(); }
-  }, 100);
 });
 
 /* ═══════════════════════════════════════
