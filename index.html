@@ -207,23 +207,20 @@
   #acc-upd{font-size:12px;color:var(--lbl3)}
 
   /* Tab bar pill */
+  /* Tab bar — pilule flottante, fond transparent */
   #tb{position:fixed;bottom:0;left:0;right:0;
-    height:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 12px);
+    height:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 14px);
     padding-bottom:env(safe-area-inset-bottom,0px);
     display:flex;align-items:flex-start;justify-content:center;z-index:200;
-    background:none;border-top:none;}
-  /* Safe-area background only — covers home indicator area */
-  #tb::after{content:'';position:absolute;bottom:0;left:0;right:0;
-    height:calc(env(safe-area-inset-bottom,0px) + 4px);
-    background:var(--glass);backdrop-filter:var(--gblur);-webkit-backdrop-filter:var(--gblur);}
+    background:none;border-top:none;pointer-events:none;}
   #tb-pill{display:flex;align-items:center;background:rgba(28,28,30,.88);
     backdrop-filter:blur(48px) saturate(200%);-webkit-backdrop-filter:blur(48px) saturate(200%);
     border:.5px solid rgba(255,255,255,.18);border-radius:99px;
     box-shadow:0 8px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.14);
-    margin-top:10px;padding:5px 8px;gap:2px;height:calc(var(--tb) - 2px);
-    position:relative;z-index:1;}
-  @media(prefers-color-scheme:light){#tb-pill{background:rgba(248,248,250,.92);
-    border-color:rgba(0,0,0,.10);box-shadow:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.9)}}
+    margin-top:8px;padding:5px 8px;gap:2px;height:calc(var(--tb) - 2px);
+    position:relative;pointer-events:all;}
+  @media(prefers-color-scheme:light){#tb-pill{background:rgba(248,248,250,.94);
+    border-color:rgba(0,0,0,.10);box-shadow:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.95)}}
   .tbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     padding:0 22px;height:100%;min-width:80px;border:none;background:none;cursor:pointer;
     color:var(--lbl3);font-family:inherit;-webkit-tap-highlight-color:transparent;
@@ -411,6 +408,40 @@
   <button class="ib-x" onclick="dismissBanner()">&#215;</button>
 </div>
 
+<!-- i18n global — avant agenda_b.js -->
+<script>
+(function(){
+  var S={
+    en:{today:'Today',allDay:'All day',inProgress:'In progress',completed:'COMPLETED',
+      startingSoon:'STARTING SOON',left:'left',justUpdated:'Just updated',
+      updatedSAgo:function(s){return'Updated '+s+'s ago';},
+      updatedMAgo:function(m){return'Updated '+m+'min ago';},
+      updatedM30Ago:function(m){return'Updated '+m+'min 30s ago';},
+      offline:'Offline',updateFailed:'Update failed',
+      configure:'Please configure your calendar in Settings.',
+      noMoreToday:'No more events today',noUpcoming:'No upcoming classes',
+      enjoyBreak:'Enjoy the break!',haveGreatWe:'Have a great weekend!',
+      nextClass:'Next class',
+    },
+    fr:{today:"Aujourd\u2019hui",allDay:'Toute la journ\u00e9e',inProgress:'En cours',
+      completed:'TERMIN\u00c9',startingSoon:'BIENT\u00d4T',left:'restant',
+      justUpdated:'Mis \u00e0 jour',
+      updatedSAgo:function(s){return'Mis \u00e0 jour il y a '+s+'s';},
+      updatedMAgo:function(m){return'Mis \u00e0 jour il y a '+m+'min';},
+      updatedM30Ago:function(m){return'Mis \u00e0 jour il y a '+m+'min 30s';},
+      offline:'Hors ligne',updateFailed:'\u00c9chec',
+      configure:'Veuillez configurer votre agenda dans les r\u00e9glages.',
+      noMoreToday:"Plus de cours aujourd\u2019hui",noUpcoming:'Aucun cours \u00e0 venir',
+      enjoyBreak:'Profitez-en\u00a0!',haveGreatWe:'Bon week-end\u00a0!',
+      nextClass:'Prochain cours',
+    }
+  };
+  window._getLang=function(){try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';}};
+  window._t=function(k,a){var s=S[window._getLang()]||S.en;var v=s[k];if(v===undefined)v=S.en[k];if(typeof v==='function')return v(a);return v!==undefined?v:k;};
+  window._locale=function(){return window._getLang()==='fr'?'fr-FR':'en-GB';};
+})();
+</script>
+
 <script src="Asset/JS/onboarding.js"></script>
 <script src="Asset/JS/agenda_b.js"></script>
 <script>
@@ -463,7 +494,7 @@ function wkUpdateHdr(){
   if(!_wkCur)return;
   var byDay=window._awByDay||{};
   var d=new Date(_wkCur+'T00:00:00');
-  var mo=d.toLocaleDateString('en-GB',{month:'long'});mo=mo[0].toUpperCase()+mo.slice(1);
+  var mo=d.toLocaleDateString(window._locale?window._locale():'en-GB',{month:'long'});mo=mo[0].toUpperCase()+mo.slice(1);
   var ml=document.getElementById('wk-month-lbl');
   if(ml)ml.innerHTML='<strong>'+mo+'</strong> <span>'+d.getFullYear()+'</span>';
   var tb=document.getElementById('wk-today-btn');if(tb)tb.classList.toggle('active',_wkCur===_wkToday);
@@ -533,8 +564,18 @@ function accRefresh(){
 }
 function accSetLang(lang){
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.lang=lang;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
-  _wkDirty=true;
+  // Re-apply all translated strings
   _applyLang();
+  // Re-render agenda compact (day labels, today pill, empty states)
+  if(window._awByDay&&typeof awRenderCompact==='function'){
+    var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+    awRenderCompact(window._awByDay,today);
+  }
+  // Re-render week header (month name in new locale)
+  wkUpdateHdr();
+  // Invalidate all rendered day grids so they re-render
+  document.querySelectorAll('.wk-grid-host').forEach(function(h){h.innerHTML='';});
+  _wkDirty=true;
 }
 function showCalSettings(){
   if(typeof _obOpenCalSettings==='function')_obOpenCalSettings();
@@ -595,19 +636,21 @@ var _STRINGS = {
     nextClass:'Next class', allDay:'All day',
     inProgress:'In progress', completed:'COMPLETED', startingSoon:'STARTING SOON',
     justUpdated:'Just updated', offline:'Offline', updateFailed:'Update failed',
+    locale:'en-GB',
   },
   fr: {
     tabAgenda:'Agenda', tabWeek:'Semaine', tabAccount:'Compte',
-    today:"Aujourd’hui", loading:'Chargement…',
+    today:'Aujourd’hui', loading:'Chargement…',
     settingsTitle:'API & Agendas',
-    refreshBtn:"Actualiser l’agenda", langLabel:'Langue',
-    updateAppBtn:"Mettre à jour l’app", byShortcut:'by Shortcut™',
-    installTitle:"Installer l’app", installSub:'Partager ⌘ → Sur l’écran d’accueil',
-    noMoreToday:"Plus de cours aujourd’hui", noUpcoming:'Aucun cours à venir',
+    refreshBtn:'Actualiser l’agenda', langLabel:'Langue',
+    updateAppBtn:'Mettre à jour l’app', byShortcut:'by Shortcut™',
+    installTitle:'Installer l’app', installSub:'Partager ⌘ → Sur l’écran d’accueil',
+    noMoreToday:'Plus de cours aujourd’hui', noUpcoming:'Aucun cours à venir',
     enjoyBreak:'Profitez-en !', haveGreatWe:'Bon week-end !',
     nextClass:'Prochain cours', allDay:'Toute la journée',
     inProgress:'En cours', completed:'TERMINÉ', startingSoon:'BIENTÔT',
     justUpdated:'Mis à jour', offline:'Hors ligne', updateFailed:'Échec',
+    locale:'fr-FR',
   }
 };
 function _lang(){ try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';} }
@@ -615,39 +658,35 @@ function _t(k){ var s=_STRINGS[_lang()]||_STRINGS.en; return s[k]||_STRINGS.en[k
 
 function _applyLang(){
   var l=_lang();
-  // Tab labels
-  var tabs=[['tb-0','tabAgenda'],['tb-1','tabWeek'],['tb-2','tabAccount']];
-  tabs.forEach(function(t){
+  window._appLocale = _t('locale')||'en-GB';
+  // Tabs
+  [['tb-0','tabAgenda'],['tb-1','tabWeek'],['tb-2','tabAccount']].forEach(function(t){
     var el=document.getElementById(t[0]);
     if(el){var sp=el.querySelector('span');if(sp)sp.textContent=_t(t[1]);}
   });
   // Today button
-  var tb=document.getElementById('wk-today-btn');if(tb&&!tb.classList.contains('active'))tb.textContent=_t('today');
+  var tb=document.getElementById('wk-today-btn');if(tb)tb.textContent=_t('today');
   // Navbar sub
   var sub=document.querySelector('.nb-sub');if(sub)sub.textContent=_t('byShortcut');
   // Account rows
-  var rl=[
-    ['acc-refresh-btn','.acc-row-lbl','refreshBtn'],
-  ];
-  rl.forEach(function(r){var el=document.getElementById(r[0]);if(el){var lbl=el.querySelector(r[1]);if(lbl)lbl.textContent=_t(r[2]);}});
-  // Settings row
   var sr=document.querySelector('button.acc-row[onclick="showCalSettings()"] .acc-row-lbl');
   if(sr)sr.textContent=_t('settingsTitle');
   var ur=document.querySelector('button.acc-row[onclick="accUpdateApp()"] .acc-row-lbl');
   if(ur)ur.textContent=_t('updateAppBtn');
+  var rr=document.getElementById('acc-refresh-btn');
+  if(rr){var rl=rr.querySelector('.acc-row-lbl');if(rl)rl.textContent=_t('refreshBtn');}
   // Install banner
   var it=document.querySelector('.ib-txt strong');if(it)it.textContent=_t('installTitle');
-  var is=document.querySelector('.ib-txt small');if(is)is.textContent=_t('installSub');
-  // Loading state (only if still showing)
-  var cmp=document.getElementById('aw-compact');
-  if(cmp){var sp2=cmp.querySelector('.aw-state span[data-loading]');if(sp2)sp2.textContent=_t('loading');}
-  // Lang selector
+  var is2=document.querySelector('.ib-txt small');if(is2)is2.textContent=_t('installSub');
+  // Lang selector sync
   var sel=document.getElementById('acc-lang');if(sel)sel.value=l;
-  // Reload week if needed
+  // Re-render agenda and week with new locale
   if(window._awByDay&&typeof awRenderCompact==='function'){
     var today2=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
     awRenderCompact(window._awByDay,today2);
   }
+  wkUpdateHdr();
+  _wkDirty=true;
 }
 /* Sync loop */
 var _lastTs=0;
