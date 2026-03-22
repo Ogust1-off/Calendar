@@ -255,55 +255,89 @@
   }
 
   /* ─────────────────────────────────────────
-     VIEW: SEMAINE — day-by-day slider
+     VIEW: SEMAINE — time grid, 1 day at a time
   ───────────────────────────────────────── */
+  #view-week { overflow:hidden; padding-bottom:0; flex-direction:column; }
+  #view-week.on { display:flex; }
 
-  /* Week nav bar */
+  /* Week header — month label + 7-day strip like Apple Calendar */
   #wk-nav {
     flex-shrink:0;
-    display:flex; align-items:center;
-    padding:10px 16px 8px;
     background:var(--glass);
     backdrop-filter:var(--glass-blur);
     -webkit-backdrop-filter:var(--glass-blur);
     border-bottom:0.5px solid var(--glass-border);
-    gap:10px;
     z-index:10;
   }
-  #wk-title {
-    flex:1;
-    font-size:20px; font-weight:700; letter-spacing:-.03em;
+
+  /* Top row: month label */
+  #wk-month-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 16px 4px;
+  }
+  #wk-month-label {
+    font-size:17px; font-weight:700; letter-spacing:-.025em;
     color:var(--sys-label);
   }
-  #wk-title span { font-weight:400; color:var(--sys-label2); }
-
-  .wk-ctrl {
-    display:flex; align-items:center; gap:4px;
-  }
-  .wk-btn {
-    width:30px; height:30px; border-radius:50%;
-    border:none; background:var(--sys-fill);
-    color:var(--sys-label2); cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
+  #wk-month-label span { font-weight:400; color:var(--sys-label2); }
+  .wk-today-jump {
+    height:28px; padding:0 12px; border-radius:99px; border:none;
+    background:var(--accent-soft); color:var(--accent);
+    font-size:12px; font-weight:500; font-family:inherit; cursor:pointer;
     -webkit-tap-highlight-color:transparent;
-    font-family:inherit; font-size:12px; font-weight:500;
     transition:opacity .15s, transform .1s;
   }
-  .wk-btn:active { opacity:.55; transform:scale(.9); }
-  .wk-btn svg { width:14px; height:14px; }
-  .wk-btn-today {
-    width:auto; border-radius:99px; padding:0 12px;
-    font-size:12px; font-weight:500;
-    background:var(--accent-soft);
-    color:var(--accent);
-    border:none;
-  }
-  .wk-btn-today.is-today { background:var(--accent); color:#fff; }
+  .wk-today-jump:active { opacity:.7; transform:scale(.95); }
+  .wk-today-jump.active-today { background:var(--accent); color:#fff; }
 
-  /* Scroll-snap strip */
+  /* Day strip: 7 days mini */
+  #wk-day-strip {
+    display:grid; grid-template-columns:repeat(7,1fr);
+    padding:4px 8px 10px; gap:0;
+  }
+  .wk-mini-day {
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:4px 2px; border-radius:10px; cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .12s;
+  }
+  .wk-mini-day:active { background:var(--sys-fill); }
+  .wk-mini-dow {
+    font-size:10px; font-weight:500; letter-spacing:.04em; text-transform:uppercase;
+    color:var(--sys-label3);
+  }
+  .wk-mini-num {
+    width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:15px; font-weight:400; color:var(--sys-label2);
+    font-variant-numeric:tabular-nums;
+    transition:background .15s, color .15s;
+  }
+  /* Today ring */
+  .wk-mini-day.is-today .wk-mini-num {
+    color:var(--sys-red); font-weight:600;
+  }
+  /* Selected day — filled circle */
+  .wk-mini-day.is-selected .wk-mini-num {
+    background:var(--accent); color:#fff; font-weight:600;
+  }
+  /* Today + selected */
+  .wk-mini-day.is-today.is-selected .wk-mini-num {
+    background:var(--sys-red); color:#fff;
+  }
+  /* Dot under day if has events */
+  .wk-mini-dot {
+    width:4px; height:4px; border-radius:50%;
+    background:var(--sys-label3);
+    visibility:hidden;
+  }
+  .wk-mini-day.has-events .wk-mini-dot { visibility:visible; }
+  .wk-mini-day.is-selected .wk-mini-dot { background:var(--accent); }
+  .wk-mini-day.is-today.is-selected .wk-mini-dot { background:var(--sys-red); }
+
+  /* Swipe strip */
   #wk-strip {
-    flex:1;
-    display:flex;
+    flex:1; display:flex;
     overflow-x:auto; overflow-y:hidden;
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
@@ -314,120 +348,25 @@
   /* Each day page */
   .wk-page {
     flex:0 0 100%; scroll-snap-align:start;
-    overflow-y:auto; overflow-x:hidden;
+    overflow:hidden; display:flex; flex-direction:column;
+  }
+
+  /* One-day grid CSS additions */
+  .awd-scroll {
+    flex:1; overflow-y:auto; overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 8px);
   }
-
-  /* Day date header */
-  .wk-date-hdr {
-    display:flex; align-items:center; gap:12px;
-    padding:14px 20px 12px;
-    border-bottom:0.5px solid var(--sys-sep);
-    background:var(--sys-bg2);
+  .awd-tgrid { min-width:0; }
+  .awd-bottom { display:flex; flex:1; }
+  .awd-daycol-wrap { flex:1; min-width:0; position:relative; }
+  .awd-body { position:relative; }
+  .awd-col {
+    position:absolute; inset:0;
+    /* single column — no grid needed */
   }
-  .wk-day-num {
-    width:44px; height:44px; border-radius:50%; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center;
-    font-size:20px; font-weight:300; color:var(--sys-label2);
-    font-variant-numeric:tabular-nums;
-  }
-  .wk-day-num.today {
-    background:var(--sys-red); color:#fff;
-    font-weight:700; font-size:18px;
-    box-shadow:0 2px 12px rgba(255,69,58,.4);
-  }
-  @media(prefers-color-scheme:light){
-    .wk-day-num.today { box-shadow:0 2px 12px rgba(255,59,48,.35); }
-  }
-  .wk-day-info { flex:1; }
-  .wk-day-name { font-size:17px; font-weight:600; letter-spacing:-.02em; color:var(--sys-label); }
-  .wk-day-name.today { color:var(--sys-red); }
-  .wk-day-sub { font-size:12px; color:var(--sys-label3); margin-top:1px; }
-  .wk-today-badge {
-    font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase;
-    color:var(--sys-red);
-    background:rgba(255,69,58,.12); border:1px solid rgba(255,69,58,.25);
-    padding:3px 9px; border-radius:99px;
-  }
-  @media(prefers-color-scheme:light){
-    .wk-today-badge { background:rgba(255,59,48,.10); border-color:rgba(255,59,48,.22); }
-  }
-
-  /* Event card in week view */
-  .wk-card {
-    display:flex; gap:12px; align-items:flex-start;
-    padding:13px 20px;
-    border-bottom:0.5px solid var(--sys-sep2);
-    background:var(--sys-bg2);
-    cursor:pointer;
-    -webkit-tap-highlight-color:transparent;
-    transition:background .1s;
-    position:relative;
-  }
-  .wk-card:active { background:var(--sys-bg3); }
-  .wk-card:last-child { border-bottom:none; }
-
-  /* Colored left accent line */
-  .wk-card-bar {
-    position:absolute; left:0; top:10px; bottom:10px;
-    width:3px; border-radius:0 3px 3px 0;
-  }
-  .wk-dot {
-    width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:3px;
-  }
-  .wk-body { flex:1; min-width:0; }
-  .wk-name {
-    font-size:15px; font-weight:500; color:var(--sys-label);
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    letter-spacing:-.015em;
-    display:flex; align-items:center; gap:6px; flex-wrap:wrap;
-  }
-  .wk-meta {
-    font-size:12px; color:var(--sys-label2); margin-top:2px;
-    display:flex; align-items:center; gap:4px;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .wk-meta svg { width:10px; height:10px; opacity:.5; flex-shrink:0; }
-  .wk-time-col {
-    display:flex; flex-direction:column; align-items:flex-end;
-    gap:2px; flex-shrink:0; text-align:right;
-    font-variant-numeric:tabular-nums;
-  }
-  .wk-time { font-size:12px; color:var(--sys-label2); }
-  .wk-dur  { font-size:11px; color:var(--sys-label3); }
-
-  /* Progress bar */
-  .wk-prog { height:2px; border-radius:99px; margin-top:7px; background:var(--sys-sep); overflow:hidden; }
-  .wk-prog-fill { height:100%; border-radius:99px; transition:width 1s linear; }
-
-  /* Badges */
-  .wk-badge {
-    font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    padding:2px 6px; border-radius:99px; border:1px solid;
-    display:inline-flex; align-items:center; flex-shrink:0;
-  }
-  .wk-badge-grp {
-    color:var(--sys-label3);
-    background:var(--sys-fill); border-color:var(--sys-sep);
-  }
-  .wk-now-badge {
-    font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
-    display:inline-flex; align-items:center;
-    padding:1px 6px; border-radius:99px; border:1px solid;
-  }
-  .wk-link { color:var(--accent); text-decoration:none; font-size:12px; }
-
-  /* Past events */
-  .wk-card.is-past { opacity:.42; filter:saturate(.3); }
-
-  /* Empty day */
-  .wk-empty {
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    padding:52px 24px; gap:8px; background:var(--sys-bg2);
-  }
-  .wk-empty-ico { font-size:36px; line-height:1; }
-  .wk-empty-lbl { font-size:14px; color:var(--sys-label3); }
+  /* Override the 7-col grid to 1 col */
+  .awd-col .aw-gev { left:2px !important; right:2px !important; }
 
   /* ─────────────────────────────────────────
      VIEW: ACCOUNT
@@ -563,20 +502,17 @@
     </div>
   </div>
 
-  <!-- VIEW: SEMAINE (day-by-day) -->
+  <!-- VIEW: SEMAINE — time grid, one day at a time -->
   <div id="view-week" class="view">
+    <!-- Week header: month + 7-day mini strip -->
     <div id="wk-nav">
-      <div id="wk-title">…</div>
-      <div class="wk-ctrl">
-        <button class="wk-btn" onclick="wkMove(-1)" aria-label="Jour précédent">
-          <svg viewBox="0 0 14 14" fill="none"><path d="M9 11L5 7l4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-        <button class="wk-btn wk-btn-today" id="wk-today-btn" onclick="wkGoToday()">Aujourd'hui</button>
-        <button class="wk-btn" onclick="wkMove(1)" aria-label="Jour suivant">
-          <svg viewBox="0 0 14 14" fill="none"><path d="M5 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+      <div id="wk-month-row">
+        <div id="wk-month-label">…</div>
+        <button class="wk-today-jump" id="wk-today-btn" onclick="wkGoToday()">Aujourd'hui</button>
       </div>
+      <div id="wk-day-strip"></div>
     </div>
+    <!-- Swipe strip: one page per day -->
     <div id="wk-strip"></div>
   </div>
 
@@ -693,7 +629,6 @@ var _wkByDay=null, _wkToday=null, _wkDates=[], _wkCur=null, _wkDirty=false;
 function wkInit(byDay,today){
   _wkByDay=byDay; _wkToday=today;
   if(!_wkCur) _wkCur=today;
-  // Build dates array: today + 48 following days
   _wkDates=[];
   var base=new Date(today+'T00:00:00');
   for(var i=0;i<49;i++){
@@ -703,121 +638,109 @@ function wkInit(byDay,today){
   var strip=document.getElementById('wk-strip');
   if(!strip) return;
   strip.innerHTML='';
-  _wkDates.forEach(function(ds){ strip.appendChild(wkPage(ds)); });
-  wkSnap(_wkCur,false);
+  // Create empty page shells — fill lazily on snap
+  _wkDates.forEach(function(ds){
+    var page=document.createElement('div');
+    page.className='wk-page'; page.dataset.date=ds;
+    var grid=document.createElement('div');
+    grid.className='wk-day-grid'; grid.dataset.date=ds;
+    page.appendChild(grid);
+    strip.appendChild(page);
+  });
+  wkSnap(_wkCur,false,true);
   wkUpdateNav();
-  // Listen to scroll end
-  strip.onscroll=null;
   var t;
   strip.addEventListener('scroll',function(){
     clearTimeout(t);
     t=setTimeout(function(){
       var s=document.getElementById('wk-strip'); if(!s) return;
       var idx=Math.round(s.scrollLeft/s.offsetWidth);
-      if(_wkDates[idx]&&_wkDates[idx]!==_wkCur){ _wkCur=_wkDates[idx]; wkUpdateNav(); }
+      if(_wkDates[idx]&&_wkDates[idx]!==_wkCur){
+        _wkCur=_wkDates[idx];
+        wkUpdateNav();  // rebuilds mini-strip + month label
+        wkRenderAround(_wkCur);
+      }
     },60);
   },{passive:true});
   _wkDirty=false;
 }
 
-function wkPage(ds){
-  var page=document.createElement('div');
-  page.className='wk-page'; page.dataset.date=ds;
-  var now=Date.now(), isT=(ds===_wkToday);
-  var d=new Date(ds+'T00:00:00');
-  var isWE=(d.getDay()===0||d.getDay()===6);
-  var dow=d.toLocaleDateString('fr-FR',{weekday:'long'});
-  dow=dow[0].toUpperCase()+dow.slice(1);
-  var full=d.toLocaleDateString('fr-FR',{day:'numeric',month:'long'});
-  var num=d.getDate();
-  var items=(_wkByDay[ds]||[]).filter(function(x){
-    return x.ev.start.length===10?ds>=_wkToday:new Date(x.ev.end)>now;
+function wkRenderAround(ds){
+  var idx=_wkDates.indexOf(ds);
+  [-1,0,1].forEach(function(delta){
+    var i=idx+delta;
+    if(i>=0&&i<_wkDates.length) wkRenderIfEmpty(_wkDates[i]);
   });
-  var h='<div class="wk-date-hdr">';
-  h+='<div class="wk-day-num'+(isT?' today':'')+'">'+num+'</div>';
-  h+='<div class="wk-day-info">';
-  h+='<div class="wk-day-name'+(isT?' today':'')+'">'+dow+'</div>';
-  h+='<div class="wk-day-sub">'+full+'</div></div>';
-  if(isT) h+='<div class="wk-today-badge">Aujourd\'hui</div>';
-  h+='</div>';
-  if(items.length===0){
-    h+='<div class="wk-empty"><div class="wk-empty-ico">'+(isWE?'🌿':'✅')+'</div>';
-    h+='<div class="wk-empty-lbl">'+(isWE?'Week-end':'Aucun cours')+'</div></div>';
-  } else {
-    items.forEach(function(x){ h+=wkCard(x.ev,x.i,now); });
-  }
-  page.innerHTML=h; return page;
 }
 
-function wkCard(ev,idx,now){
-  var allDay=ev.start.length===10;
-  var isNow=!allDay&&new Date(ev.start)<=now&&new Date(ev.end)>=now;
-  var past=!allDay&&!isNow&&new Date(ev.end)<now;
-  var full=ev.summary||'(Sans titre)';
-  var short=full.includes(' - ')?full.split(' - ')[0].trim():full;
-  var col=ev.cal2?'lime':colorFor(short);
-  var acc=COLOR_HEX[col]||'#3b82f6';
-  var isLM=window.matchMedia('(prefers-color-scheme:light)').matches;
-  var alpha=isLM?'20':'28';
-  var typeM=full.match(/\b(CM|TD|TP|DS|Exam|Cours)\b/i);
-  var badge=typeM?typeM[0].toUpperCase():'';
-  var grpM=full.match(/(?:AB|CD|EF|GH|A&M\d[A-Z\s]*(?:S\d+)?)/i);
-  var grp=grpM?grpM[0].trim():'';
-  var ts=allDay?'Journée':fmtTime(ev.start)+' – '+fmtTime(ev.end);
-  var dur=allDay?'':fmtDur(ev.start,ev.end);
-  var pct=isNow?Math.min(100,~~((now-new Date(ev.start))/(new Date(ev.end)-new Date(ev.start))*100)):0;
-  var tch=teacher(ev.description);
-  var mUrl=mapUrl(ev.description);
-
-  var h='<div class="wk-card'+(past?' is-past':'')+'" onclick="awPopOpen(this,'+idx+')">';
-  h+='<div class="wk-card-bar" style="background:'+acc+'"></div>';
-  h+='<div class="wk-dot" style="background:'+acc+'"></div>';
-  h+='<div class="wk-body">';
-  h+='<div class="wk-name">'+short;
-  if(badge) h+='<span class="wk-badge" style="color:'+acc+';border-color:'+acc+alpha+';background:'+acc+'14">'+badge+'</span>';
-  if(grp)   h+='<span class="wk-badge wk-badge-grp">'+grp+'</span>';
-  if(isNow) h+='<span class="wk-now-badge" style="color:'+acc+';border-color:'+acc+'44;background:'+acc+'12">En cours</span>';
-  h+='</div>';
-  if(ev.location){
-    h+='<div class="wk-meta"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>';
-    h+=ev.location.split(',')[0].trim();
-    if(mUrl) h+=' <a class="wk-link" href="'+mUrl+'" target="_blank" rel="noopener">↗</a>';
-    h+='</div>';
-  }
-  if(tch) h+='<div class="wk-meta"><svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>'+tch+'</div>';
-  if(isNow) h+='<div class="wk-prog"><div class="wk-prog-fill" data-pb="'+idx+'" style="width:'+pct+'%;background:'+acc+'"></div></div>';
-  h+='</div>';
-  h+='<div class="wk-time-col"><span class="wk-time">'+ts+'</span>';
-  if(dur) h+='<span class="wk-dur">'+dur+'</span>';
-  h+='</div></div>';
-  return h;
+function wkRenderIfEmpty(ds){
+  var strip=document.getElementById('wk-strip'); if(!strip) return;
+  var grid=strip.querySelector('.wk-page[data-date="'+ds+'"] .wk-day-grid');
+  if(!grid||grid.children.length>0) return;
+  if(typeof awRenderDay==='function') awRenderDay(ds,grid);
 }
 
-function wkSnap(ds,smooth){
+function wkSnap(ds,smooth,render){
   var strip=document.getElementById('wk-strip'); if(!strip) return;
   var idx=_wkDates.indexOf(ds); if(idx<0) return;
   strip.scrollTo({left:idx*strip.offsetWidth,behavior:smooth?'smooth':'instant'});
+  if(render) wkRenderAround(ds);
 }
 
 function wkUpdateNav(){
-  var el=document.getElementById('wk-title');
-  var tb=document.getElementById('wk-today-btn');
-  if(!_wkCur) return;
+  if(!_wkCur||!_wkToday) return;
+  var byDay=window._awByDay||{};
+
+  // ── Month label ──────────────────────────────────────────────────
   var d=new Date(_wkCur+'T00:00:00');
-  var dow=d.toLocaleDateString('fr-FR',{weekday:'long'});
-  dow=dow[0].toUpperCase()+dow.slice(1);
   var mo=d.toLocaleDateString('fr-FR',{month:'long'});
   mo=mo[0].toUpperCase()+mo.slice(1);
-  if(el) el.innerHTML='<strong>'+dow+'</strong> <span>'+d.getDate()+' '+mo+'</span>';
-  if(tb){ tb.classList.toggle('is-today',_wkCur===_wkToday); }
+  var yr=d.getFullYear();
+  var mlEl=document.getElementById('wk-month-label');
+  if(mlEl) mlEl.innerHTML='<strong>'+mo+'</strong> <span>'+yr+'</span>';
+
+  // Today button state
+  var tb=document.getElementById('wk-today-btn');
+  if(tb) tb.classList.toggle('active-today',_wkCur===_wkToday);
+
+  // ── 7-day mini strip ─────────────────────────────────────────────
+  // Show the 7 days of the week containing _wkCur (Mon–Sun)
+  var dow=d.getDay(); // 0=Sun
+  var monday=new Date(d);
+  monday.setDate(d.getDate()-(dow===0?6:dow-1)); // go to Monday
+
+  var stripEl=document.getElementById('wk-day-strip');
+  if(!stripEl) return;
+  stripEl.innerHTML='';
+
+  var DOW_SHORT=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  for(var i=0;i<7;i++){
+    var day=new Date(monday); day.setDate(monday.getDate()+i);
+    var ds=dateStr(day);
+    var isToday=(ds===_wkToday);
+    var isSelected=(ds===_wkCur);
+    var hasEvs=((byDay[ds]||[]).length>0);
+
+    var cls='wk-mini-day';
+    if(isToday)    cls+=' is-today';
+    if(isSelected) cls+=' is-selected';
+    if(hasEvs)     cls+=' has-events';
+
+    var btn=document.createElement('button');
+    btn.className=cls;
+    btn.dataset.date=ds;
+    btn.innerHTML=
+      '<span class="wk-mini-dow">'+DOW_SHORT[i]+'</span>'+
+      '<span class="wk-mini-num">'+day.getDate()+'</span>'+
+      '<span class="wk-mini-dot"></span>';
+    btn.addEventListener('click',(function(date){
+      return function(){ _wkCur=date; wkSnap(_wkCur,true,true); wkUpdateNav(); };
+    })(ds));
+    stripEl.appendChild(btn);
+  }
 }
 
-function wkMove(delta){
-  var idx=_wkDates.indexOf(_wkCur);
-  var ni=Math.max(0,Math.min(_wkDates.length-1,idx+delta));
-  _wkCur=_wkDates[ni]; wkSnap(_wkCur,true); wkUpdateNav();
-}
-function wkGoToday(){ _wkCur=_wkToday; wkSnap(_wkCur,true); wkUpdateNav(); }
+function wkGoToday(){ _wkCur=_wkToday; wkSnap(_wkCur,true,true); wkUpdateNav(); }
 
 /* ════════════════════════════════════════════
    TABS
@@ -830,8 +753,12 @@ function goTab(i){
   _tab=i;
   VIDS.forEach(function(id,j){
     var el=document.getElementById(id); if(!el) return;
-    if(j===i){ el.classList.add('on'); if(id==='view-week') el.style.display='flex'; else el.style.display='block'; }
-    else{ el.classList.remove('on'); el.style.display='none'; }
+    if(j===i){
+      el.classList.add('on');
+      el.style.display=(id==='view-week'?'flex':'block');
+    } else {
+      el.classList.remove('on'); el.style.display='none';
+    }
   });
   TIDS.forEach(function(id,j){ var el=document.getElementById(id); if(el) el.classList.toggle('on',j===i); });
   // indicator

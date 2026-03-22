@@ -1041,3 +1041,79 @@ setInterval(() => {
     el.textContent = 'in ' + awFmtRemaining(ev.start);
   });
 }, 1000);
+// ── ONE-DAY GRID VIEW ──────────────────────────────────────────────────────────
+// Renders the same time-grid as awRenderCalendar but for a single day.
+// Called by the app shell's week view.
+
+function awRenderDay(ds, container) {
+  if (!container) return;
+  const byDay  = window._awByDay || {};
+  const today  = awToday();
+  const isToday = ds === today;
+  const isWE    = awIsWeekend(ds);
+  const isPast  = ds < today;
+
+  const gridH = (AW_HOUR_END - AW_HOUR_START) * AW_PX_PER_HOUR;
+  const items  = byDay[ds] || [];
+  const timed  = items.filter(({ev}) => ev.start.length > 10);
+  const laid   = awLayoutColumns(timed);
+
+  // Now-line
+  const now  = new Date();
+  const nowH = now.getHours() + now.getMinutes() / 60;
+  const showNow = isToday && nowH >= AW_HOUR_START && nowH <= AW_HOUR_END;
+  const topNow  = (nowH - AW_HOUR_START) * AW_PX_PER_HOUR;
+
+  let html = `<div class="aw-tgrid-scroll awd-scroll">`;
+  html += `<div class="aw-tgrid awd-tgrid" style="--grid-h:${gridH}px">`;
+
+  // ── Hour gutter + single-column body ──
+  html += `<div class="aw-tgrid-bottom awd-bottom">`;
+
+  html += `<div class="aw-tgutter">`;
+  for (let h = AW_HOUR_START; h <= AW_HOUR_END; h++) {
+    const top = (h - AW_HOUR_START) * AW_PX_PER_HOUR;
+    html += `<div class="aw-thour" style="top:${top}px">${awPad(h)}:00</div>`;
+  }
+  html += `</div>`;
+
+  // Single day column
+  html += `<div class="awd-daycol-wrap">`;
+  html += `<div class="aw-tgrid-body awd-body" style="height:${gridH}px">`;
+
+  // Hour lines
+  html += `<div class="aw-hlines">`;
+  for (let h = AW_HOUR_START; h <= AW_HOUR_END; h++) {
+    const top = (h - AW_HOUR_START) * AW_PX_PER_HOUR;
+    html += `<div class="aw-hline" style="top:${top}px"></div>`;
+  }
+  html += `</div>`;
+
+  // Now line
+  if (showNow) {
+    html += `<div class="aw-now-line" style="top:${topNow}px;left:0;right:0;width:100%">
+      <div class="aw-now-dot"></div>
+    </div>`;
+  }
+
+  // Events — single column
+  html += `<div class="awd-col${isToday ? ' today' : ''}${isWE ? ' we' : ''}${isPast && !isToday ? ' past' : ''}">`;
+  html += laid.map(({ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart}) =>
+    awGridEvHtml(ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart)
+  ).join('');
+  html += `</div>`;
+
+  html += `</div></div></div></div>`;
+
+  container.innerHTML = html;
+
+  // Scroll to now or first event
+  if (showNow) {
+    const scrollEl = container.querySelector('.awd-scroll');
+    if (scrollEl) scrollEl.scrollTop = Math.max(0, topNow - 80);
+  } else if (timed.length > 0) {
+    const firstH = awTimeToHours(timed[0].ev.start);
+    const scrollEl = container.querySelector('.awd-scroll');
+    if (scrollEl) scrollEl.scrollTop = Math.max(0, (firstH - AW_HOUR_START) * AW_PX_PER_HOUR - 40);
+  }
+}
