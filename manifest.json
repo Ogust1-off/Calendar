@@ -1,0 +1,32 @@
+{
+  "name": "Calendar by Shortcut™",
+  "short_name": "Calendar",
+  "description": "Calendar by Shortcut™ — par Ogust'1",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#07080b",
+  "theme_color": "#07080b",
+  "lang": "fr",
+  "icons": [
+    {
+      "src": "Asset/Picture/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "Asset/Picture/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "Asset/Picture/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["education", "productivity"],
+  "screenshots": []
+}

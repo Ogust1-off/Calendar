@@ -1,0 +1,720 @@
+/*Calendar by Shortcut™ — CSS file by Augustin de Chalendar
+Copyright © 2026 Ogust'1. All rights reserved.
+*/
+
+/* ─────────── AGENDA WIDGET ─────────── */
+.agenda-widget {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+  font-size: 14px;
+}
+
+/* ── Header ── */
+.agenda-widget .aw-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px; border-bottom: 1px solid var(--border);
+}
+.agenda-widget .aw-title {
+  font-weight: 600; letter-spacing: 0.09em; font-size: inherit;
+  text-transform: uppercase; color: var(--faint);
+}
+.agenda-widget .aw-last-updated {
+  flex: 1;
+  font-size: 10.5px; color: var(--faint); font-style: italic;
+  margin-left: 10px;
+}
+.agenda-widget .aw-toggle {
+  font-size: 12px; font-weight: 500; color: var(--muted);
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+  cursor: pointer; padding: 5px 12px; border-radius: var(--r-pill);
+  font-family: inherit; display: none; align-items: center; gap: 5px;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.agenda-widget .aw-toggle:hover { background: rgba(255,255,255,0.08); border-color: var(--border-hi); color: var(--text); }
+.agenda-widget .aw-toggle svg { transition: transform 0.28s cubic-bezier(.34,1.56,.64,1); flex-shrink: 0; }
+.agenda-widget .aw-toggle.open svg { transform: rotate(180deg); }
+
+/* ── Skipped days cascade ── */
+.aw-skipped-list { border-bottom: 1px solid var(--border); }
+.aw-skipped-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 22px; border-bottom: 1px solid var(--border); opacity: 0.6;
+}
+.aw-skipped-row:last-child { border-bottom: none; }
+.aw-skipped-label { font-size: 12px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.aw-skipped-label.today { color: rgb(235, 76, 70); }/*Old var(--accent)*/
+.aw-skipped-today-pill {
+  font-size: 9px; font-weight: 600;
+  color: rgb(235, 76, 70);/*Old var(--accent)*/
+  background: rgba(235, 76, 70,0.1);/*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(235, 76, 70,0.2);/*Old rgba(96,165,250,0.2)*/
+  padding: 1px 6px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase;
+}
+.aw-skipped-msg { font-size: 11px; color: var(--faint); font-style: italic; }
+
+/* ── Compact day header ── */
+.aw-compact-day-hd {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 22px 9px; border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.aw-compact-day-label { font-size: 12px; font-weight: 600; text-transform: capitalize; color: var(--muted); }
+.aw-compact-day-label.today { color: rgb(235, 76, 70); }/*Old var(--accent)*/
+
+/* ── Inline row info lines (Formatuer / Groupe) ── */
+.aw-row-info {
+  display: flex; align-items: center; gap: 5px;
+  margin-top: 3px;
+}
+.aw-row-info-label {
+  font-size: 11px; color: var(--faint); flex-shrink: 0;
+}
+
+.agenda-widget .aw-map-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 11.5px;
+  transition: opacity 0.15s;
+}
+.agenda-widget .aw-map-link:hover { opacity: 0.75; text-decoration: underline; }
+
+/* ── Inline row badges (TD, CM, CD, A&M1…) ── */
+.aw-row-badges {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-left: 6px; flex-shrink: 0;
+}
+.aw-row-badge {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 1px 6px; border-radius: 99px;
+  border: 1px solid;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.aw-row-badge--group {
+  color: var(--muted);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+}
+
+@media (prefers-color-scheme: light) {
+  /* Synchronise les variables CSS avec le mode clair */
+  :root {
+    --glass-bg:    rgba(255,255,255,0.75);
+    --glass-border: rgba(0,0,0,0.07);
+    --accent:      #2563eb;
+    --bg:          #eef0f5;
+    --border:      rgba(0,0,0,0.07);
+    --border-hi:   rgba(255,255,255,0.95);
+    --text:        rgba(10,12,20,0.88);
+    --muted:       rgba(10,12,20,0.46);
+    --faint:       rgba(10,12,20,0.28);
+  }
+  .aw-row-badge--group {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.1);
+  }
+}
+
+/* ── Color dot in compact rows ── */
+.aw-color-dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+  box-shadow: 0 0 6px currentColor;
+}
+.aw-color-dot[data-color="blue"]    { background: #3b82f6; box-shadow: 0 0 7px rgba(59,130,246,0.6); }
+.aw-color-dot[data-color="violet"]  { background: #8b5cf6; box-shadow: 0 0 7px rgba(139,92,246,0.6); }
+.aw-color-dot[data-color="emerald"] { background: #10b981; box-shadow: 0 0 7px rgba(16,185,129,0.6); }
+.aw-color-dot[data-color="amber"]   { background: #f59e0b; box-shadow: 0 0 7px rgba(245,158,11,0.6); }
+.aw-color-dot[data-color="rose"]    { background: #f43f5e; box-shadow: 0 0 7px rgba(244,63,94,0.6); }
+.aw-color-dot[data-color="cyan"]    { background: #06b6d4; box-shadow: 0 0 7px rgba(6,182,212,0.6); }
+.aw-color-dot[data-color="orange"]  { background: #f97316; box-shadow: 0 0 7px rgba(249,115,22,0.6); }
+.aw-color-dot[data-color="grey"]    { background: #94a3b8; box-shadow: 0 0 7px rgba(148,163,184,0.5); }
+.aw-color-dot[data-color="lime"]    { background: #84cc16; box-shadow: 0 0 7px rgba(132,204,22,0.6); }
+
+/* Progress bar colored variants */
+.aw-progress-bar--colored[data-color="blue"]    { background: rgba(59,130,246,0.65); }
+.aw-progress-bar--colored[data-color="violet"]  { background: rgba(139,92,246,0.65); }
+.aw-progress-bar--colored[data-color="emerald"] { background: rgba(16,185,129,0.65); }
+.aw-progress-bar--colored[data-color="amber"]   { background: rgba(245,158,11,0.65); }
+.aw-progress-bar--colored[data-color="rose"]    { background: rgba(244,63,94,0.65); }
+.aw-progress-bar--colored[data-color="cyan"]    { background: rgba(6,182,212,0.65); }
+.aw-progress-bar--colored[data-color="orange"]  { background: rgba(249,115,22,0.65); }
+.aw-progress-bar--colored[data-color="grey"]    { background: rgba(148,163,184,0.55); }
+.aw-progress-bar--colored[data-color="lime"]    { background: rgba(132,204,22,0.65); }
+
+/* Liquid Glass event row — click feedback */
+.agenda-widget .aw-event {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 13px 22px; border-bottom: 1px solid var(--border);
+  transition: background 0.18s, transform 0.15s;
+  cursor: default;
+  position: relative;
+}
+.agenda-widget .aw-event:active {
+  background: rgba(255,255,255,0.07) !important;
+}
+
+/* Liquid Glass popover upgrade */
+.aw-pop {
+  position: absolute;
+  z-index: 999;
+  width: 260px;
+  background: rgba(22,26,40,0.92);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  overflow: hidden;
+  opacity: 0;
+  transform: scale(0.93) translateY(6px);
+  transform-origin: top left;
+  transition: opacity 0.18s ease, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none;
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+.aw-pop.visible {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: all;
+}
+
+/* Light mode for color dots */
+@media (prefers-color-scheme: light) {
+  .aw-color-dot[data-color="blue"]    { box-shadow: 0 0 7px rgba(59,130,246,0.4); }
+  .aw-color-dot[data-color="violet"]  { box-shadow: 0 0 7px rgba(139,92,246,0.4); }
+  .aw-color-dot[data-color="emerald"] { box-shadow: 0 0 7px rgba(16,185,129,0.4); }
+  .aw-color-dot[data-color="amber"]   { box-shadow: 0 0 7px rgba(245,158,11,0.4); }
+  .aw-color-dot[data-color="rose"]    { box-shadow: 0 0 7px rgba(244,63,94,0.4); }
+  .aw-color-dot[data-color="cyan"]    { box-shadow: 0 0 7px rgba(6,182,212,0.4); }
+  .aw-color-dot[data-color="orange"]  { box-shadow: 0 0 7px rgba(249,115,22,0.4); }
+  .aw-color-dot[data-color="grey"]    { box-shadow: 0 0 7px rgba(148,163,184,0.3); }
+  .aw-pop {
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+    backdrop-filter: blur(40px) saturate(200%);
+  }
+}
+.agenda-widget .aw-event:last-child { border-bottom: none; }
+
+/* ═══ DARK MODE — COMPACT VIEW ═══════════════════════════════════════════ */
+.agenda-widget .aw-event {
+  transition: background 0.12s;
+}
+.agenda-widget .aw-event:hover          { background: rgba(255,255,255,0.06); }
+.agenda-widget .aw-event-now:hover      { box-shadow: inset 0 0 0 1000px rgba(255,255,255,0.08); }
+.agenda-widget .aw-event-past           { opacity: 0.45; filter: saturate(0.4); }
+
+/* Now event: pulse glow on the color dot */
+.agenda-widget .aw-event-now .aw-color-dot {
+  animation: aw-dot-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+}
+@keyframes aw-dot-pulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.4); opacity: 0.85; }
+}
+.agenda-widget .aw-event-now {
+  border-left: 2px solid transparent; padding-left: 20px;
+}
+.agenda-widget .aw-body { flex: 1; min-width: 0; }
+.agenda-widget .aw-name {
+  font-size: 13.5px; font-weight: 500; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  letter-spacing: -0.01em; display: flex; align-items: center; gap: 0;
+}
+.agenda-widget .aw-meta {
+  font-size: 11.5px; color: var(--muted); margin-top: 3px;
+  display: flex; align-items: center; gap: 4px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.agenda-widget .aw-desc { font-size: 11px; color: var(--faint); margin-top: 4px; line-height: 1.4; }
+.agenda-widget .aw-icon { width: 12px; height: 12px; opacity: 0.5; flex-shrink: 0; }
+.agenda-widget .aw-progress {
+  margin-top: 7px; height: 2px; background: rgba(255,255,255,0.07); border-radius: 99px; overflow: hidden;
+}
+.agenda-widget .aw-progress-bar {
+  height: 100%; background: rgba(96,165,250,0.55); border-radius: 99px; transition: width 1s linear;
+}
+.agenda-widget .aw-time {
+  font-size: 12px; color: var(--muted); white-space: nowrap; text-align: right;
+  flex-shrink: 0; font-variant-numeric: tabular-nums;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 3px;
+}
+.agenda-widget .aw-dur { font-size: 10px; color: var(--faint); }
+
+/* ── Badges ── */
+.aw-now-badge {
+  display: inline-flex; align-items: center;
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.05em;
+  border: 1px solid;
+  padding: 1px 7px; border-radius: 99px; text-transform: uppercase; flex-shrink: 0;
+}
+.aw-today-pill {
+  font-size: 9px; font-weight: 600;
+  color: rgb(235, 76, 70); /*Old var(--accent)*/
+  background: rgba(235, 76, 70,0.1); /*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(235, 76, 70,0.2); /*Old rgba(96,165,250,0.2)*/
+  padding: 1px 7px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase;
+}
+
+/* ── Full / Calendar panel ── */
+.agenda-widget .aw-full {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+.agenda-widget .aw-full.open {
+  max-height: 900px;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════
+   TIME GRID CALENDAR
+   ═══════════════════════════════════════════ */
+
+/* Nav bar — date left, controls right */
+.aw-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+}
+
+/* Left: big month label + optional "This Week" pill */
+.aw-cal-nav-left {
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* Month label — "March 2026" */
+.aw-cal-month-label {
+  font-size: 22px; line-height: 1; color: var(--text);
+  letter-spacing: -0.03em;
+}
+.aw-cal-month-label strong {
+  font-weight: 700;
+}
+.aw-cal-year {
+  font-weight: 400; color: var(--muted);
+}
+
+/* Right: ← Today → */
+.aw-cal-nav-right {
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* Arrow buttons */
+.aw-cal-nav-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  color: var(--muted); cursor: pointer;
+  border: none; font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.aw-cal-nav-btn:hover { background: rgba(255,255,255,0.15); color: var(--text); }
+.aw-cal-nav-btn.disabled,
+.aw-cal-nav-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+/* Today button — pill shape, same background as arrows */
+.aw-cal-today-btn {
+  display: flex; align-items: center; justify-content: center;
+  height: 28px; padding: 0 13px; border-radius: 99px;
+  background: rgba(255,255,255,0.1);
+  color: var(--muted); cursor: pointer;
+  font-size: 11.5px; font-weight: 500; font-family: inherit;
+  border: none;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.aw-cal-today-btn:hover { background: rgba(255,255,255,0.15); color: var(--text); }
+.aw-cal-today-btn.disabled,
+.aw-cal-today-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
+
+/* "This Week" accent pill */
+.aw-cal-this-week-pill {
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  color: rgb(235, 76, 70); /*Old var(--accent)*/
+  background: rgba(235, 76, 70,0.1);/*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(235, 76, 70,0.2);/*Old rgba(96,165,250,0.2)*/
+  padding: 2px 8px; border-radius: 99px;
+}
+
+/* Keep old .aw-cal-week-label in case used elsewhere */
+.aw-cal-week-label {
+  font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.02em;
+}
+
+/* No vertical scroll — grid is full height */
+.aw-tgrid-scroll {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* Main grid layout: gutter | days — flex column to stack header + body */
+.aw-tgrid {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Week number — corner aligned with day headers */
+.aw-tgutter-corner {
+  width: 46px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 8px 8px 7px;  /* same padding as .aw-tday-head */
+}
+.aw-week-num {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--faint);
+  opacity: 0.55;
+  user-select: none;
+  line-height: 1;
+}
+
+/* Top row: gutter corner + day headers */
+.aw-tgrid-top {
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* Bottom row: gutter + body */
+.aw-tgrid-bottom {
+  display: flex;
+  height: var(--grid-h);
+}
+
+/* Hour gutter */
+.aw-tgutter {
+  width: 46px;
+  flex-shrink: 0;
+  position: relative;
+  border-right: 1px solid var(--border);
+}
+.aw-thour {
+  position: absolute;
+  right: 8px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  line-height: 1;
+  user-select: none;
+}
+
+/* Days area — horizontal scroll only */
+.aw-tdays {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+.aw-tdays::-webkit-scrollbar { height: 3px; }
+.aw-tdays::-webkit-scrollbar-track { background: transparent; }
+.aw-tdays::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+
+/* Day headers row */
+.aw-tdays-head-wrap {
+  flex: 1; min-width: 0; overflow: hidden;
+}
+.aw-tday-heads {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(72px, 1fr));
+  min-width: 504px;
+}
+.aw-tday-head {
+  display: flex;
+  align-items: center;
+  padding: 8px 4px 7px;
+  gap: 3px;
+  justify-content: center;
+  align-content: center;
+}
+.aw-tday-head:last-child { border-right: none; }
+.aw-tday-dow {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--faint);
+}
+.aw-tday-num {
+  font-size: 16px; font-weight: 400; color: var(--muted); line-height: 1;
+  width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.aw-tday-num.today {
+  color: #fff;
+  background: rgb(235, 76, 70); /*Old var(--accent)*/
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+}
+
+/* Grid body */
+.aw-tgrid-body {
+  position: relative;
+  min-width: 504px;
+  flex: 1;
+}
+
+/* Horizontal hour lines */
+.aw-hlines { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.aw-hline {
+  position: absolute; left: 0; right: 0; height: 0.5px;
+  background: var(--border);
+}
+
+/* Current time indicator */
+.aw-now-line {
+  position: absolute;
+  height: 2px;
+  background: rgb(235, 83, 78); /*Old #f87171*/
+  z-index: 5;
+  pointer-events: none;
+}
+.aw-now-dot {
+  position: absolute;
+  left: -4px; top: -4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgb(235, 83, 78); /*Old #f87171*/
+}
+
+/* Day columns */
+.aw-tcols {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(72px, 1fr));
+}
+.aw-tcol {
+  position: relative;
+  border-right: 0.5px solid var(--border);
+  overflow: hidden;
+}
+.aw-tcol:last-child { border-right: none; }
+.aw-tcol.we  { background: rgba(255,255,255,0.015); }
+
+/* ── Time-grid event blocks ── */
+.aw-gev {
+  position: absolute;
+  left: 2px; right: 2px;
+  border-radius: 8px;
+  padding: 4px 7px 4px 11px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: filter 0.15s;
+  will-change: filter;
+  z-index: 2;
+  box-sizing: border-box;
+  border: none;
+}
+
+/* Inner accent bar — sits inside the card on the left */
+.aw-gev-accent {
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 99px;
+  pointer-events: none;
+}
+/* Colors now handled by JS inline styles for both dark/light mode coherence */
+.aw-gev:hover { outline: 0.5px solid rgba(255,255,255,0.35); outline-offset: -1px; }
+.aw-gev:hover { opacity: 2.5; filter: saturate(1.5) brightness(1.25);}
+.aw-gev-past  { opacity: 0.5; filter: saturate(1); }
+.aw-gev-past:hover { opacity: 0.75; filter: saturate(1); }
+
+.aw-gev-icon {
+  width: 9px; height: 9px; flex-shrink: 0; opacity: 0.7;
+  display: inline-block; vertical-align: middle; margin-right: 3px; margin-top: -1px;
+}
+.aw-gev-time, .aw-gev-loc { display: flex; align-items: center; pointer-events: none; }
+.aw-gev-name { pointer-events: none; }
+.aw-gev-name {
+  font-size: 10.5px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3; letter-spacing: -0.01em;
+}
+.aw-gev-time {
+  font-size: 9.5px; color: var(--muted); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-variant-numeric: tabular-nums;
+}
+.aw-gev-loc {
+  font-size: 9px; color: var(--faint); margin-top: 1px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.aw-gev-progress {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: rgba(255,255,255,0.12);
+}
+.aw-gev-progress-bar {
+  height: 100%; background: rgba(255,255,255,0.5); transition: width 1s linear;
+}
+
+/* ── Compact empty state ── */
+.aw-empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 32px 24px; gap: 6px; text-align: center;
+}
+.aw-empty-icon { font-size: 28px; line-height: 1; margin-bottom: 4px; }
+.aw-empty-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.aw-empty-sub   { font-size: 12px; color: var(--muted); }
+
+/* ── Footer ── */
+.agenda-widget .aw-footer {
+  padding: 11px 22px; border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; flex-shrink: 0;
+}
+.agenda-widget .aw-link { font-size: 12px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+.agenda-widget .aw-link:hover { color: var(--text); }
+
+/* ── State / loading ── */
+.agenda-widget .aw-state { padding: 32px 20px; text-align: center; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.aw-spinner {
+  display: inline-block; width: 13px; height: 13px;
+  border: 1.5px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: aw-spin 0.7s linear infinite;
+  margin-right: 8px; vertical-align: middle;
+}
+@keyframes aw-spin { to { transform: rotate(360deg); } }
+
+/* ── Event popover ── */
+.aw-pop-accent {
+  height: 3px;
+  width: 100%;
+}
+.aw-pop-close {
+  position: absolute;
+  top: 10px; right: 10px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.07);
+  border: none; cursor: pointer;
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.aw-pop-close:hover { background: rgba(255,255,255,0.14); color: var(--text); }
+.aw-pop-body {
+  padding: 12px 14px 14px;
+}
+.aw-pop-title {
+  font-size: 12.5px; font-weight: 600; color: var(--text);
+  line-height: 1.4; margin-bottom: 10px; padding-right: 20px;
+  letter-spacing: -0.01em;
+}
+.aw-pop-row {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12px; color: var(--muted); margin-bottom: 6px; line-height: 1.4;
+}
+.aw-pop-icon {
+  width: 13px; height: 13px; flex-shrink: 0;
+  opacity: 0.55; margin-top: 1px;
+}
+.aw-pop-muted { opacity: 0.55; }
+.aw-pop-tags {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; margin-bottom: 2px;
+}
+.aw-pop-tag {
+  font-size: 9.5px; font-weight: 600; letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 7px; border-radius: 99px;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--muted);
+  background: rgba(255,255,255,0.05);
+}
+.aw-pop-tag-past {
+  color: var(--faint); opacity: 0.7;
+}
+.aw-pop-progress-wrap {
+  margin-top: 10px; height: 3px;
+  background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden;
+}
+.aw-pop-progress-bar {
+  height: 100%; border-radius: 99px; transition: width 1s linear;
+}
+.aw-pop-progress-label {
+  font-size: 10px; color: var(--faint); margin-top: 4px;
+  display: flex; justify-content: space-between;
+}
+.aw-pop-desc {
+  font-size: 11px; color: var(--faint); margin-top: 10px;
+  line-height: 1.5; border-top: 1px solid var(--border); padding-top: 8px;
+}
+
+/* ── Light mode ── */
+@media (prefers-color-scheme: light) {
+  .agenda-widget { background: transparent; box-shadow: none; }
+  .agenda-widget .aw-toggle { background: rgba(0,0,0,0.04); }
+  .agenda-widget .aw-toggle:hover { background: rgba(0,0,0,0.07); }
+
+  /* ═══ LIGHT MODE — COMPACT VIEW ══════════════════════════════════════════ */
+  .agenda-widget .aw-event:hover          { background: rgba(0,0,0,0.05); }
+  .agenda-widget .aw-event-now:hover      { box-shadow: inset 0 0 0 1000px rgba(0,0,0,0.06); }
+  .agenda-widget .aw-event-past           { opacity: 0.42; filter: saturate(0.3); }
+
+  /* structural */
+  .aw-tcol.we  { background: rgba(89, 89, 89, 0.015); }
+
+  /* Nav buttons */
+  .aw-cal-nav-btn { background: rgba(0,0,0,0.07); color: var(--muted); }
+  .aw-cal-nav-btn:hover { background: rgba(0,0,0,0.13); color: var(--text); }
+  .aw-cal-nav-btn.disabled,
+  .aw-cal-nav-btn:disabled { opacity: 0.35; }
+
+  /* Today button — light mode */
+  .aw-cal-today-btn { background: rgba(0,0,0,0.07); color: var(--muted); }
+  .aw-cal-today-btn:hover { background: rgba(0,0,0,0.13); color: var(--text); }
+  .aw-cal-today-btn.disabled,
+  .aw-cal-today-btn:disabled { opacity: 0.35; }
+
+  .aw-cal-this-week-pill {
+    color: rgb(235, 83, 78); /*Old #2563eb;*/
+    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
+    border-color: rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-now-line { background: rgb(235, 76, 70); }/*Old: #dc2626*/
+  .aw-now-dot  { background: rgb(235, 76, 70); }/*Old: #dc2626*/
+  .aw-today-pill {
+    color: rgb(235, 83, 78); /*Old #2563eb;*/
+    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
+    border-color: rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-compact-day-label.today { color: rgb(235, 83, 78) } /*Old #2563eb;*/
+  .aw-skipped-label.today { color: rgb(235, 83, 78); } /*Old #2563eb;*/
+  .aw-skipped-today-pill {
+    color: rgb(235, 83, 78); /*Old #2563eb;*/
+    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
+    border: 1px solid rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-tday-num.today { background: rgb(235, 76, 70); }/*Old: #2563eb*/
+  .agenda-widget .aw-progress-bar { background: rgba(37,99,235,0.45); }
+  .aw-tdays::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
+
+  /* Cal event hover/past */
+  .aw-gev:hover { outline: 0.5px solid rgba(0,0,0,0.18); outline-offset: -1px; }
+  .aw-gev:hover { opacity: 1; filter: saturate(1.2) brightness(1.2);}
+  .aw-gev-past  { opacity: 0.5; filter: saturate(1) brightness(1); }                      /*COLOR OF CAL VIEW PAST*/
+  .aw-gev-past:hover { opacity: 0.75; filter: saturate(1) brightness(1); }           /*COLOR OF CAL VIEW PAST HOVER*/
+  /* gev colors now use CSS vars, no override needed */
+
+  /* Popover light */
+  .aw-pop {
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+    backdrop-filter: blur(40px) saturate(200%);
+  }
+  .aw-pop-close { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4); }
+  .aw-pop-close:hover { background: rgba(0,0,0,0.1); color: rgba(0,0,0,0.8); }
+  .aw-pop-title { color: rgba(10,20,40,0.9); }
+  .aw-pop-row   { color: rgba(10,20,40,0.55); }
+  .aw-pop-tag   { border-color: rgba(0,0,0,0.12); color: rgba(10,20,40,0.45); background: rgba(0,0,0,0.04); }
+  .aw-pop-progress-wrap { background: rgba(0,0,0,0.07); }
+  .aw-pop-desc { color: rgba(10,20,40,0.4); border-color: rgba(0,0,0,0.07); }
+}

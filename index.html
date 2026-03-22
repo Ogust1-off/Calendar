@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <title>Calendar by Shortcut™</title>
+
+  <!-- PWA iPhone -->
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Calendar"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)"/>
+  <meta name="theme-color" content="#f2f4f8" media="(prefers-color-scheme: light)"/>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="Asset/Picture/icon-180.png"/>
+  <link rel="apple-touch-icon" sizes="152x152" href="Asset/Picture/icon-152.png"/>
+  <link rel="apple-touch-icon" sizes="120x120" href="Asset/Picture/icon-120.png"/>
+  <link rel="icon" type="image/png" sizes="32x32" href="Asset/Picture/icon-32.png"/>
+
+  <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
+
+  <style>
+    /* ══════════════════════════════════════════
+       VARIABLES — dark (default)
+    ══════════════════════════════════════════ */
+    :root {
+      --accent:      #60a5fa;
+      --accent-2:    #818cf8;
+      --bg:          #0d1117;
+      --surface:     #161b22;
+      --surface-2:   #1c2230;
+      --border:      rgba(255,255,255,0.07);
+      --border-hi:   rgba(255,255,255,0.14);
+      --text:        rgba(255,255,255,0.90);
+      --muted:       rgba(255,255,255,0.45);
+      --faint:       rgba(255,255,255,0.24);
+      --r-pill:      999px;
+      --navbar-h:    56px;
+      --tabbar-h:    56px;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --accent:    #2563eb;
+        --accent-2:  #6366f1;
+        --bg:        #f2f4f8;
+        --surface:   #ffffff;
+        --surface-2: #f7f9fc;
+        --border:    rgba(0,0,0,0.07);
+        --border-hi: rgba(0,0,0,0.13);
+        --text:      rgba(10,12,20,0.90);
+        --muted:     rgba(10,12,20,0.48);
+        --faint:     rgba(10,12,20,0.30);
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       RESET & BASE
+    ══════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html {
+      background: var(--bg);
+      color-scheme: dark light;
+      height: 100%;
+    }
+
+    body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, "SF Pro Text", ui-sans-serif, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overscroll-behavior: none;
+      overflow: hidden; /* scroll handled by #app-scroll */
+    }
+
+    /* ══════════════════════════════════════════
+       APP SHELL — plein écran natif
+    ══════════════════════════════════════════ */
+    #app-shell {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      /* Safe areas */
+      padding-top: env(safe-area-inset-top);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
+
+    /* ── Nav Bar ── */
+    #app-navbar {
+      flex-shrink: 0;
+      height: var(--navbar-h);
+      display: flex; align-items: center;
+      padding: 0 16px;
+      gap: 10px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      z-index: 100;
+    }
+    /* Subtle blur on navbar */
+    #app-navbar {
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+    }
+
+    .nav-logo {
+      display: flex; align-items: center; gap: 9px; flex-shrink: 0;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 28px; height: 28px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+    }
+    .nav-logo-icon svg { width: 100%; height: 100%; display: block; }
+    .nav-logo-name {
+      font-size: 16px; font-weight: 700; letter-spacing: -0.03em;
+      color: var(--text); line-height: 1;
+    }
+    .nav-logo-name span {
+      font-size: 10px; font-weight: 400;
+      color: var(--muted); letter-spacing: 0;
+      display: block; margin-top: 1px;
+    }
+
+    .nav-spacer { flex: 1; }
+
+    /* Last updated pill */
+    #nav-updated {
+      font-size: 11px; color: var(--faint); font-style: italic;
+      white-space: nowrap;
+    }
+
+    /* Nav action buttons */
+    .nav-btn {
+      width: 34px; height: 34px; border-radius: 10px; border: none;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s, color 0.15s, transform 0.12s;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover  { background: var(--border-hi); color: var(--text); }
+    .nav-btn:active { transform: scale(0.9); }
+    .nav-btn svg    { width: 16px; height: 16px; }
+
+    /* Segment control: Agenda / Calendar */
+    .nav-segment {
+      display: flex; align-items: center;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 3px; gap: 2px;
+    }
+    .nav-seg-btn {
+      padding: 5px 13px; border-radius: 7px; border: none;
+      background: transparent; color: var(--muted);
+      font-size: 13px; font-weight: 500;
+      font-family: inherit; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.18s, color 0.18s;
+      white-space: nowrap;
+    }
+    .nav-seg-btn.active {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.3);
+    }
+
+    /* ── Scrollable Content Area ── */
+    #app-scroll {
+      flex: 1; overflow-y: auto; overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+      padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px);
+    }
+
+    /* ── Tab Bar ── */
+    #app-tabbar {
+      position: fixed;
+      bottom: 0; left: env(safe-area-inset-left); right: env(safe-area-inset-right);
+      height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+      padding-bottom: env(safe-area-inset-bottom);
+      display: flex; align-items: flex-start;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      z-index: 100;
+    }
+    .tab-btn {
+      flex: 1; height: var(--tabbar-h);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; border: none; background: none; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      color: var(--faint);
+      transition: color 0.15s;
+      font-family: inherit;
+    }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn svg    { width: 22px; height: 22px; }
+    .tab-btn span   { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+    .tab-indicator {
+      position: absolute; top: 0; height: 2px; border-radius: 0 0 2px 2px;
+      background: var(--accent);
+      transition: left 0.25s cubic-bezier(.34,1.4,.64,1), width 0.25s;
+    }
+
+    /* ══════════════════════════════════════════
+       AGENDA WIDGET — overrides pour mode plein écran
+    ══════════════════════════════════════════ */
+    #calendar {
+      /* Supprime toute trace de card */
+      background: none !important;
+      border: none !important;
+      border-radius: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      margin: 0 !important;
+      overflow: visible !important;
+    }
+
+    /* Header de la widget caché — remplacé par notre navbar */
+    #calendar .aw-header { display: none !important; }
+
+    /* Vue complète always visible, pas de toggle */
+    #calendar .aw-full {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+
+    /* Compact view */
+    #calendar #aw-compact { padding-bottom: 0; }
+
+    /* Séparateurs de jours plus naturels */
+    .aw-compact-day-hd {
+      background: var(--surface-2) !important;
+      padding: 10px 20px 8px !important;
+      border-top: 1px solid var(--border) !important;
+      border-bottom: 1px solid var(--border) !important;
+      margin-top: 4px;
+    }
+    .aw-compact-day-hd:first-child { margin-top: 0; border-top: none !important; }
+
+    /* Events rows — plus d'espace */
+    .agenda-widget .aw-event {
+      padding: 14px 20px !important;
+    }
+
+    /* Skipped rows */
+    .aw-skipped-row { padding: 7px 20px !important; }
+
+    /* ── Vue calendrier en plein écran ── */
+    .aw-cal-nav { padding: 12px 16px 8px !important; }
+    .aw-tgrid-scroll { overflow-x: auto !important; }
+
+    /* ══════════════════════════════════════════
+       INSTALLATION BANNER
+    ══════════════════════════════════════════ */
+    #install-banner {
+      display: none;
+      position: fixed;
+      bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
+      left: 14px; right: 14px;
+      background: color-mix(in srgb, var(--surface) 96%, transparent);
+      border: 1px solid var(--border-hi);
+      border-radius: 18px; padding: 12px 16px;
+      font-size: 13px; color: var(--text);
+      z-index: 200;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 8px 36px rgba(0,0,0,0.25);
+      gap: 10px; align-items: center;
+      animation: bannerUp 0.35s cubic-bezier(.34,1.56,.64,1);
+    }
+    #install-banner.show { display: flex; }
+    @keyframes bannerUp {
+      from { opacity:0; transform:translateY(12px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .install-icon { font-size: 22px; flex-shrink: 0; }
+    .install-text { flex:1; line-height:1.45; }
+    .install-text strong { display:block; font-size:13.5px; margin-bottom:2px; font-weight:600; }
+    .install-text small  { font-size:11.5px; color:var(--muted); }
+    .install-close {
+      background:none; border:none; color:var(--faint);
+      font-size:20px; cursor:pointer; padding:2px 4px; line-height:1; flex-shrink:0;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app-shell">
+
+  <!-- ── Navigation Bar ── -->
+  <nav id="app-navbar">
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-icon">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="13" fill="url(#navGrad)"/>
+          <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity="0.95"/>
+          <defs>
+            <linearGradient id="navGrad" x1="0" y1="0" x2="48" y2="48">
+              <stop offset="0%" stop-color="#3b82f6"/>
+              <stop offset="100%" stop-color="#6366f1"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="nav-logo-name">
+        Calendar
+        <span>by Shortcut™</span>
+      </div>
+    </a>
+
+    <div class="nav-spacer"></div>
+
+    <span id="nav-updated" id="aw-last-updated"></span>
+
+    <!-- Segment: Agenda / Week -->
+    <div class="nav-segment" id="nav-segment">
+      <button class="nav-seg-btn active" id="seg-agenda" onclick="appShowAgenda()">Agenda</button>
+      <button class="nav-seg-btn"        id="seg-week"   onclick="appShowWeek()">Semaine</button>
+    </div>
+
+    <!-- Settings -->
+    <button class="nav-btn" onclick="showSettings()" aria-label="Paramètres">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </nav>
+
+  <!-- ── Scrollable Content ── -->
+  <div id="app-scroll">
+    <div id="calendar" class="agenda-widget">
+      <div id="aw-compact">
+        <div class="aw-state"><span class="aw-spinner"></span>Chargement…</div>
+      </div>
+      <div class="aw-full" id="aw-full"></div>
+      <!-- hidden header required by agenda_b.js -->
+      <div class="aw-header" style="display:none">
+        <span class="aw-title"></span>
+        <span class="aw-last-updated" id="aw-last-updated"></span>
+        <button class="aw-toggle" id="aw-toggle-btn" style="display:none">
+          <span class="aw-btn-label">Calendar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tab Bar ── -->
+  <div id="app-tabbar">
+    <div class="tab-indicator" id="tab-indicator"></div>
+    <button class="tab-btn active" id="tab-today" onclick="tabSelect(0)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="3"/>
+        <path d="M16 2v4M8 2v4M3 10h18"/>
+        <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+      </svg>
+      <span>Aujourd'hui</span>
+    </button>
+    <button class="tab-btn" id="tab-week" onclick="tabSelect(1)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="3"/>
+        <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+      </svg>
+      <span>Semaine</span>
+    </button>
+    <button class="tab-btn" id="tab-settings" onclick="tabSelect(2)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+      <span>Compte</span>
+    </button>
+  </div>
+
+</div><!-- /app-shell -->
+
+<!-- Installation Banner -->
+<div id="install-banner">
+  <div class="install-icon">📲</div>
+  <div class="install-text">
+    <strong>Installer l'app</strong>
+    <small>Partager ⎙ → Sur l'écran d'accueil</small>
+  </div>
+  <button class="install-close" onclick="dismissBanner()">×</button>
+</div>
+
+<script src="Asset/JS/onboarding.js"></script>
+<script src="Asset/JS/agenda_b.js"></script>
+<script>
+/* ── Sync last-updated label to navbar ── */
+(function() {
+  const orig = Object.getOwnPropertyDescriptor(Element.prototype, 'textContent');
+  // Simpler: poll & mirror
+  setInterval(function() {
+    var src = document.getElementById('aw-last-updated');
+    var dst = document.getElementById('nav-updated');
+    if (src && dst && src.textContent !== dst.textContent) {
+      dst.textContent = src.textContent;
+      dst.style.color  = src.style.color || '';
+    }
+  }, 500);
+})();
+
+/* ── Segment / Tab logic ── */
+var appCalendarOpen = false;
+
+function appShowAgenda() {
+  document.getElementById('seg-agenda').classList.add('active');
+  document.getElementById('seg-week').classList.remove('active');
+  // Close calendar if open
+  var full    = document.getElementById('aw-full');
+  var compact = document.getElementById('aw-compact');
+  if (full && compact) {
+    full.classList.remove('open');
+    compact.style.display = 'block';
+  }
+  appCalendarOpen = false;
+  tabSelect(0, true);
+}
+
+function appShowWeek() {
+  document.getElementById('seg-week').classList.add('active');
+  document.getElementById('seg-agenda').classList.remove('active');
+  // Open calendar
+  var full    = document.getElementById('aw-full');
+  var compact = document.getElementById('aw-compact');
+  if (full && compact) {
+    full.classList.add('open');
+    compact.style.display = 'none';
+  }
+  appCalendarOpen = true;
+  tabSelect(1, true);
+}
+
+var currentTab = 0;
+function tabSelect(idx, skipView) {
+  currentTab = idx;
+  var tabs = ['tab-today','tab-week','tab-settings'];
+  tabs.forEach(function(id, i) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('active', i === idx);
+  });
+  // Move indicator
+  var tabbar = document.getElementById('app-tabbar');
+  var indicator = document.getElementById('tab-indicator');
+  if (tabbar && indicator) {
+    var btnW = tabbar.offsetWidth / tabs.length;
+    indicator.style.left  = (idx * btnW) + 'px';
+    indicator.style.width = btnW + 'px';
+  }
+  if (!skipView) {
+    if (idx === 0) appShowAgenda();
+    if (idx === 1) appShowWeek();
+    if (idx === 2) showSettings();
+  }
+}
+
+// Init indicator position
+window.addEventListener('load', function() { tabSelect(0, true); });
+
+/* ── Service Worker ── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
+}
+
+/* ── Install banner ── */
+function isIos()        { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function isStandalone() { return window.navigator.standalone === true; }
+function dismissBanner() {
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('install-dismissed', '1');
+}
+window.addEventListener('load', function() {
+  if (isIos() && !isStandalone() && !localStorage.getItem('install-dismissed')) {
+    setTimeout(function() {
+      document.getElementById('install-banner').classList.add('show');
+    }, 4000);
+  }
+});
+</script>
+</body>
+</html>
