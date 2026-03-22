@@ -313,7 +313,7 @@ function obToggleEye(inputId, btn) {
     '#ob-overlay.ob-visible{opacity:1}',
     '#ob-overlay.ob-exit{opacity:0;transition:opacity .4s ease}',
     /* BUG 3 FIX: use dvh + allow sheet to grow, remove overflow:hidden so content never clips */
-    '.ob-sheet{position:relative;width:100%;background:#0d1017;border-radius:30px 30px 0 0;padding:0 0 calc(28px + env(safe-area-inset-bottom));overflow:visible;min-height:min(72vh,72dvh);max-height:min(96vh,96dvh);display:flex;flex-direction:column;transform:translateY(60px);transition:transform .45s cubic-bezier(.32,1.2,.45,1);box-shadow:0 -20px 80px rgba(0,0,0,.7)}',
+    '.ob-sheet{position:relative;width:100%;background:rgba(10,14,26,0.82);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border-radius:30px 30px 0 0;border-top:1px solid rgba(255,255,255,0.13);padding:0 0 calc(28px + env(safe-area-inset-bottom));overflow:visible;min-height:min(72vh,72dvh);max-height:min(96vh,96dvh);display:flex;flex-direction:column;transform:translateY(60px);transition:transform .45s cubic-bezier(.32,1.2,.45,1);box-shadow:0 -24px 80px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,0.12)}',
     /* Clip only the decorative orbs, not the content */
     '.ob-sheet>:not(.ob-bg-orbs){position:relative;z-index:1}',
     '#ob-overlay.ob-visible .ob-sheet{transform:translateY(0)}',
@@ -363,7 +363,7 @@ function obToggleEye(inputId, btn) {
     '.ob-input-eye:hover{color:rgba(255,255,255,.65)}',
     '.ob-error{font-size:12px;color:#f43f5e;max-height:0;overflow:hidden;transition:max-height .2s ease,margin-top .2s}',
     '.ob-error.visible{max-height:40px;margin-top:2px}',
-    '.ob-hint-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 16px;margin-top:20px}',
+    '.ob-hint-card{background:rgba(255,255,255,.06);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:14px 16px;margin-top:20px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.07)}',
     '.ob-hint-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:8px}',
     '.ob-hint-steps{margin:0;padding-left:18px;color:rgba(255,255,255,.42);font-size:12.5px;line-height:1.8}',
     '.ob-hint-steps strong{color:rgba(255,255,255,.65)}',
@@ -371,11 +371,11 @@ function obToggleEye(inputId, btn) {
     /* BUG 1 FIX: user-select:none only on buttons, NEVER on inputs */
     '.ob-btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:15px 24px;border-radius:16px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:-apple-system,"SF Pro Text",system-ui,sans-serif;transition:transform .12s,box-shadow .18s,opacity .18s;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}',
     /* Explicitly allow text selection in inputs (overrides any parent rules) */
-    '.ob-input{user-select:text!important;-webkit-user-select:text!important;width:100%;padding:14px 46px 14px 16px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;color:rgba(255,255,255,.88);font-size:15px;font-family:-apple-system,"SF Pro Text",system-ui,sans-serif;outline:none;transition:border-color .18s,background .18s,box-shadow .18s;-webkit-appearance:none;box-sizing:border-box}',
+    '.ob-input{user-select:text!important;-webkit-user-select:text!important;width:100%;padding:14px 46px 14px 16px;background:rgba(255,255,255,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.14);border-radius:14px;color:rgba(255,255,255,.90);font-size:15px;font-family:-apple-system,"SF Pro Text",system-ui,sans-serif;outline:none;transition:border-color .18s,background .18s,box-shadow .18s;-webkit-appearance:none;box-sizing:border-box;box-shadow:inset 0 1px 0 rgba(255,255,255,0.06)}',
     '.ob-btn:active{transform:scale(.97)}',
     '.ob-btn-primary{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,.35);flex:1}',
     '.ob-btn-primary:hover{box-shadow:0 6px 28px rgba(99,102,241,.5)}',
-    '.ob-btn-ghost{background:rgba(255,255,255,.07);color:rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.1);flex-shrink:0}',
+    '.ob-btn-ghost{background:rgba(255,255,255,.08);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.14);flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,0.1)}',
     '.ob-btn-ghost:hover{background:rgba(255,255,255,.11);color:rgba(255,255,255,.85)}',
     '.ob-btn-full{width:100%}',
     '.ob-btn-row{display:flex;gap:10px}',
@@ -395,7 +395,7 @@ function obToggleEye(inputId, btn) {
     '.ob-close-btn:hover{background:rgba(255,255,255,.14);color:rgba(255,255,255,.85)}',
     '@media(prefers-color-scheme:light){',
     ':root{--bg:#eef0f5;--border:rgba(0,0,0,.07);--border-hi:rgba(255,255,255,.95);--text:rgba(10,12,20,.88);--muted:rgba(10,12,20,.46);--faint:rgba(10,12,20,.28);--accent:#2563eb}',
-    '.ob-sheet{background:#f0f2f7}',
+    '.ob-sheet{background:rgba(240,244,252,0.85);backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);border-top:1px solid rgba(255,255,255,0.9);box-shadow:0 -20px 60px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,0.9)}',
     '.ob-title,.ob-form-title,.ob-done-title,.ob-logo-wordmark{color:rgba(10,15,30,.92)}',
     '.ob-subtitle,.ob-form-desc{color:rgba(10,15,30,.5)}',
     '.ob-feature{color:rgba(10,15,30,.65)}',

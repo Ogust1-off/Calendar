@@ -4,330 +4,410 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <title>Calendar by Shortcut™</title>
-
-  <!-- PWA iPhone -->
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Calendar"/>
   <meta name="mobile-web-app-capable" content="yes"/>
-  <meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)"/>
-  <meta name="theme-color" content="#f2f4f8" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#0a0e1a" media="(prefers-color-scheme: dark)"/>
+  <meta name="theme-color" content="#e8ecf4" media="(prefers-color-scheme: light)"/>
   <link rel="manifest" href="manifest.json"/>
   <link rel="apple-touch-icon" sizes="180x180" href="Asset/Picture/icon-180.png"/>
   <link rel="apple-touch-icon" sizes="152x152" href="Asset/Picture/icon-152.png"/>
   <link rel="apple-touch-icon" sizes="120x120" href="Asset/Picture/icon-120.png"/>
   <link rel="icon" type="image/png" sizes="32x32" href="Asset/Picture/icon-32.png"/>
-
   <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
-
   <style>
-    /* ══════════════════════════════════════════
-       VARIABLES — dark (default)
-    ══════════════════════════════════════════ */
+  /* ═══════════════════════════════════════════════
+     TOKENS
+  ═══════════════════════════════════════════════ */
+  :root {
+    --accent:   #60a5fa;
+    --accent2:  #818cf8;
+    --bg:       #0a0e1a;
+    --surface:  rgba(255,255,255,0.06);
+    --surface2: rgba(255,255,255,0.10);
+    --border:   rgba(255,255,255,0.09);
+    --border2:  rgba(255,255,255,0.16);
+    --text:     rgba(255,255,255,0.92);
+    --muted:    rgba(255,255,255,0.48);
+    --faint:    rgba(255,255,255,0.26);
+    --navbar-h: 56px;
+    --tab-h:    56px;
+    /* Liquid Glass recipe */
+    --lg-bg:    rgba(255,255,255,0.07);
+    --lg-blur:  blur(24px) saturate(180%);
+    --lg-border:rgba(255,255,255,0.14);
+    --lg-shadow:0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.12);
+  }
+  @media (prefers-color-scheme: light) {
     :root {
-      --accent:      #60a5fa;
-      --accent-2:    #818cf8;
-      --bg:          #0d1117;
-      --surface:     #161b22;
-      --surface-2:   #1c2230;
-      --border:      rgba(255,255,255,0.07);
-      --border-hi:   rgba(255,255,255,0.14);
-      --text:        rgba(255,255,255,0.90);
-      --muted:       rgba(255,255,255,0.45);
-      --faint:       rgba(255,255,255,0.24);
-      --r-pill:      999px;
-      --navbar-h:    56px;
-      --tabbar-h:    56px;
+      --accent:   #2563eb;
+      --accent2:  #6366f1;
+      --bg:       #e8ecf4;
+      --surface:  rgba(255,255,255,0.55);
+      --surface2: rgba(255,255,255,0.80);
+      --border:   rgba(0,0,0,0.07);
+      --border2:  rgba(0,0,0,0.13);
+      --text:     rgba(10,14,30,0.90);
+      --muted:    rgba(10,14,30,0.50);
+      --faint:    rgba(10,14,30,0.32);
+      --lg-bg:    rgba(255,255,255,0.60);
+      --lg-blur:  blur(24px) saturate(200%);
+      --lg-border:rgba(255,255,255,0.90);
+      --lg-shadow:0 6px 24px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
     }
-    @media (prefers-color-scheme: light) {
-      :root {
-        --accent:    #2563eb;
-        --accent-2:  #6366f1;
-        --bg:        #f2f4f8;
-        --surface:   #ffffff;
-        --surface-2: #f7f9fc;
-        --border:    rgba(0,0,0,0.07);
-        --border-hi: rgba(0,0,0,0.13);
-        --text:      rgba(10,12,20,0.90);
-        --muted:     rgba(10,12,20,0.48);
-        --faint:     rgba(10,12,20,0.30);
-      }
-    }
+  }
 
-    /* ══════════════════════════════════════════
-       RESET & BASE
-    ══════════════════════════════════════════ */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ═══════════════════════════════════════════════
+     BASE
+  ═══════════════════════════════════════════════ */
+  *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+  html { height:100%; background:var(--bg); color-scheme:dark light; }
+  body {
+    height:100%; background:var(--bg); color:var(--text);
+    font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior:none; overflow:hidden;
+  }
 
-    html {
-      background: var(--bg);
-      color-scheme: dark light;
-      height: 100%;
+  /* Fond dégradé ambiant */
+  body::before {
+    content:''; position:fixed; inset:0; z-index:-1;
+    background:
+      radial-gradient(ellipse 65% 50% at 20% 0%,  rgba(59,130,246,0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 40% at 80% 100%, rgba(99,102,241,0.14) 0%, transparent 60%),
+      var(--bg);
+  }
+  @media (prefers-color-scheme: light) {
+    body::before { background:
+      radial-gradient(ellipse 65% 50% at 20% 0%,  rgba(59,130,246,0.10) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 40% at 80% 100%, rgba(99,102,241,0.08) 0%, transparent 60%),
+      var(--bg);
     }
+  }
 
-    body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, "SF Pro Text", ui-sans-serif, system-ui, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      overscroll-behavior: none;
-      overflow: hidden; /* scroll handled by #app-scroll */
-    }
+  /* ═══════════════════════════════════════════════
+     APP SHELL
+  ═══════════════════════════════════════════════ */
+  #app-shell {
+    position:fixed; inset:0;
+    display:flex; flex-direction:column;
+    padding-top:env(safe-area-inset-top);
+    height:100dvh; height:100vh;
+  }
 
-    /* ══════════════════════════════════════════
-       APP SHELL — plein écran natif
-    ══════════════════════════════════════════ */
-    #app-shell {
-      position: fixed; inset: 0;
-      display: flex; flex-direction: column;
-      /* Safe areas */
-      padding-top: env(safe-area-inset-top);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
-    }
+  /* ── Liquid Glass mixin (reusable) ── */
+  .lg {
+    background: var(--lg-bg);
+    backdrop-filter: var(--lg-blur);
+    -webkit-backdrop-filter: var(--lg-blur);
+    border: 1px solid var(--lg-border);
+    box-shadow: var(--lg-shadow);
+  }
 
-    /* ── Nav Bar ── */
-    #app-navbar {
-      flex-shrink: 0;
-      height: var(--navbar-h);
-      display: flex; align-items: center;
-      padding: 0 16px;
-      gap: 10px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      z-index: 100;
-    }
-    /* Subtle blur on navbar */
-    #app-navbar {
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      background: color-mix(in srgb, var(--surface) 92%, transparent);
-    }
+  /* ═══════════════════════════════════════════════
+     NAV BAR — Liquid Glass
+  ═══════════════════════════════════════════════ */
+  #app-navbar {
+    flex-shrink:0; height:var(--navbar-h);
+    display:flex; align-items:center;
+    padding:0 14px; gap:10px; z-index:200;
+    background: var(--lg-bg);
+    backdrop-filter: var(--lg-blur);
+    -webkit-backdrop-filter: var(--lg-blur);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 var(--lg-border);
+  }
+  .nav-logo { display:flex; align-items:center; gap:9px; text-decoration:none; flex-shrink:0; }
+  .nav-logo-icon { width:30px; height:30px; border-radius:9px; overflow:hidden; flex-shrink:0; box-shadow:0 2px 8px rgba(59,130,246,0.35); }
+  .nav-logo-icon svg { width:100%; height:100%; display:block; }
+  .nav-logo-name { font-size:16px; font-weight:700; letter-spacing:-.03em; color:var(--text); line-height:1.1; }
+  .nav-logo-name small { font-size:10px; font-weight:400; color:var(--muted); letter-spacing:0; display:block; }
+  .nav-spacer { flex:1; }
+  #nav-updated { font-size:10.5px; color:var(--faint); font-style:italic; white-space:nowrap; }
 
-    .nav-logo {
-      display: flex; align-items: center; gap: 9px; flex-shrink: 0;
-      text-decoration: none;
-    }
-    .nav-logo-icon {
-      width: 28px; height: 28px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
-    }
-    .nav-logo-icon svg { width: 100%; height: 100%; display: block; }
-    .nav-logo-name {
-      font-size: 16px; font-weight: 700; letter-spacing: -0.03em;
-      color: var(--text); line-height: 1;
-    }
-    .nav-logo-name span {
-      font-size: 10px; font-weight: 400;
-      color: var(--muted); letter-spacing: 0;
-      display: block; margin-top: 1px;
-    }
+  /* Nav button — Liquid Glass pill */
+  .nav-btn {
+    width:34px; height:34px; border-radius:10px; border:none; cursor:pointer;
+    background:var(--surface); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border); color:var(--muted);
+    display:flex; align-items:center; justify-content:center;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .15s,color .15s,transform .1s;
+    flex-shrink:0;
+  }
+  .nav-btn:active { transform:scale(.88); }
+  .nav-btn svg { width:15px; height:15px; }
 
-    .nav-spacer { flex: 1; }
+  /* ═══════════════════════════════════════════════
+     VIEWS
+  ═══════════════════════════════════════════════ */
+  .app-view {
+    display:none; flex:1;
+    overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    padding-bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 8px);
+  }
+  .app-view.active { display:block; }
 
-    /* Nav last updated */
-    #nav-updated {
-      font-size: 11px; color: var(--faint); font-style: italic;
-      white-space: nowrap; margin-right: 4px;
-    }
-    .nav-btn {
-      width: 34px; height: 34px; border-radius: 10px; border: none;
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--muted); cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.15s, color 0.15s, transform 0.12s;
-      flex-shrink: 0;
-    }
-    .nav-btn:hover  { background: var(--border-hi); color: var(--text); }
-    .nav-btn:active { transform: scale(0.9); }
-    .nav-btn svg    { width: 16px; height: 16px; }
-    /* ── Scrollable Content Area ── */
-    /* ── Vues (pages) — une seule visible à la fois ── */
-    .app-view {
-      display: none;
-      flex: 1; overflow-y: auto; overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px);
-    }
-    .app-view.active { display: block; }
-    /* app-shell needs to be full height with views filling it */
-    #app-shell { height: 100dvh; height: 100vh; }
+  /* ═══════════════════════════════════════════════
+     AGENDA VIEW — day-by-day avec sticky header
+  ═══════════════════════════════════════════════ */
 
-    /* ── Tab Bar ── */
-    #app-tabbar {
-      position: fixed;
-      bottom: 0; left: env(safe-area-inset-left); right: env(safe-area-inset-right);
-      height: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-      padding-bottom: env(safe-area-inset-bottom);
-      display: flex; align-items: flex-start;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      background: color-mix(in srgb, var(--surface) 92%, transparent);
-      z-index: 100;
-    }
-    .tab-btn {
-      flex: 1; height: var(--tabbar-h);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 3px; border: none; background: none; cursor: pointer;
-      -webkit-tap-highlight-color: transparent;
-      color: var(--faint);
-      transition: color 0.15s;
-      font-family: inherit;
-    }
-    .tab-btn.active { color: var(--accent); }
-    .tab-btn svg    { width: 22px; height: 22px; }
-    .tab-btn span   { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
-    .tab-indicator {
-      position: absolute; top: 0; height: 2px; border-radius: 0 0 2px 2px;
-      background: var(--accent);
-      transition: left 0.25s cubic-bezier(.34,1.4,.64,1), width 0.25s;
-    }
+  /* Sticky day header — Liquid Glass */
+  .ag-day-header {
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px 9px;
+    background: var(--lg-bg);
+    backdrop-filter: var(--lg-blur);
+    -webkit-backdrop-filter: var(--lg-blur);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 var(--lg-border), 0 4px 16px rgba(0,0,0,0.12);
+  }
+  .ag-day-num {
+    width:38px; height:38px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:600; color:var(--muted);
+    transition:background .18s, color .18s;
+  }
+  .ag-day-num.today {
+    background:linear-gradient(135deg,#3b82f6,#6366f1);
+    color:#fff;
+    box-shadow:0 4px 14px rgba(59,130,246,0.45);
+  }
+  .ag-day-info { flex:1; }
+  .ag-day-name { font-size:13px; font-weight:600; color:var(--text); letter-spacing:-.01em; }
+  .ag-day-name.today { color:var(--accent); }
+  .ag-day-sub { font-size:11px; color:var(--faint); margin-top:1px; }
+  .ag-today-pill {
+    font-size:9px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--accent); background:rgba(96,165,250,.14); border:1px solid rgba(96,165,250,.28);
+    padding:2px 8px; border-radius:99px; flex-shrink:0;
+  }
+  @media (prefers-color-scheme:light) {
+    .ag-today-pill { color:#2563eb; background:rgba(37,99,235,.1); border-color:rgba(37,99,235,.22); }
+  }
 
-    /* ══════════════════════════════════════════
-       AGENDA WIDGET — overrides plein écran
-    ══════════════════════════════════════════ */
-    .agenda-widget, #calendar-agenda, #calendar-week {
-      background: none !important;
-      border: none !important;
-      border-radius: 0 !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      margin: 0 !important;
-      overflow: visible !important;
-    }
+  /* Empty day */
+  .ag-empty-day {
+    padding:18px 18px 16px 70px;
+    font-size:13px; color:var(--faint); font-style:italic;
+    border-bottom:1px solid var(--border);
+  }
 
-    /* Cache l'header interne partout */
-    .agenda-widget .aw-header { display: none !important; }
+  /* Weekend / no-class day */
+  .ag-rest-day {
+    display:flex; align-items:center; gap:10px;
+    padding:16px 18px; border-bottom:1px solid var(--border);
+  }
+  .ag-rest-icon { font-size:20px; flex-shrink:0; opacity:.6; }
+  .ag-rest-label { font-size:13px; color:var(--faint); }
 
-    /* Séparateurs de jours */
-    .aw-compact-day-hd {
-      background: var(--surface-2) !important;
-      padding: 9px 18px 7px !important;
-      border-top: 1px solid var(--border) !important;
-      border-bottom: 1px solid var(--border) !important;
-      margin-top: 4px;
-    }
-    .aw-compact-day-hd:first-child { margin-top: 0; border-top: none !important; }
+  /* Event card — Liquid Glass */
+  .ag-event {
+    margin:8px 12px;
+    border-radius:16px;
+    padding:12px 14px 12px 14px;
+    display:flex; gap:12px; align-items:flex-start;
+    background:var(--lg-bg);
+    backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border);
+    box-shadow:var(--lg-shadow);
+    transition:transform .12s, box-shadow .12s;
+    cursor:pointer;
+    position:relative; overflow:hidden;
+  }
+  .ag-event:active { transform:scale(.985); }
+  /* Accent left bar */
+  .ag-event-bar {
+    position:absolute; left:0; top:8px; bottom:8px;
+    width:3px; border-radius:0 3px 3px 0;
+  }
+  .ag-event-body { flex:1; min-width:0; padding-left:6px; }
+  .ag-event-name {
+    font-size:14px; font-weight:600; color:var(--text);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    letter-spacing:-.015em; display:flex; align-items:center; gap:6px; flex-wrap:wrap;
+  }
+  .ag-event-meta {
+    font-size:12px; color:var(--muted); margin-top:3px;
+    display:flex; align-items:center; gap:5px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .ag-event-meta svg { width:11px; height:11px; opacity:.55; flex-shrink:0; }
+  .ag-event-time {
+    font-size:12px; color:var(--muted); text-align:right; flex-shrink:0;
+    font-variant-numeric:tabular-nums; line-height:1.5;
+    display:flex; flex-direction:column; align-items:flex-end; gap:2px;
+  }
+  .ag-event-dur { font-size:10.5px; color:var(--faint); }
+  /* Now badge */
+  .ag-now-bar {
+    height:2px; border-radius:99px; margin-top:8px;
+    background:rgba(255,255,255,.1);
+  }
+  .ag-now-bar-fill { height:100%; border-radius:99px; transition:width 1s linear; }
+  .ag-now-pill {
+    display:inline-flex; align-items:center;
+    font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    padding:1px 7px; border-radius:99px; border:1px solid;
+  }
+  .ag-event.is-past { opacity:.45; filter:saturate(.35); }
+  .ag-event.is-now  { box-shadow:0 0 0 1.5px currentColor, var(--lg-shadow); }
 
-    /* Events */
-    .agenda-widget .aw-event { padding: 13px 18px !important; }
-    .aw-skipped-row { padding: 7px 18px !important; }
+  /* Event badge */
+  .ag-badge {
+    font-size:9px; font-weight:700; letter-spacing:.05em; text-transform:uppercase;
+    padding:2px 7px; border-radius:99px; border:1px solid; flex-shrink:0;
+    display:inline-flex; align-items:center;
+  }
+  .ag-badge-group {
+    color:var(--muted); background:rgba(255,255,255,.06); border-color:rgba(255,255,255,.12);
+    font-size:9px;
+  }
+  @media (prefers-color-scheme:light) { .ag-badge-group { background:rgba(0,0,0,.05); border-color:rgba(0,0,0,.12); } }
 
-    /* Vue semaine */
-    .aw-cal-nav { padding: 12px 16px 8px !important; }
-    .aw-tgrid-scroll { overflow-x: auto !important; }
+  /* Link */
+  .ag-link { color:var(--accent); text-decoration:none; font-size:11.5px; }
+  .ag-link:hover { text-decoration:underline; }
 
-    /* Page Compte */
-    .account-page {
-      padding: 32px 20px 24px;
-      display: flex; flex-direction: column; align-items: center; gap: 28px;
-    }
-    .account-section {
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-    }
-    .account-icon {
-      width: 72px; height: 72px; border-radius: 20px; overflow: hidden;
-      box-shadow: 0 8px 24px rgba(59,130,246,0.3);
-    }
-    .account-icon svg { width: 100%; height: 100%; display: block; }
-    .account-title {
-      font-size: 22px; font-weight: 700; letter-spacing: -0.03em;
-      color: var(--text); text-align: center;
-    }
-    .account-title span { color: var(--muted); font-weight: 400; font-size: 14px; }
-    .account-sub { font-size: 13px; color: var(--faint); }
-    .account-rows {
-      width: 100%; border-radius: 14px; overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--surface);
-    }
-    .account-row {
-      width: 100%; display: flex; align-items: center; gap: 12px;
-      padding: 14px 16px; border: none; background: none;
-      color: var(--text); font-size: 15px; font-family: inherit;
-      cursor: pointer; text-align: left;
-      border-bottom: 1px solid var(--border);
-      -webkit-tap-highlight-color: transparent;
-      transition: background 0.12s;
-    }
-    .account-row:last-child { border-bottom: none; }
-    .account-row:active { background: var(--surface-2); }
-    .account-row-icon { font-size: 18px; flex-shrink: 0; }
-    .account-row-label { flex: 1; }
-    .account-row-chevron { width: 14px; height: 14px; color: var(--faint); flex-shrink: 0; }
-    .account-version { font-size: 11px; color: var(--faint); font-style: italic; }
+  /* Color dot */
+  .ag-dot {
+    width:9px; height:9px; border-radius:50%; flex-shrink:0; margin-top:5px;
+  }
 
-    /* ══════════════════════════════════════════
-       INSTALLATION BANNER
-    ══════════════════════════════════════════ */
-    #install-banner {
-      display: none;
-      position: fixed;
-      bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px);
-      left: 14px; right: 14px;
-      background: color-mix(in srgb, var(--surface) 96%, transparent);
-      border: 1px solid var(--border-hi);
-      border-radius: 18px; padding: 12px 16px;
-      font-size: 13px; color: var(--text);
-      z-index: 200;
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      box-shadow: 0 8px 36px rgba(0,0,0,0.25);
-      gap: 10px; align-items: center;
-      animation: bannerUp 0.35s cubic-bezier(.34,1.56,.64,1);
-    }
-    #install-banner.show { display: flex; }
-    @keyframes bannerUp {
-      from { opacity:0; transform:translateY(12px); }
-      to   { opacity:1; transform:translateY(0); }
-    }
-    .install-icon { font-size: 22px; flex-shrink: 0; }
-    .install-text { flex:1; line-height:1.45; }
-    .install-text strong { display:block; font-size:13.5px; margin-bottom:2px; font-weight:600; }
-    .install-text small  { font-size:11.5px; color:var(--muted); }
-    .install-close {
-      background:none; border:none; color:var(--faint);
-      font-size:20px; cursor:pointer; padding:2px 4px; line-height:1; flex-shrink:0;
-    }
+  /* ═══════════════════════════════════════════════
+     SEMAINE VIEW overrides
+  ═══════════════════════════════════════════════ */
+  .agenda-widget, #calendar-week {
+    background:none!important; border:none!important; border-radius:0!important;
+    box-shadow:none!important; backdrop-filter:none!important; margin:0!important; overflow:visible!important;
+  }
+  .agenda-widget .aw-header { display:none!important; }
+  .aw-cal-nav { padding:12px 14px 8px!important; }
+  .aw-tgrid-scroll { overflow-x:auto!important; }
+
+  /* Liquid Glass pour les events de la vue grille */
+  .aw-gev {
+    border-radius:9px!important;
+    backdrop-filter:blur(12px) saturate(140%)!important;
+    -webkit-backdrop-filter:blur(12px) saturate(140%)!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+  }
+  @media (prefers-color-scheme:light) {
+    .aw-gev { border-color:rgba(255,255,255,.55)!important; }
+  }
+
+  /* ═══════════════════════════════════════════════
+     ACCOUNT PAGE
+  ═══════════════════════════════════════════════ */
+  .account-page { padding:28px 16px 24px; display:flex; flex-direction:column; align-items:center; gap:24px; }
+  .account-hero { display:flex; flex-direction:column; align-items:center; gap:10px; padding-top:12px; }
+  .account-hero-icon {
+    width:76px; height:76px; border-radius:22px; overflow:hidden;
+    box-shadow:0 10px 28px rgba(59,130,246,0.38);
+  }
+  .account-hero-icon svg { width:100%; height:100%; display:block; }
+  .account-hero-name { font-size:22px; font-weight:700; letter-spacing:-.035em; color:var(--text); }
+  .account-hero-sub  { font-size:12px; color:var(--faint); }
+  /* Liquid Glass rows */
+  .account-rows {
+    width:100%; border-radius:18px; overflow:hidden;
+    background:var(--lg-bg); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border); box-shadow:var(--lg-shadow);
+  }
+  .account-row {
+    width:100%; display:flex; align-items:center; gap:13px;
+    padding:15px 16px; border:none; background:none;
+    color:var(--text); font-size:15px; font-family:inherit;
+    cursor:pointer; text-align:left;
+    border-bottom:1px solid var(--border);
+    -webkit-tap-highlight-color:transparent;
+    transition:background .12s;
+  }
+  .account-row:last-child { border-bottom:none; }
+  .account-row:active { background:var(--surface2); }
+  .account-row-icon { font-size:19px; flex-shrink:0; }
+  .account-row-label { flex:1; font-size:15px; }
+  .account-row-chevron { width:14px; height:14px; color:var(--faint); flex-shrink:0; }
+  #nav-updated-acc { font-size:11px; color:var(--faint); font-style:italic; }
+
+  /* ═══════════════════════════════════════════════
+     TAB BAR — Liquid Glass
+  ═══════════════════════════════════════════════ */
+  #app-tabbar {
+    position:fixed; bottom:0;
+    left:env(safe-area-inset-left); right:env(safe-area-inset-right);
+    height:calc(var(--tab-h) + env(safe-area-inset-bottom));
+    padding-bottom:env(safe-area-inset-bottom);
+    display:flex; align-items:flex-start;
+    background:var(--lg-bg);
+    backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    border-top:1px solid var(--border);
+    box-shadow:0 -1px 0 var(--lg-border), 0 -4px 20px rgba(0,0,0,.15);
+    z-index:200;
+  }
+  .tab-btn {
+    flex:1; height:var(--tab-h);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    border:none; background:none; cursor:pointer; color:var(--faint);
+    -webkit-tap-highlight-color:transparent; font-family:inherit;
+    transition:color .15s, transform .1s;
+  }
+  .tab-btn:active { transform:scale(.88); }
+  .tab-btn.active { color:var(--accent); }
+  .tab-btn svg  { width:23px; height:23px; }
+  .tab-btn span { font-size:10px; font-weight:500; letter-spacing:.015em; }
+  .tab-indicator {
+    position:absolute; top:0; height:2px; border-radius:0 0 3px 3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    transition:left .28s cubic-bezier(.34,1.4,.64,1), width .28s;
+    box-shadow:0 0 8px rgba(96,165,250,.6);
+  }
+
+  /* ═══════════════════════════════════════════════
+     INSTALL BANNER
+  ═══════════════════════════════════════════════ */
+  #install-banner {
+    display:none; position:fixed;
+    bottom:calc(var(--tab-h) + env(safe-area-inset-bottom) + 12px);
+    left:14px; right:14px;
+    background:var(--lg-bg); backdrop-filter:var(--lg-blur); -webkit-backdrop-filter:var(--lg-blur);
+    border:1px solid var(--border2); border-radius:18px; padding:12px 16px;
+    gap:10px; align-items:center; color:var(--text);
+    box-shadow:var(--lg-shadow); z-index:300;
+    animation:bannerUp .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  #install-banner.show { display:flex; }
+  @keyframes bannerUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .install-icon { font-size:22px; flex-shrink:0; }
+  .install-text { flex:1; line-height:1.4; }
+  .install-text strong { display:block; font-size:13.5px; font-weight:600; margin-bottom:2px; }
+  .install-text small  { font-size:11.5px; color:var(--muted); }
+  .install-close { background:none; border:none; color:var(--faint); font-size:20px; cursor:pointer; padding:2px 4px; }
   </style>
 </head>
 <body>
-
 <div id="app-shell">
 
-  <!-- ── Navigation Bar ── -->
+  <!-- NAV BAR -->
   <nav id="app-navbar">
     <a class="nav-logo" href="#">
       <div class="nav-logo-icon">
         <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect width="48" height="48" rx="13" fill="url(#navGrad)"/>
-          <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity="0.95"/>
-          <defs>
-            <linearGradient id="navGrad" x1="0" y1="0" x2="48" y2="48">
-              <stop offset="0%" stop-color="#3b82f6"/>
-              <stop offset="100%" stop-color="#6366f1"/>
-            </linearGradient>
-          </defs>
+          <rect width="48" height="48" rx="13" fill="url(#ng)"/>
+          <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/>
+          <defs><linearGradient id="ng" x1="0" y1="0" x2="48" y2="48">
+            <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#6366f1"/>
+          </linearGradient></defs>
         </svg>
       </div>
-      <div class="nav-logo-name">
-        Calendar
-        <span>by Shortcut™</span>
-      </div>
+      <div class="nav-logo-name">Calendar<small>by Shortcut™</small></div>
     </a>
-
     <div class="nav-spacer"></div>
-
     <span id="nav-updated"></span>
-
-    <!-- Settings -->
     <button class="nav-btn" onclick="showSettings()" aria-label="Paramètres">
       <svg viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
@@ -336,56 +416,53 @@
     </button>
   </nav>
 
-  <!-- ── Vue Agenda (onglet 0) ── -->
+  <!-- VUE AGENDA -->
   <div id="view-agenda" class="app-view active">
-    <div id="calendar-agenda" class="agenda-widget">
-      <div id="aw-compact">
-        <div class="aw-state"><span class="aw-spinner"></span>Chargement…</div>
-      </div>
-    </div>
+    <div id="ag-days-container"></div>
   </div>
 
-  <!-- ── Vue Semaine (onglet 1) ── -->
+  <!-- VUE SEMAINE -->
   <div id="view-week" class="app-view">
     <div id="calendar-week" class="agenda-widget">
       <div id="aw-full"></div>
     </div>
   </div>
 
-  <!-- ── Vue Compte (onglet 2) ── -->
+  <!-- VUE COMPTE -->
   <div id="view-account" class="app-view">
     <div class="account-page">
-      <div class="account-section">
-        <div class="account-icon">
+      <div class="account-hero">
+        <div class="account-hero-icon">
           <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="48" height="48" rx="14" fill="url(#accGrad)"/>
-            <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity="0.95"/>
-            <defs><linearGradient id="accGrad" x1="0" y1="0" x2="48" y2="48">
+            <rect width="48" height="48" rx="14" fill="url(#ag)"/>
+            <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/>
+            <defs><linearGradient id="ag" x1="0" y1="0" x2="48" y2="48">
               <stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#6366f1"/>
             </linearGradient></defs>
           </svg>
         </div>
-        <h2 class="account-title">Calendar <span>by Shortcut™</span></h2>
-        <p class="account-sub">© 2026 Ogust'1</p>
+        <div class="account-hero-name">Calendar</div>
+        <div class="account-hero-sub">by Shortcut™ · © 2026 Ogust'1</div>
       </div>
       <div class="account-rows">
         <button class="account-row" onclick="showSettings()">
           <span class="account-row-icon">⚙️</span>
-          <span class="account-row-label">Paramètres du calendrier</span>
+          <span class="account-row-label">Paramètres calendrier</span>
           <svg class="account-row-chevron" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="account-row" onclick="forceRefresh()">
           <span class="account-row-icon">🔄</span>
-          <span class="account-row-label">Actualiser maintenant</span>
+          <span class="account-row-label">Actualiser</span>
           <svg class="account-row-chevron" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
-      <p class="account-version" id="nav-updated-acc"></p>
+      <p id="nav-updated-acc"></p>
     </div>
   </div>
 
-  <!-- header caché requis par agenda_b.js -->
-  <div style="display:none">
+  <!-- éléments cachés requis par agenda_b.js -->
+  <div style="display:none" aria-hidden="true">
+    <div id="aw-compact"></div>
     <div class="aw-header">
       <span class="aw-title"></span>
       <span class="aw-last-updated" id="aw-last-updated"></span>
@@ -393,36 +470,32 @@
     </div>
   </div>
 
-  <!-- ── Tab Bar ── -->
+  <!-- TAB BAR -->
   <div id="app-tabbar">
     <div class="tab-indicator" id="tab-indicator"></div>
     <button class="tab-btn active" id="tab-today" onclick="tabSelect(0)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="3"/>
-        <path d="M16 2v4M8 2v4M3 10h18"/>
+        <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
         <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
       </svg>
       <span>Aujourd'hui</span>
     </button>
     <button class="tab-btn" id="tab-week" onclick="tabSelect(1)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="3"/>
-        <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
+        <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
       </svg>
       <span>Semaine</span>
     </button>
     <button class="tab-btn" id="tab-settings" onclick="tabSelect(2)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="8" r="4"/>
-        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
       </svg>
       <span>Compte</span>
     </button>
   </div>
+</div>
 
-</div><!-- /app-shell -->
-
-<!-- Installation Banner -->
+<!-- INSTALL BANNER -->
 <div id="install-banner">
   <div class="install-icon">📲</div>
   <div class="install-text">
@@ -435,85 +508,268 @@
 <script src="Asset/JS/onboarding.js"></script>
 <script src="Asset/JS/agenda_b.js"></script>
 <script>
-/* ── Sync last-updated labels ── */
-setInterval(function() {
-  var src = document.getElementById('aw-last-updated');
-  var dst = document.getElementById('nav-updated');
-  var dstAcc = document.getElementById('nav-updated-acc');
-  if (src) {
-    if (dst && src.textContent !== dst.textContent) {
-      dst.textContent = src.textContent;
-      dst.style.color = src.style.color || '';
-    }
-    if (dstAcc) dstAcc.textContent = src.textContent;
-  }
-}, 500);
+/* ══════════════════════════════════════════════════
+   AGENDA VIEW — rendu jour par jour avec sticky header
+══════════════════════════════════════════════════ */
+var _agByDay = null;
+var _agToday = null;
 
-/* ── Tab / View logic ── */
-var currentTab = 0;
+var COLOR_HEX = {
+  blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
+  amber:'#f59e0b', rose:'#f43f5e', cyan:'#06b6d4',
+  orange:'#f97316', grey:'#94a3b8', lime:'#84cc16'
+};
+
+function agBuildDays(byDay, today) {
+  _agByDay = byDay; _agToday = today;
+  var container = document.getElementById('ag-days-container');
+  if (!container) return;
+
+  var nowTs = Date.now();
+  var base  = new Date(today + 'T00:00:00');
+  var html  = '';
+  var hasAny = false;
+
+  for (var i = 0; i < 49; i++) {
+    var d  = new Date(base); d.setDate(base.getDate() + i);
+    var ds = agDateStr(d);
+    var isToday  = (ds === today);
+    var isWE     = (d.getDay() === 0 || d.getDay() === 6);
+    var items    = (byDay[ds] || []);
+    var future   = items.filter(function(x) {
+      var ev = x.ev;
+      return ev.start.length === 10 ? ds >= today : new Date(ev.end) > nowTs;
+    });
+
+    // Build header
+    var dow   = d.toLocaleDateString('fr-FR', {weekday:'long'});
+    dow = dow.charAt(0).toUpperCase() + dow.slice(1);
+    var dmStr = d.toLocaleDateString('fr-FR', {day:'numeric', month:'long'});
+    var numStr = d.getDate();
+
+    html += '<div class="ag-day-section" data-date="' + ds + '">';
+    html += '<div class="ag-day-header">';
+    html += '<div class="ag-day-num' + (isToday ? ' today' : '') + '">' + numStr + '</div>';
+    html += '<div class="ag-day-info">';
+    html += '<div class="ag-day-name' + (isToday ? ' today' : '') + '">' + dow + '</div>';
+    html += '<div class="ag-day-sub">' + dmStr + '</div>';
+    html += '</div>';
+    if (isToday) html += '<div class="ag-today-pill">Aujourd\'hui</div>';
+    html += '</div>'; // end header
+
+    if (future.length === 0) {
+      if (isWE) {
+        html += '<div class="ag-rest-day"><span class="ag-rest-icon">🌿</span><span class="ag-rest-label">Week-end</span></div>';
+      } else {
+        html += '<div class="ag-empty-day">Aucun cours</div>';
+      }
+    } else {
+      hasAny = true;
+      future.forEach(function(x) {
+        html += agEventCard(x.ev, x.i, isToday, nowTs);
+      });
+    }
+
+    html += '</div>'; // end section
+  }
+
+  container.innerHTML = html;
+
+  // Scroll to today's section
+  var todaySec = container.querySelector('[data-date="' + today + '"]');
+  if (todaySec) {
+    var view = document.getElementById('view-agenda');
+    if (view) view.scrollTop = todaySec.offsetTop;
+  }
+}
+
+function agDateStr(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth()+1).padStart(2,'0');
+  var day = String(d.getDate()).padStart(2,'0');
+  return y + '-' + m + '-' + day;
+}
+
+function agEventCard(ev, idx, isToday, nowTs) {
+  var allDay   = ev.start.length === 10;
+  var now      = !allDay && (new Date(ev.start) <= nowTs && new Date(ev.end) >= nowTs);
+  var past     = !allDay && !now && new Date(ev.end) < nowTs;
+  var fullName = ev.summary || '(Sans titre)';
+  var shortName= fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
+  var color    = ev.cal2 ? 'lime' : agColorFor(shortName);
+  var accent   = COLOR_HEX[color] || '#3b82f6';
+  var isLM     = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+  var typeM  = fullName.match(/\b(CM|TD|TP|DS|Exam|Cours)\b/i);
+  var badge  = typeM ? typeM[0].toUpperCase() : '';
+  var grpM   = fullName.match(/(?:AB|CD|EF|GH|A&M\d[A-Z\s]*(?:S\d+)?)/i);
+  var group  = grpM ? grpM[0].trim() : '';
+
+  var startStr = allDay ? 'Journée' : agFmtTime(ev.start) + ' – ' + agFmtTime(ev.end);
+  var dur = allDay ? '' : agFmtDur(ev.start, ev.end);
+
+  // Progress
+  var pct = now ? Math.min(100, Math.round((nowTs - new Date(ev.start)) / (new Date(ev.end) - new Date(ev.start)) * 100)) : 0;
+
+  // Parse desc for extras
+  var desc = ev.description || '';
+  var teacher = '';
+  var fmBlock = desc.match(/Formateur[^:]*:([\s\S]*?)(?:Participants|---|$)/i);
+  if (fmBlock) {
+    var names = (fmBlock[1].match(/[A-ZÀÂÄ][A-ZÀÂÄ\s\-]{2,}[a-zàâä][a-zàâä\-]+/g) || [])
+      .filter(function(n){ return n.length > 3 && !n.includes('@'); });
+    teacher = names.join(', ');
+  }
+  var mapM = desc.match(/https?:\/\/(?:www\.)?openstreetmap\.[^\s]+/i) || desc.match(/https?:\/\/maps\.[^\s]+/i);
+  var mapUrl = mapM ? mapM[0] : '';
+
+  var alpha = isLM ? '22' : '28';
+  var cardStyle = now ? 'border-color:' + accent + '55;' : '';
+  var barStyle  = 'background:' + accent;
+
+  var html = '<div class="ag-event' + (past?' is-past':'') + (now?' is-now':'') + '" style="' + cardStyle + 'color:' + accent + '" data-ev="' + idx + '" onclick="awPopOpen(this,' + idx + ')">';
+  html += '<div class="ag-event-bar" style="' + barStyle + '"></div>';
+  // Dot
+  html += '<div class="ag-dot" style="background:' + accent + ';box-shadow:0 0 7px ' + accent + '88"></div>';
+  html += '<div class="ag-event-body">';
+  html += '<div class="ag-event-name">' + shortName;
+  if (badge) html += '<span class="ag-badge" style="color:' + accent + ';border-color:' + accent + alpha + ';background:' + accent + '18">' + badge + '</span>';
+  if (group) html += '<span class="ag-badge ag-badge-group">' + group + '</span>';
+  if (now)   html += '<span class="ag-now-pill" style="color:' + accent + ';border-color:' + accent + '55;background:' + accent + '18">En cours</span>';
+  html += '</div>';
+  if (ev.location) {
+    html += '<div class="ag-event-meta">';
+    html += '<svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>';
+    html += ev.location.split(',')[0].trim();
+    if (mapUrl) html += ' <a class="ag-link" href="' + mapUrl + '" target="_blank" rel="noopener">↗</a>';
+    html += '</div>';
+  }
+  if (teacher) {
+    html += '<div class="ag-event-meta">';
+    html += '<svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+    html += teacher + '</div>';
+  }
+  if (now) {
+    html += '<div class="ag-now-bar"><div class="ag-now-bar-fill" style="width:' + pct + '%;background:' + accent + '" data-ag-bar="' + idx + '"></div></div>';
+  }
+  html += '</div>'; // body
+  html += '<div class="ag-event-time"><span>' + startStr + '</span>';
+  if (dur) html += '<span class="ag-event-dur">' + dur + '</span>';
+  html += '</div>';
+  html += '</div>'; // card
+  return html;
+}
+
+function agColorFor(name) {
+  var COLOR_MAP = [
+    {m:'math',c:'blue'},{m:'physique',c:'cyan'},{m:'informatique',c:'violet'},
+    {m:'sciences ind',c:'amber'},{m:'anglais',c:'emerald'},{m:'sport',c:'rose'},
+    {m:'culture',c:'orange'},{m:'proj',c:'grey'}
+  ];
+  var COLORS = ['blue','violet','emerald','amber','rose','cyan','orange','grey'];
+  var norm = name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  for (var i=0;i<COLOR_MAP.length;i++) {
+    if (norm.includes(COLOR_MAP[i].m)) return COLOR_MAP[i].c;
+  }
+  var word = norm.split(/[\s\-\u2013]/)[0];
+  var h = 0;
+  for (var j=0;j<word.length;j++) h = (h*31 + word.charCodeAt(j)) >>> 0;
+  return COLORS[h % COLORS.length];
+}
+function agFmtTime(iso) {
+  return new Date(iso).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+function agFmtDur(s,e) {
+  var ms=new Date(e)-new Date(s), h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000);
+  if(h===0) return m+'min'; if(m===0) return h+'h'; return h+'h'+String(m).padStart(2,'0');
+}
+
+/* Patch awRender to also build the new agenda view */
+var _origAwRender = null;
+document.addEventListener('DOMContentLoaded', function() {
+  if (typeof awRender === 'function') {
+    _origAwRender = awRender;
+    // Override not possible directly — use MutationObserver on aw-compact
+    // Instead we hook into awInit success via polling
+  }
+});
+
+// Poll for data availability and build agenda view
+var _agBuilt = false;
+setInterval(function() {
+  if (!_agBuilt && typeof awEvCache !== 'undefined' && awEvCache.length > 0 && typeof window._awByDay !== 'undefined') {
+    var today = (typeof awToday === 'function') ? awToday() : new Date().toISOString().slice(0,10);
+    agBuildDays(window._awByDay, today);
+    _agBuilt = true;
+  }
+  // Rebuild if data refreshed
+  if (_agBuilt && typeof awLastUpdated !== 'undefined' && window._lastAgBuild !== awLastUpdated) {
+    var today2 = (typeof awToday === 'function') ? awToday() : new Date().toISOString().slice(0,10);
+    agBuildDays(window._awByDay, today2);
+    window._lastAgBuild = awLastUpdated;
+  }
+  // Sync last-updated
+  var src = document.getElementById('aw-last-updated');
+  var d1  = document.getElementById('nav-updated');
+  var d2  = document.getElementById('nav-updated-acc');
+  if (src && d1 && src.textContent !== d1.textContent) { d1.textContent = src.textContent; d1.style.color = src.style.color||''; }
+  if (src && d2) d2.textContent = src.textContent;
+  // Update progress bars
+  document.querySelectorAll('[data-ag-bar]').forEach(function(el) {
+    var idx = parseInt(el.dataset.agBar);
+    var ev  = awEvCache && awEvCache[idx];
+    if (!ev) return;
+    var now = Date.now();
+    var pct = Math.min(100, Math.round((now - new Date(ev.start)) / (new Date(ev.end) - new Date(ev.start)) * 100));
+    el.style.width = pct + '%';
+  });
+}, 800);
+
+/* Re-render on color scheme change */
+window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function() {
+  if (_agByDay && _agToday) { _agBuilt = false; }
+});
+
+/* ══════════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════════ */
 var VIEWS = ['view-agenda','view-week','view-account'];
 var TABS  = ['tab-today','tab-week','tab-settings'];
 
 function tabSelect(idx) {
-  currentTab = idx;
-
-  // Swap views
-  VIEWS.forEach(function(id, i) {
-    var el = document.getElementById(id);
-    if (el) el.classList.toggle('active', i === idx);
-  });
-
-  // Swap tab active state
-  TABS.forEach(function(id, i) {
-    var el = document.getElementById(id);
-    if (el) el.classList.toggle('active', i === idx);
-  });
-
-  // Move indicator
-  var tabbar   = document.getElementById('app-tabbar');
-  var indicator = document.getElementById('tab-indicator');
-  if (tabbar && indicator) {
-    var btnW = tabbar.offsetWidth / TABS.length;
-    indicator.style.left  = (idx * btnW) + 'px';
-    indicator.style.width = btnW + 'px';
-  }
-
-  // Compte tab → ouvre settings
-  if (idx === 2) {
-    // Stay on account page, settings button is there
+  VIEWS.forEach(function(id,i){ var el=document.getElementById(id); if(el) el.classList.toggle('active',i===idx); });
+  TABS.forEach(function(id,i){ var el=document.getElementById(id); if(el) el.classList.toggle('active',i===idx); });
+  var tb=document.getElementById('app-tabbar'), ind=document.getElementById('tab-indicator');
+  if(tb&&ind){ var w=tb.offsetWidth/TABS.length; ind.style.left=(idx*w)+'px'; ind.style.width=w+'px'; }
+  // Scroll agenda to today when switching back
+  if (idx===0 && _agByDay) {
+    var con=document.getElementById('ag-days-container');
+    var view=document.getElementById('view-agenda');
+    if(con&&view){
+      var today=(typeof awToday==='function')?awToday():new Date().toISOString().slice(0,10);
+      var sec=con.querySelector('[data-date="'+today+'"]');
+      if(sec) view.scrollTop=sec.offsetTop;
+    }
   }
 }
+function appShowAgenda(){ tabSelect(0); }
+function appShowWeek(){   tabSelect(1); }
+function forceRefresh(){  _agBuilt=false; if(typeof awInit==='function') awInit(); }
 
-function appShowAgenda() { tabSelect(0); }
-function appShowWeek()   { tabSelect(1); }
-
-function forceRefresh() {
-  if (typeof awInit === 'function') awInit();
-}
-
-// Init
-window.addEventListener('load', function() { tabSelect(0); });
+window.addEventListener('load', function(){ tabSelect(0); });
 
 /* ── Service Worker ── */
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function() {
-    navigator.serviceWorker.register('sw.js').catch(function(){});
-  });
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
 }
 
 /* ── Install banner ── */
-function isIos()        { return /iphone|ipad|ipod/i.test(navigator.userAgent); }
-function isStandalone() { return window.navigator.standalone === true; }
-function dismissBanner() {
-  document.getElementById('install-banner').classList.remove('show');
-  localStorage.setItem('install-dismissed', '1');
-}
-window.addEventListener('load', function() {
-  if (isIos() && !isStandalone() && !localStorage.getItem('install-dismissed')) {
-    setTimeout(function() {
-      document.getElementById('install-banner').classList.add('show');
-    }, 4000);
-  }
+function isIos(){ return /iphone|ipad|ipod/i.test(navigator.userAgent); }
+function isStandalone(){ return window.navigator.standalone===true; }
+function dismissBanner(){ document.getElementById('install-banner').classList.remove('show'); localStorage.setItem('install-dismissed','1'); }
+window.addEventListener('load', function(){
+  if(isIos()&&!isStandalone()&&!localStorage.getItem('install-dismissed'))
+    setTimeout(function(){ document.getElementById('install-banner').classList.add('show'); },4500);
 });
 </script>
 </body>
