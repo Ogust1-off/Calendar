@@ -110,41 +110,81 @@
   #v-agenda .aw-skipped-list{border-bottom:.5px solid var(--sep)!important}
   #v-agenda .aw-empty-state{background:var(--bg2)!important}
 
-  /* ── Week view — day grid ── */
-  /* Header */
-  #wk-hdr{flex-shrink:0;background:var(--glass);
+  /* ── Week view — header ── */
+  #wk-hdr{
+    flex-shrink:0;
+    background:var(--glass);
     backdrop-filter:var(--gblur);-webkit-backdrop-filter:var(--gblur);
-    border-bottom:.5px solid var(--gbdr);z-index:100}
-  #wk-month-row{display:flex;align-items:center;justify-content:space-between;
-    padding:10px 16px 4px}
-  #wk-month-lbl{font-size:18px;font-weight:700;letter-spacing:-.03em;color:var(--lbl)}
-  #wk-month-lbl span{font-weight:400;color:var(--lbl2)}
-  .wk-today-btn{height:28px;padding:0 12px;border-radius:99px;border:none;
-    background:rgba(10,132,255,.18);color:var(--tint);font-size:12px;font-weight:500;
-    font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent;
-    transition:opacity .15s,transform .1s}
-  .wk-today-btn:active{opacity:.7;transform:scale(.95)}
+    border-bottom:.5px solid var(--gbdr);z-index:100;
+    padding:12px 16px 0;
+  }
+
+  /* Month + year + Today button row */
+  #wk-month-row{
+    display:flex;align-items:baseline;justify-content:space-between;
+    margin-bottom:10px;
+  }
+  #wk-month-lbl{
+    font-size:22px;font-weight:700;letter-spacing:-.035em;color:var(--lbl);
+    line-height:1;
+  }
+  #wk-month-lbl span{font-weight:300;color:var(--lbl2);font-size:20px}
+  .wk-today-btn{
+    height:26px;padding:0 11px;border-radius:99px;border:none;
+    background:var(--fill);color:var(--lbl2);
+    font-size:12px;font-weight:500;font-family:inherit;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+    transition:background .15s,color .15s,transform .1s;
+    letter-spacing:-.01em;
+  }
+  .wk-today-btn:active{transform:scale(.93)}
   .wk-today-btn.active{background:var(--tint);color:#fff}
 
-  /* 7-day mini strip */
-  #wk-days{display:grid;grid-template-columns:repeat(7,1fr);padding:3px 8px 8px}
-  .wk-mini{display:flex;flex-direction:column;align-items:center;gap:3px;
-    padding:3px 2px;border-radius:9px;cursor:pointer;
-    -webkit-tap-highlight-color:transparent;transition:background .12s}
+  /* 7-day strip — Apple Calendar style */
+  #wk-days{
+    display:grid;grid-template-columns:repeat(7,1fr);
+    margin:0 -16px;padding:0 4px 10px;
+  }
+  .wk-mini{
+    display:flex;flex-direction:column;align-items:center;gap:5px;
+    padding:4px 0;cursor:pointer;border-radius:10px;
+    -webkit-tap-highlight-color:transparent;transition:background .1s;
+  }
   .wk-mini:active{background:var(--fill)}
-  .wk-mini-dow{font-size:10px;font-weight:500;letter-spacing:.04em;
-    text-transform:uppercase;color:var(--lbl3)}
-  .wk-mini-num{width:28px;height:28px;border-radius:50%;
+  /* Day-of-week letter */
+  .wk-mini-dow{
+    font-size:11px;font-weight:500;letter-spacing:.02em;
+    text-transform:uppercase;color:var(--lbl3);line-height:1;
+  }
+  .wk-mini.is-today .wk-mini-dow{color:var(--red)}
+  /* Date number circle */
+  .wk-mini-num{
+    width:32px;height:32px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    font-size:14px;font-weight:400;color:var(--lbl2);
-    font-variant-numeric:tabular-nums;transition:background .15s,color .15s}
-  .wk-mini.is-today .wk-mini-num{color:var(--red);font-weight:600}
-  .wk-mini.is-sel .wk-mini-num{background:var(--tint);color:#fff;font-weight:600}
-  .wk-mini.is-today.is-sel .wk-mini-num{background:var(--red)}
-  .wk-mini-dot{width:4px;height:4px;border-radius:50%;background:var(--lbl3);visibility:hidden}
-  .wk-mini.has-ev .wk-mini-dot{visibility:visible}
-  .wk-mini.is-sel .wk-mini-dot{background:var(--tint)}
-  .wk-mini.is-today.is-sel .wk-mini-dot{background:var(--red)}
+    font-size:16px;font-weight:400;color:var(--lbl);
+    font-variant-numeric:tabular-nums;line-height:1;
+    transition:background .15s,color .15s;
+  }
+  .wk-mini.is-today .wk-mini-num{
+    color:var(--red);font-weight:600;
+  }
+  .wk-mini.is-sel .wk-mini-num{
+    background:var(--tint);color:#fff;font-weight:600;
+    box-shadow:0 2px 8px rgba(10,132,255,.35);
+  }
+  .wk-mini.is-today.is-sel .wk-mini-num{
+    background:var(--red);color:#fff;
+    box-shadow:0 2px 8px rgba(255,69,58,.35);
+  }
+  /* Event dot */
+  .wk-mini-dot{
+    width:4px;height:4px;border-radius:50%;
+    background:var(--lbl3);opacity:0;transition:opacity .15s;
+    margin-top:-2px;
+  }
+  .wk-mini.has-ev .wk-mini-dot{opacity:1}
+  .wk-mini.is-sel .wk-mini-dot{background:rgba(255,255,255,.6)}
+  .wk-mini.is-today:not(.is-sel) .wk-mini-dot{background:var(--red)}
 
   /* Scroll-snap strip */
   #wk-strip{flex:1;min-height:0;display:flex;
@@ -209,8 +249,12 @@
   /* ── Account ── */
   .acc-page{padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:28px}
   .acc-hero{display:flex;flex-direction:column;align-items:center;gap:12px}
-  .acc-icon{width:78px;height:78px;border-radius:22px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+  .acc-icon{width:78px;height:78px;border-radius:50%;overflow:hidden;
+    box-shadow:0 0 0 3px rgba(255,255,255,.1),0 4px 20px rgba(0,0,0,.25)}
   .acc-icon img{width:100%;height:100%;object-fit:cover;display:block}
+  /* Navbar avatar — round when profile pic set */
+  #nb-avatar-wrap.has-photo{border-radius:50%!important}
+  #nb-avatar-wrap.has-photo img{border-radius:50%}
   .acc-name{font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--lbl)}
   .acc-sub{font-size:13px;color:var(--lbl3)}
   .acc-rows{width:100%;background:var(--bg2);border-radius:10px;overflow:hidden;border:.5px solid var(--sep)}
@@ -269,7 +313,9 @@
   <!-- NAVBAR -->
   <header id="nb">
     <a class="nb-brand" href="#">
-      <div class="nb-ico"><img src="Asset/Picture/icon-180.png" alt=""/></div>
+      <div class="nb-ico" id="nb-avatar-wrap">
+        <img id="nb-avatar-img" src="Asset/Picture/icon-180.png" alt=""/>
+      </div>
       <div><div class="nb-name">Calendar<span class="nb-sub">by Shortcut™</span></div></div>
     </a>
     <span id="nb-upd"></span>
@@ -309,8 +355,10 @@
   <div id="v-account" class="view">
     <div class="acc-page">
       <div class="acc-hero">
-        <div class="acc-icon"><img src="Asset/Picture/icon-180.png" alt="Calendar"/></div>
-        <div class="acc-name">Calendar</div>
+        <div class="acc-icon" id="acc-avatar-wrap">
+          <img id="acc-avatar-img" src="Asset/Picture/icon-180.png" alt=""/>
+        </div>
+        <div class="acc-name" id="acc-display-name">Calendar</div>
         <div class="acc-sub">by Shortcut™ · © 2026 Ogust'1</div>
       </div>
       <div class="acc-rows">
@@ -495,7 +543,30 @@ function forceRefresh() { appRefresh(); }
 function appShowAgenda() { goTab(0); }
 function appShowWeek()   { goTab(1); }
 
-window.addEventListener('load', function() { goTab(0); });
+window.addEventListener('load', function() {
+  goTab(0);
+  _applyProfile();
+});
+
+function _applyProfile() {
+  try {
+    var cfg = JSON.parse(localStorage.getItem('shortcut_config') || 'null') || {};
+    // Avatar
+    var photo = cfg.photo || '';
+    var nbImg = document.getElementById('nb-avatar-img');
+    var nbWrap = document.getElementById('nb-avatar-wrap');
+    var accImg = document.getElementById('acc-avatar-img');
+    if (photo) {
+      if (nbImg)  { nbImg.src = photo; }
+      if (nbWrap) { nbWrap.classList.add('has-photo'); nbWrap.style.borderRadius='50%'; }
+      if (accImg) { accImg.src = photo; }
+    }
+    // Display name
+    var name = cfg.displayName || '';
+    var nameEl = document.getElementById('acc-display-name');
+    if (nameEl && name) nameEl.textContent = name;
+  } catch(e) {}
+}
 
 /* Sync updated label + rebuild week on new data */
 var _lastTs=0;

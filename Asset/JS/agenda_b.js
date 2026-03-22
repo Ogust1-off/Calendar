@@ -618,23 +618,36 @@ function awPopOpen(el, idx) {
 
   document.body.appendChild(pop);
 
-  // Mobile: bottom sheet; desktop: float next to event
+  // Always fixed. On mobile: bottom sheet. On desktop: float near event.
+  pop.style.position = 'fixed';
+  pop.style.zIndex   = '9999';
+
   if (window.innerWidth < 600) {
-    pop.style.cssText += ';position:fixed;left:10px;right:10px;bottom:calc(49px + env(safe-area-inset-bottom,0px) + 8px);top:auto;width:auto;max-width:none;border-radius:18px;transform-origin:bottom center;';
+    pop.style.left          = '10px';
+    pop.style.right         = '10px';
+    pop.style.bottom        = 'calc(49px + env(safe-area-inset-bottom,0px) + 10px)';
+    pop.style.top           = 'auto';
+    pop.style.width         = 'auto';
+    pop.style.maxWidth      = 'none';
+    pop.style.borderRadius  = '20px';
+    pop.style.transformOrigin = 'bottom center';
   } else {
-    const rect  = el.getBoundingClientRect();
-    const popW  = 260, margin = 8;
-    let left = rect.right + margin + window.scrollX;
-    let top  = rect.top + window.scrollY;
-    if (rect.right + margin + popW > window.innerWidth - margin)
-      left = rect.left - popW - margin + window.scrollX;
-    if (left - window.scrollX < margin) left = margin + window.scrollX;
-    const popH = pop.offsetHeight || 200;
-    if (rect.top + popH > window.innerHeight - margin)
-      top = window.innerHeight - popH - margin + window.scrollY;
-    if (top - window.scrollY < margin) top = margin + window.scrollY;
+    const rect   = el.getBoundingClientRect();
+    const popW   = 260, m = 10;
+    // Prefer right side, fall back to left
+    let left = rect.right + m;
+    if (left + popW > window.innerWidth - m) left = rect.left - popW - m;
+    if (left < m) left = m;
+    // Align top with event, clamp to screen
+    let top = rect.top;
+    requestAnimationFrame(() => {
+      const popH = pop.offsetHeight;
+      if (top + popH > window.innerHeight - m) top = window.innerHeight - popH - m;
+      if (top < m) top = m;
+      pop.style.top = top + 'px';
+    });
     pop.style.left = left + 'px';
-    pop.style.top  = top  + 'px';
+    pop.style.top  = rect.top + 'px';
   }
 
   requestAnimationFrame(() => pop.classList.add('visible'));
