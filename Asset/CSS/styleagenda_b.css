@@ -266,9 +266,15 @@ Copyright © 2026 Ogust'1. All rights reserved.
   max-height: 0; overflow: hidden;
   transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1);
 }
+/* In app shell, aw-full is always visible — no max-height constraint */
+#view-week .aw-full,
+#view-week .agenda-widget .aw-full {
+  max-height: none !important;
+  overflow: visible !important;
+}
 .agenda-widget .aw-full.open {
-  max-height: 900px;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 
 /* ═══════════════════════════════════════════
@@ -349,8 +355,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
 
 /* No vertical scroll — grid is full height */
 .aw-tgrid-scroll {
-  overflow-x: hidden;
-  overflow-y: hidden;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Main grid layout: gutter | days — flex column to stack header + body */
