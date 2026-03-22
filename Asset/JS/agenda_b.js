@@ -321,7 +321,7 @@ function awRowHtml(ev, idx = -1) {
 
   const CLOCK_SVG = `<svg style="display:inline;vertical-align:middle;margin-right:3px;opacity:.5" width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
 
-  return `<div class="aw-event${now ? ' aw-event-now' : ''}${past ? ' aw-event-past' : ''}" data-ev="${idx}" style="${nowStyle}">
+  return `<div class="aw-event${now ? ' aw-event-now' : ''}${past ? ' aw-event-past' : ''}" data-ev="${idx}" style="${nowStyle}cursor:pointer;" onclick="awPopOpen(this,${idx})">
     <div class="aw-color-dot" data-color="${color}"></div>
     <div class="aw-body">
       <div class="aw-name">${shortName}${badges ? `<span class="aw-row-badges">${badges}</span>` : ''}</div>
@@ -1102,12 +1102,14 @@ function awRenderDay(ds, container) {
 
   container.innerHTML = html;
 
-  // Scroll: use shared position if set, otherwise compute smart default
+  // Initial scroll position
   var scrollTo;
   if (typeof window._wkScrollTop === 'number') {
+    // Use the shared scroll position (set by user scrolling another day)
     scrollTo = window._wkScrollTop;
   } else if (isToday) {
     scrollTo = nowH * AW_PX_PER_HOUR - availH * 0.38;
+    window._wkScrollTop = Math.max(0, scrollTo); // share as default
   } else if (timed.length > 0) {
     scrollTo = awTimeToHours(timed[0].ev.start) * AW_PX_PER_HOUR - availH * 0.25;
   } else {
@@ -1115,8 +1117,16 @@ function awRenderDay(ds, container) {
   }
   container.scrollTop = Math.max(0, scrollTo);
 
-  // Save scroll on user interaction (shared across day pages)
+  // When the user scrolls this day, sync ALL other rendered day pages immediately
   container.addEventListener('scroll', function() {
-    window._wkScrollTop = container.scrollTop;
+    var top = container.scrollTop;
+    window._wkScrollTop = top;
+    // Propagate to all other rendered .wk-grid-host elements
+    var others = document.querySelectorAll('.wk-grid-host');
+    others.forEach(function(host) {
+      if (host !== container && host.children.length > 0) {
+        host.scrollTop = top;
+      }
+    });
   }, { passive: true });
 }

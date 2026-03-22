@@ -302,15 +302,15 @@
   /* Glass pill */
   #tb-pill{
     display:flex;align-items:center;
-    background:rgba(30,30,32,.75);
+    background:rgba(30,30,32,.80);
     backdrop-filter:blur(40px) saturate(200%);-webkit-backdrop-filter:blur(40px) saturate(200%);
-    border:.5px solid rgba(255,255,255,.14);
+    border:.5px solid rgba(255,255,255,.16);
     border-radius:99px;
-    box-shadow:0 8px 32px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.1);
-    margin-top:8px;
-    padding:4px 6px;
+    box-shadow:0 10px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12);
+    margin-top:6px;
+    padding:5px 8px;
     gap:2px;
-    height:calc(var(--tb) - 10px);
+    height:calc(var(--tb) - 4px);
   }
   @media(prefers-color-scheme:light){
     #tb-pill{
@@ -320,8 +320,8 @@
     }
   }
   .tbtn{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-    padding:0 18px;height:100%;min-width:72px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    padding:0 22px;height:100%;min-width:80px;
     border:none;background:none;cursor:pointer;color:var(--lbl3);
     font-family:inherit;-webkit-tap-highlight-color:transparent;
     border-radius:99px;
@@ -336,8 +336,8 @@
   @media(prefers-color-scheme:light){
     .tbtn.on{background:rgba(0,122,255,.12);}
   }
-  .tbtn svg{width:22px;height:22px}
-  .tbtn span{font-size:10px;font-weight:500;letter-spacing:.01em}
+  .tbtn svg{width:24px;height:24px}
+  .tbtn span{font-size:11px;font-weight:500;letter-spacing:.01em}
   .tb-line{display:none}
 
   /* ── Install banner ── */
