@@ -1,16 +1,16 @@
 {
   "name": "Calendar by Shortcut™",
   "short_name": "Calendar",
-  "description": "Calendar by Shortcut™ — par Ogust'1",
+  "description": "ECAM schedule — by Ogust'1",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a0e1a",
-  "theme_color": "#0a0e1a",
-  "lang": "fr",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "en",
   "icons": [
-    { "src": "Asset/Picture/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "Asset/Picture/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
-    { "src": "Asset/Picture/icon-180.png", "sizes": "180x180", "type": "image/png" }
+    {"src":"Asset/Picture/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"Asset/Picture/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},
+    {"src":"Asset/Picture/icon-180.png","sizes":"180x180","type":"image/png"}
   ]
 }

@@ -1,54 +1,14 @@
-// Calendar by Shortcut™ — Service Worker
-// © 2026 Ogust'1
+// Calendar by Shortcut™ — Service Worker v2
+const CACHE = 'cal-v2';
+const ASSETS = ['./', './index.html', './manifest.json',
+  './Asset/CSS/styleagenda_b.css', './Asset/JS/onboarding.js', './Asset/JS/agenda_b.js'];
 
-const CACHE_NAME = 'calendar-by-shortcut-v1';
-const ASSETS = [
-  './',
-  './index.html',
-  './manifest.json',
-  './Asset/CSS/styleagenda_b.css',
-  './Asset/JS/agenda_b.js',
-];
-
-// Installation : mise en cache des assets statiques
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-  );
-  self.skipWaiting();
-});
-
-// Activation : supprime les anciens caches
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    )
-  );
-  self.clients.claim();
-});
-
-// Fetch : réseau en priorité, cache en fallback
-self.addEventListener('fetch', event => {
-  // Ne pas intercepter les requêtes vers l'API Google Calendar (toujours réseau)
-  if (event.request.url.includes('googleapis.com') ||
-      event.request.url.includes('corsproxy.io')) {
-    return; // laisse passer directement
-  }
-
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Met à jour le cache avec la réponse fraîche
-        if (response && response.status === 200 && response.type === 'basic') {
-          const cloned = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, cloned));
-        }
-        return response;
-      })
-      .catch(() => {
-        // Offline : sert depuis le cache
-        return caches.match(event.request);
-      })
-  );
+self.addEventListener('install',  e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS))); self.skipWaiting(); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k))))); self.clients.claim(); });
+self.addEventListener('fetch', e => {
+  if (e.request.url.includes('googleapis.com') || e.request.url.includes('corsproxy.io')) return;
+  e.respondWith(fetch(e.request).then(r => {
+    if (r&&r.status===200&&r.type==='basic') { const cl=r.clone(); caches.open(CACHE).then(c=>c.put(e.request,cl)); }
+    return r;
+  }).catch(() => caches.match(e.request)));
 });

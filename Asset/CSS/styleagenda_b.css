@@ -1,14 +1,16 @@
-/*Calendar by Shortcut™ — CSS file by Augustin de Chalendar
+/*Shortcut™ CSS file for Agenda by Augustin de Chalendar
 Copyright © 2026 Ogust'1. All rights reserved.
 */
 
 /* ─────────── AGENDA WIDGET ─────────── */
 .agenda-widget {
-  background: transparent;
-  border: none;
-  box-shadow: none;
-  overflow: visible;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+  border: 1px solid var(--border);
+  backdrop-filter: blur(8px) saturate(120%);
+  box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+  overflow: hidden;
   font-size: 14px;
+  transition: background 0.5s, border 0.5s, box-shadow 0.5s;
 }
 
 /* ── Header ── */
@@ -44,12 +46,12 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-skipped-row:last-child { border-bottom: none; }
 .aw-skipped-label { font-size: 12px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.aw-skipped-label.today { color: var(--sys-red, #ff453a); }/*Old var(--accent)*/
+.aw-skipped-label.today { color: rgb(235, 76, 70); }/*Old var(--accent)*/
 .aw-skipped-today-pill {
   font-size: 9px; font-weight: 600;
-  color: var(--sys-red, #ff453a);/*Old var(--accent)*/
-  background: rgba(255,69,58,0.1);/*Old rgba(96,165,250,0.1)*/
-  border: 1px solid rgba(255,69,58,0.2);/*Old rgba(96,165,250,0.2)*/
+  color: rgb(235, 76, 70);/*Old var(--accent)*/
+  background: rgba(235, 76, 70,0.1);/*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(235, 76, 70,0.2);/*Old rgba(96,165,250,0.2)*/
   padding: 1px 6px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase;
 }
 .aw-skipped-msg { font-size: 11px; color: var(--faint); font-style: italic; }
@@ -61,7 +63,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   background: rgba(255,255,255,0.02);
 }
 .aw-compact-day-label { font-size: 12px; font-weight: 600; text-transform: capitalize; color: var(--muted); }
-.aw-compact-day-label.today { color: var(--sys-red, #ff453a); }/*Old var(--accent)*/
+.aw-compact-day-label.today { color: rgb(235, 76, 70); }/*Old var(--accent)*/
 
 /* ── Inline row info lines (Formatuer / Groupe) ── */
 .aw-row-info {
@@ -100,17 +102,6 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 
 @media (prefers-color-scheme: light) {
-  /* Synchronise les variables CSS avec le mode clair */
-  :root {
-    --sys-red: #ff3b30;
-    --accent:  #007aff;
-    --bg:      #f2f2f7;
-    --border:  rgba(0,0,0,0.12);
-    --border-hi: rgba(0,0,0,0.20);
-    --text:    rgba(0,0,0,0.88);
-    --muted:   rgba(0,0,0,0.50);
-    --faint:   rgba(0,0,0,0.30);
-  }
   .aw-row-badge--group {
     background: rgba(0,0,0,0.04);
     border-color: rgba(0,0,0,0.1);
@@ -163,7 +154,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   position: absolute;
   z-index: 999;
   width: 260px;
-  background: rgba(22,26,40,0.88);
+  background: rgba(22,26,40,0.92);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 18px;
   box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -254,9 +245,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-today-pill {
   font-size: 9px; font-weight: 600;
-  color: var(--sys-red, #ff453a); /*Old var(--accent)*/
-  background: rgba(255,69,58,0.1); /*Old rgba(96,165,250,0.1)*/
-  border: 1px solid rgba(255,69,58,0.2); /*Old rgba(96,165,250,0.2)*/
+  color: rgb(235, 76, 70); /*Old var(--accent)*/
+  background: rgba(235, 76, 70,0.1); /*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(235, 76, 70,0.2); /*Old rgba(96,165,250,0.2)*/
   padding: 1px 7px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase;
 }
 
@@ -265,15 +256,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
   max-height: 0; overflow: hidden;
   transition: max-height 0.5s cubic-bezier(0.4,0,0.2,1);
 }
-/* In app shell, aw-full is always visible — no max-height constraint */
-#view-week .aw-full,
-#view-week .agenda-widget .aw-full {
-  max-height: none !important;
-  overflow: visible !important;
-}
 .agenda-widget .aw-full.open {
-  max-height: none;
-  overflow: visible;
+  max-height: 900px;
+  overflow: hidden;
 }
 
 /* ═══════════════════════════════════════════
@@ -341,9 +326,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
 /* "This Week" accent pill */
 .aw-cal-this-week-pill {
   font-size: 9.5px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--sys-red, #ff453a); /*Old var(--accent)*/
-  background: rgba(255,69,58,0.1);/*Old rgba(96,165,250,0.1)*/
-  border: 1px solid rgba(255,69,58,0.2);/*Old rgba(96,165,250,0.2)*/
+  color: rgb(235, 76, 70); /*Old var(--accent)*/
+  background: rgba(235, 76, 70,0.1);/*Old rgba(96,165,250,0.1)*/
+  border: 1px solid rgba(235, 76, 70,0.2);/*Old rgba(96,165,250,0.2)*/
   padding: 2px 8px; border-radius: 99px;
 }
 
@@ -354,9 +339,8 @@ Copyright © 2026 Ogust'1. All rights reserved.
 
 /* No vertical scroll — grid is full height */
 .aw-tgrid-scroll {
-  overflow-x: auto;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 /* Main grid layout: gutter | days — flex column to stack header + body */
@@ -394,7 +378,6 @@ Copyright © 2026 Ogust'1. All rights reserved.
 /* Bottom row: gutter + body */
 .aw-tgrid-bottom {
   display: flex;
-  min-height: var(--grid-h);
   height: var(--grid-h);
 }
 
@@ -458,7 +441,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-tday-num.today {
   color: #fff;
-  background: var(--sys-red, #ff453a); /*Old var(--accent)*/
+  background: rgb(235, 76, 70); /*Old var(--accent)*/
   width: 28px; height: 28px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 700;
@@ -482,7 +465,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
 .aw-now-line {
   position: absolute;
   height: 2px;
-  background: var(--sys-red, #ff453a); /*Old #f87171*/
+  background: rgb(235, 83, 78); /*Old #f87171*/
   z-index: 5;
   pointer-events: none;
 }
@@ -491,7 +474,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   left: -4px; top: -4px;
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: var(--sys-red, #ff453a); /*Old #f87171*/
+  background: rgb(235, 83, 78); /*Old #f87171*/
 }
 
 /* Day columns */
@@ -547,17 +530,17 @@ Copyright © 2026 Ogust'1. All rights reserved.
 .aw-gev-time, .aw-gev-loc { display: flex; align-items: center; pointer-events: none; }
 .aw-gev-name { pointer-events: none; }
 .aw-gev-name {
-  font-size: 10.5px; font-weight: 600; color: var(--text);
+  font-size: 10.5px; font-weight: 600; color: rgba(255,255,255,0.92);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   line-height: 1.3; letter-spacing: -0.01em;
 }
 .aw-gev-time {
-  font-size: 9.5px; color: var(--muted); margin-top: 1px;
+  font-size: 9.5px; color: rgba(255,255,255,0.6); margin-top: 1px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   font-variant-numeric: tabular-nums;
 }
 .aw-gev-loc {
-  font-size: 9px; color: var(--faint); margin-top: 1px;
+  font-size: 9px; color: rgba(255,255,255,0.45); margin-top: 1px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .aw-gev-progress {
@@ -661,7 +644,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
 
 /* ── Light mode ── */
 @media (prefers-color-scheme: light) {
-  .agenda-widget { background: transparent; box-shadow: none; }
+  .agenda-widget { background: rgba(255,255,255,0.75); box-shadow: 0 6px 30px rgba(0,0,0,0.1); }
   .agenda-widget .aw-toggle { background: rgba(0,0,0,0.04); }
   .agenda-widget .aw-toggle:hover { background: rgba(0,0,0,0.07); }
 
@@ -686,22 +669,22 @@ Copyright © 2026 Ogust'1. All rights reserved.
   .aw-cal-today-btn:disabled { opacity: 0.35; }
 
   .aw-cal-this-week-pill {
-    color: var(--sys-red, #ff453a); /*Old #2563eb;*/
-    background: rgba(255,69,58,0.08); /*Old rgba(37,99,235,0.08)*/
-    border-color: rgba(255,69,58,0.18); /*Old rgba(37,99,235,0.18)*/}
-  .aw-now-line { background: var(--sys-red, #ff453a); }/*Old: #dc2626*/
-  .aw-now-dot  { background: var(--sys-red, #ff453a); }/*Old: #dc2626*/
+    color: rgb(235, 83, 78); /*Old #2563eb;*/
+    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
+    border-color: rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-now-line { background: rgb(235, 76, 70); }/*Old: #dc2626*/
+  .aw-now-dot  { background: rgb(235, 76, 70); }/*Old: #dc2626*/
   .aw-today-pill {
-    color: var(--sys-red, #ff453a); /*Old #2563eb;*/
-    background: rgba(255,69,58,0.08); /*Old rgba(37,99,235,0.08)*/
-    border-color: rgba(255,69,58,0.18); /*Old rgba(37,99,235,0.18)*/}
-  .aw-compact-day-label.today { color: var(--sys-red, #ff453a) } /*Old #2563eb;*/
-  .aw-skipped-label.today { color: var(--sys-red, #ff453a); } /*Old #2563eb;*/
+    color: rgb(235, 83, 78); /*Old #2563eb;*/
+    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
+    border-color: rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-compact-day-label.today { color: rgb(235, 83, 78) } /*Old #2563eb;*/
+  .aw-skipped-label.today { color: rgb(235, 83, 78); } /*Old #2563eb;*/
   .aw-skipped-today-pill {
-    color: var(--sys-red, #ff453a); /*Old #2563eb;*/
-    background: rgba(255,69,58,0.08); /*Old rgba(37,99,235,0.08)*/
-    border: 1px solid rgba(255,69,58,0.18); /*Old rgba(37,99,235,0.18)*/}
-  .aw-tday-num.today { background: var(--sys-red, #ff453a); }/*Old: #2563eb*/
+    color: rgb(235, 83, 78); /*Old #2563eb;*/
+    background: rgba(235, 83, 78,0.08); /*Old rgba(37,99,235,0.08)*/
+    border: 1px solid rgba(235, 83, 78,0.18); /*Old rgba(37,99,235,0.18)*/}
+  .aw-tday-num.today { background: rgb(235, 76, 70); }/*Old: #2563eb*/
   .agenda-widget .aw-progress-bar { background: rgba(37,99,235,0.45); }
   .aw-tdays::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
 
@@ -710,7 +693,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
   .aw-gev:hover { opacity: 1; filter: saturate(1.2) brightness(1.2);}
   .aw-gev-past  { opacity: 0.5; filter: saturate(1) brightness(1); }                      /*COLOR OF CAL VIEW PAST*/
   .aw-gev-past:hover { opacity: 0.75; filter: saturate(1) brightness(1); }           /*COLOR OF CAL VIEW PAST HOVER*/
-  /* gev colors now use CSS vars, no override needed */
+  .aw-gev-name { color: rgba(10,20,40,0.88); }
+  .aw-gev-time { color: rgba(10,20,40,0.52); }
+  .aw-gev-loc  { color: rgba(10,20,40,0.38); }
 
   /* Popover light */
   .aw-pop {
