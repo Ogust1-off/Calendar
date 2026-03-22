@@ -222,40 +222,31 @@
     min-height:0;display:flex;flex-direction:column;
   }
 
-  /* ── Time grid ── */
-  /* Scrollable container for the time grid */
+  /* ── Time grid layout ── */
   .awd-scroll{
     flex:1;min-height:0;
     overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
-    /* Fast momentum scroll */
     scroll-behavior:auto;
     padding-bottom:calc(var(--tab-h) + var(--safe-bottom) + 8px);
   }
-
-  /* Grid: gutter + column side by side */
   .awd-grid{
     display:flex;
-    position:relative;
-    min-height:1440px; /* 24 * 60px */
+    /* height set inline by JS (1440px) */
   }
-
-  /* Hour gutter */
   .awd-gutter{
-    width:52px;flex-shrink:0;
-    position:relative;
+    width:52px;flex-shrink:0;position:relative;
     border-right:.5px solid var(--sep);
     background:var(--bg);
+    /* same height as grid */
   }
   .awd-hour-lbl{
     position:absolute;right:7px;
     font-size:10px;font-weight:400;color:var(--label3);
     font-variant-numeric:tabular-nums;
-    transform:translateY(-50%);
-    white-space:nowrap;line-height:1;user-select:none;
+    transform:translateY(-50%);white-space:nowrap;line-height:1;user-select:none;
   }
-
-  /* Day column area */
+  /* Day column — MUST be position:relative for absolute event blocks */
   .awd-col{
     flex:1;min-width:0;
     position:relative;
@@ -263,11 +254,9 @@
   }
   .awd-hline{
     position:absolute;left:0;right:0;height:.5px;
-    background:var(--sep2);pointer-events:none;
+    background:var(--sep2);pointer-events:none;z-index:0;
   }
   .awd-hline.major{background:var(--sep);}
-
-  /* Now indicator */
   .awd-now{
     position:absolute;left:0;right:0;height:2px;
     background:var(--red);z-index:10;pointer-events:none;
@@ -277,24 +266,49 @@
     width:10px;height:10px;border-radius:50%;background:var(--red);
   }
 
-  /* Event blocks */
-  .aw-gev{
-    border-radius:4px!important;
-    border-top:none!important;border-bottom:none!important;border-right:none!important;
-    padding:3px 5px 3px 9px!important;
-    overflow:hidden!important;
+
+  /* Event blocks in day grid — restore original design */
+  /* Remove overrides that broke the original style */
+  .aw-gev {
+    border-radius: 8px !important;
+    padding: 4px 7px 4px 11px !important;
+    border: none !important;
+    overflow: hidden !important;
   }
-  .aw-gev-accent{display:none!important;}
-  .aw-gev-name{
-    font-size:11px!important;font-weight:600!important;line-height:1.3!important;
-    white-space:normal!important;
-    display:-webkit-box!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;
-    overflow:hidden!important;
+  /* Restore accent bar */
+  .aw-gev-accent {
+    display: block !important;
+    position: absolute !important;
+    left: 4px !important; top: 4px !important; bottom: 4px !important;
+    width: 3px !important; border-radius: 99px !important;
   }
-  .aw-gev-time{font-size:10px!important;margin-top:1px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-  .aw-gev-loc{font-size:10px!important;margin-top:1px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
-  .aw-gev:hover{filter:brightness(1.12)!important;}
-  .aw-gev-past{opacity:.4!important;filter:saturate(.3)!important;}
+  /* Restore text styles */
+  .aw-gev-name {
+    font-size: 10.5px !important; font-weight: 600 !important;
+    color: rgba(255,255,255,0.92) !important;
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+    line-height: 1.3 !important; letter-spacing: -0.01em !important;
+    display: block !important; -webkit-line-clamp: unset !important;
+  }
+  .aw-gev-time {
+    font-size: 9.5px !important; color: rgba(255,255,255,0.6) !important;
+    margin-top: 1px !important; display: flex !important; align-items: center !important;
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+  }
+  .aw-gev-loc {
+    font-size: 9px !important; color: rgba(255,255,255,0.45) !important;
+    margin-top: 1px !important; display: flex !important; align-items: center !important;
+    white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;
+  }
+  .aw-gev:hover { filter: saturate(1.5) brightness(1.25) !important; outline: 0.5px solid rgba(255,255,255,0.35) !important; outline-offset: -1px !important; }
+  .aw-gev-past  { opacity: 0.5 !important; filter: saturate(0.6) !important; }
+  @media (prefers-color-scheme: light) {
+    .aw-gev-name  { color: rgba(10,20,40,0.88) !important; }
+    .aw-gev-time  { color: rgba(10,20,40,0.52) !important; }
+    .aw-gev-loc   { color: rgba(10,20,40,0.38) !important; }
+    .aw-gev:hover { outline-color: rgba(0,0,0,0.18) !important; filter: saturate(1.2) brightness(1.2) !important; }
+  }
+
 
   /* ── Account ── */
   .acc-page{padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:28px;}

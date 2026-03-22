@@ -436,9 +436,73 @@ function awLayoutColumns(timedItems) {
 
 // Time-grid event block — true side-by-side only when same start time
 function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackDepth = 0, isTopStacked = true, visibleHeight = null, nextCoverStart = null) {
-  const now      = awIsNow(ev.start, ev.end);
-  const past     = !now && awIsPast(ev.end);
-  const fullName = ev.summary || '(Sans titre)';
+  const now       = awIsNow(ev.start, ev.end);
+  const past      = !now && awIsPast(ev.end);
+  const fullName  = ev.summary || '(No title)';
+  const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
+  const loc       = ev.location ? ev.location.split(',')[0].trim() : '';
+  const color     = ev.cal2 ? AW_CAL2_COLOR : awColorFor(shortName);
+
+  const colorHex = {
+    blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
+    amber:'#f59e0b', rose:'#f43f5e', cyan:'#06b6d4', orange:'#f97316', grey:'#94a3b8',
+    lime: AW_CAL2_COLOR_HEX,
+  };
+  const accent = colorHex[color] || '#3b82f6';
+  const isLM = window.matchMedia('(prefers-color-scheme: light)').matches;
+
+  const bgAlpha   = isLM ? '33' : '44';
+  const bg        = `${accent}${bgAlpha}`;
+  const glowColor = now ? `${accent}33` : 'transparent';
+  const borderColor = accent;
+
+  // Use 0-24h grid — no clamping needed, just position directly
+  const startH = awTimeToHours(ev.start);
+  const endH   = awTimeToHours(ev.end);
+  const clampS = Math.max(startH, AW_HOUR_START);
+  const clampE = Math.min(endH,   AW_HOUR_END);
+  if (clampS >= clampE) return '';
+
+  const top    = (clampS - AW_HOUR_START) * AW_PX_PER_HOUR;
+  const height = Math.max((clampE - clampS) * AW_PX_PER_HOUR - 2, 18);
+  const pct    = now ? awProgress(ev.start, ev.end) : 0;
+
+  let leftStyle, rightStyle;
+  if (sameStart && totalCols > 1) {
+    const INDENT   = 12;
+    const base     = stackDepth * INDENT + 2;
+    const colWidth = `calc((100% - ${base}px) / ${totalCols})`;
+    leftStyle  = `calc(${base}px + ${col} * ${colWidth})`;
+    rightStyle = col < totalCols - 1 ? `calc(${totalCols - col - 1} * ${colWidth})` : `2px`;
+  } else {
+    const INDENT = 12;
+    leftStyle  = `${col * INDENT + 2}px`;
+    rightStyle = `2px`;
+  }
+  const zIndex = sameStart ? 2 + stackDepth : 2 + col;
+
+  const HIDE_MIN    = 45 / 60;
+  const coveredSoon = nextCoverStart !== null && (nextCoverStart - awTimeToHours(ev.start)) < HIDE_MIN;
+  const showTime    = height >= 28 && (sameStart || isTopStacked) && !coveredSoon;
+  const showLoc     = height >= 44 && loc && (sameStart || isTopStacked) && !coveredSoon;
+
+  const CLOCK_GEV = `<svg class="aw-gev-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
+  const PIN_GEV   = `<svg class="aw-gev-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>`;
+
+  return `<div class="aw-gev${now ? ' aw-gev-now' : ''}${past ? ' aw-gev-past' : ''}"
+    data-color="${color}" data-ev="${idx}"
+    style="top:${top}px;height:${height}px;left:${leftStyle};right:${rightStyle};z-index:${zIndex};cursor:pointer;background:${bg};${now ? `box-shadow:0 2px 10px ${glowColor};` : ''}"
+    onclick="awPopOpen(this,${idx})">
+    <div class="aw-gev-accent" style="background:${borderColor}"></div>
+    <div class="aw-gev-name">${shortName}</div>
+    ${showTime ? `<div class="aw-gev-time">${CLOCK_GEV}${awFmtTime(ev.start)} \u2013 ${awFmtTime(ev.end)}</div>` : ''}
+    ${showLoc  ? `<div class="aw-gev-loc">${PIN_GEV}${loc}</div>` : ''}
+    ${now      ? `<div class="aw-gev-progress"><div class="aw-gev-progress-bar" style="width:${pct}%;background:${borderColor}"></div></div>` : ''}
+  </div>`;
+}
+
+
+
   const loc      = ev.location ? ev.location.split(',')[0].trim() : '';
   const color    = ev.cal2 ? AW_CAL2_COLOR : awColorFor(fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName);
 
