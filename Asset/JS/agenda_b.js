@@ -30,10 +30,11 @@ function awLoadConfigVars() {
   return !!(AW_API_KEY && AW_CALENDAR_ID);
 }
 
-// Grid config: 0h–24h, 60px per hour (Apple Calendar style)
+// Grid config: 0h–24h, responsive px/hour
 const AW_HOUR_START  = 0;
 const AW_HOUR_END    = 24;
-const AW_PX_PER_HOUR = 60;
+// Computed dynamically in awRenderDay; fallback for awRenderCalendar (7-col view)
+let AW_PX_PER_HOUR   = 60;
 
 // ── 🎨 COULEURS PAR MATIÈRE ──────────────────────────────────────────────────
 const AW_COLOR_MAP = [
@@ -681,25 +682,40 @@ function awPopOpen(el, idx) {
 
   document.body.appendChild(pop);
 
-  const rect   = el.getBoundingClientRect();
-  const popW   = 260;
-  const margin = 8;
-  let left = rect.right + margin + window.scrollX;
-  let top  = rect.top          + window.scrollY;
+  // On mobile (narrow screen) → bottom sheet
+  const isMobile = window.innerWidth < 600;
+  if (isMobile) {
+    pop.style.position = 'fixed';
+    pop.style.left     = '10px';
+    pop.style.right    = '10px';
+    pop.style.bottom   = `calc(${getComputedStyle(document.documentElement).getPropertyValue('--tab-h') || '49px'} + env(safe-area-inset-bottom, 0px) + 10px)`;
+    pop.style.top      = 'auto';
+    pop.style.width    = 'auto';
+    pop.style.maxWidth = 'none';
+    pop.style.borderRadius = '18px';
+    pop.style.transformOrigin = 'bottom center';
+  } else {
+    // Desktop — original float logic
+    const rect   = el.getBoundingClientRect();
+    const popW   = 260;
+    const margin = 8;
+    let left = rect.right + margin + window.scrollX;
+    let top  = rect.top + window.scrollY;
 
-  if (rect.right + margin + popW > window.innerWidth - margin) {
-    left = rect.left - popW - margin + window.scrollX;
+    if (rect.right + margin + popW > window.innerWidth - margin) {
+      left = rect.left - popW - margin + window.scrollX;
+    }
+    if (left - window.scrollX < margin) left = margin + window.scrollX;
+
+    const popH = pop.offsetHeight || 200;
+    if (rect.top + popH > window.innerHeight - margin) {
+      top = window.innerHeight - popH - margin + window.scrollY;
+    }
+    if (top - window.scrollY < margin) top = margin + window.scrollY;
+
+    pop.style.left = left + 'px';
+    pop.style.top  = top  + 'px';
   }
-  if (left - window.scrollX < margin) left = margin + window.scrollX;
-
-  const popH = pop.offsetHeight || 200;
-  if (rect.top + popH > window.innerHeight - margin) {
-    top = window.innerHeight - popH - margin + window.scrollY;
-  }
-  if (top - window.scrollY < margin) top = margin + window.scrollY;
-
-  pop.style.left = left + 'px';
-  pop.style.top  = top  + 'px';
 
   requestAnimationFrame(() => pop.classList.add('visible'));
 
@@ -1105,9 +1121,15 @@ function awRenderDay(ds, container) {
   const today   = awToday();
   const isToday = ds === today;
 
-  const PX_H  = 60;
+  // Responsive: fit exactly 11 visible hours in the scroll container height
+  const HOURS_VISIBLE = 11;
+  const containerH    = container.clientHeight || window.innerHeight * 0.72;
+  const PX_H          = Math.round(containerH / HOURS_VISIBLE);
+  // Also update global so awGridEvHtml uses the same value
+  AW_PX_PER_HOUR      = PX_H;
+
   const HOURS = 24;
-  const gridH = HOURS * PX_H; // 1440px
+  const gridH = HOURS * PX_H;
 
   const items = byDay[ds] || [];
   const timed = items.filter(({ev}) => ev.start.length > 10);
