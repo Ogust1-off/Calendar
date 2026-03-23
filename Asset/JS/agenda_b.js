@@ -301,7 +301,7 @@ function awRowHtml(ev, idx = -1) {
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
     group     ? `<span class="aw-row-badge aw-row-badge--group">${group}</span>` : '',
-    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">In progress</span>` : '',
+    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">${window._t?window._t('inProgress'):'In progress'}</span>` : '',
   ].filter(Boolean).join('');
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
@@ -589,12 +589,12 @@ function awPopOpen(el, idx) {
       ${typeBadge || group || startsSoon? `<div class="aw-pop-tags">
         ${typeBadge ? `<span class="aw-pop-tag" style="border-color:${accent};color:${accent}">${typeBadge}</span>` : ''}
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
-        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
-        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
+        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
+        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'Done'}</span>` : ''}
         ${startsSoon ? `<span class="aw-pop-tag">${window._t?window._t("startingSoon"):"STARTING SOON"}</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
-        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
-        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
+        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
+        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'Done'}</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
         <div class="aw-pop-progress-label" style="justify-content:flex-end;gap:4px">

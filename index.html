@@ -60,9 +60,13 @@
     font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
     overscroll-behavior:none;overflow:hidden}
-  @media(orientation:landscape){body::after{content:'Please rotate to portrait';
-    position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--lbl2);
-    display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:500;}}
+  @media(orientation:landscape){
+    #v-week,#v-account{display:none!important}
+    #v-agenda.on{display:block!important}
+    #tb{display:none!important}
+    #app{height:100svh}
+    #v-agenda.on{padding-bottom:8px}
+  }
 
   /* ── Splash ── */
   #splash{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
@@ -205,6 +209,7 @@
   .acc-icon img{width:100%;height:100%;object-fit:cover;display:block}
   .acc-name{font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--lbl);cursor:pointer}
   .acc-sub{font-size:13px;color:var(--lbl3)}
+  .acc-section-title{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--lbl3);padding:0 4px;margin:16px 0 6px;align-self:flex-start;width:100%}
   .acc-rows{width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;
     border:.5px solid var(--sep);box-shadow:0 2px 16px rgba(0,0,0,.18)}
   @media(prefers-color-scheme:light){.acc-rows{box-shadow:0 2px 16px rgba(0,0,0,.07)}}
@@ -352,7 +357,7 @@
       <div class="nb-ico" id="nb-avatar-wrap">
         <img id="nb-avatar-img" src="Asset/Picture/icon-180.png" alt=""/>
       </div>
-      <div><div class="nb-name">Calendar<span class="nb-sub">by Shortcut&#8482;</span></div></div>
+      <div><div class="nb-name" id="nb-name-el">Calendar<span class="nb-sub" id="nb-sub-el">by Shortcut&#8482;</span></div></div>
     </a>
     <span id="nb-upd"></span>
   </header>
@@ -395,6 +400,8 @@
         <div class="acc-sub">by Shortcut&#8482; &middot; &copy; 2026 Ogust&apos;1</div>
         <input type="file" id="acc-photo-input" accept="image/*" style="display:none" onchange="accChangePhoto(this)"/>
       </div>
+      <!-- Affichage -->
+      <p class="acc-section-title" id="acc-s-display">Display</p>
       <div class="acc-rows">
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico">&#127760;</span>
@@ -405,7 +412,7 @@
           </select>
         </div>
         <div class="acc-row acc-row-static">
-          <span class="acc-row-ico">&#127763;</span>
+          <span class="acc-row-ico" id="acc-theme-ico">&#10024;</span>
           <span class="acc-row-lbl" id="acc-theme-lbl">Theme</span>
           <select class="acc-select" id="acc-theme" onchange="accSetTheme(this.value)">
             <option value="auto">Auto</option>
@@ -413,11 +420,37 @@
             <option value="light">Light</option>
           </select>
         </div>
-        <button class="acc-row" onclick="showCalSettings()">
-          <span class="acc-row-ico">&#128197;</span>
-          <span class="acc-row-lbl" id="acc-settings-lbl">Calendar API &amp; Calendars</span>
+      </div>
+
+      <!-- Calendrier 1 -->
+      <p class="acc-section-title" id="acc-s-cal1">Calendar 1</p>
+      <div class="acc-rows">
+        <button class="acc-row" onclick="accEditCal1Source()">
+          <span class="acc-row-ico">&#128273;</span>
+          <span class="acc-row-lbl" id="acc-cal1-src-lbl">Source &amp; API</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
+        <button class="acc-row" onclick="accEditCal1Style()">
+          <span class="acc-row-ico">&#127912;</span>
+          <span class="acc-row-lbl" id="acc-cal1-style-lbl">Colour style</span>
+          <span class="acc-row-status" id="acc-cal1-preset-badge"></span>
+          <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Calendrier 2 -->
+      <p class="acc-section-title" id="acc-s-cal2">Calendar 2</p>
+      <div class="acc-rows">
+        <button class="acc-row" onclick="accEditCal2()">
+          <span class="acc-row-ico">&#127881;</span>
+          <span class="acc-row-lbl" id="acc-cal2-lbl">Source &amp; colour</span>
+          <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- App -->
+      <p class="acc-section-title" id="acc-s-app">App</p>
+      <div class="acc-rows">
         <button class="acc-row" id="acc-refresh-btn" onclick="accRefresh()">
           <span class="acc-row-ico" id="acc-refresh-ico">&#128260;</span>
           <span class="acc-row-lbl" id="acc-refresh-lbl">Refresh calendar</span>
@@ -617,8 +650,8 @@ function _initPillSwipe(){
     }
     // It was a swipe — change tab based on direction
     var newTab=startTab;
-    if(swipeDist<-SWIPE_THRESH&&startTab<2)newTab=startTab+1;
-    else if(swipeDist>SWIPE_THRESH&&startTab>0)newTab=startTab-1;
+    if(swipeDist>SWIPE_THRESH&&startTab>0)newTab=startTab-1;
+    else if(swipeDist<-SWIPE_THRESH&&startTab<2)newTab=startTab+1;
     if(newTab!==startTab)goTab(newTab);
     else _updateSlider();
     swipeActive=false;
@@ -634,10 +667,18 @@ function _applyProfile(){
       if(ni)ni.src=cfg.photo;if(ai)ai.src=cfg.photo;
       if(nw){nw.classList.add('has-photo');nw.style.borderRadius='50%';}
     }
-    if(cfg.displayName){var ne=document.getElementById('acc-display-name');if(ne)ne.textContent=cfg.displayName;}
+    if(cfg.displayName){
+      var ne=document.getElementById('acc-display-name');if(ne)ne.textContent=cfg.displayName;
+      var nbName=document.getElementById('nb-name-el');
+      var lang=cfg.lang||'en';
+      var greeting=lang==='fr'?'Bonjour, '+cfg.displayName+' !':'Hi, '+cfg.displayName+'!';
+      if(nbName)nbName.childNodes[0].textContent=greeting;
+    }
     var sel=document.getElementById('acc-lang');if(sel&&cfg.lang)sel.value=cfg.lang;
     var tsel=document.getElementById('acc-theme');if(tsel&&cfg.theme)tsel.value=cfg.theme;
-    if(cfg.theme)_applyTheme(cfg.theme);
+    if(cfg.theme)_applyTheme(cfg.theme); else _applyTheme('auto');
+    var pb=document.getElementById('acc-cal1-preset-badge');
+    if(pb){var pm={'ecam':'ECAM','custom':'Custom','none':'Single'};pb.textContent=pm[cfg.cal1Preset||'ecam']||'';}
   }catch(e){}
 }
 
@@ -681,7 +722,10 @@ function accSetLang(lang){
 function accSetTheme(v){
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.theme=v;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
   _applyTheme(v);
+  location.reload();
 }
+function _themeIcon(v){return v==='dark'?'&#127769;':v==='light'?'&#9728;&#65039;':'&#10024;';}
+function _themeIcon(v){return v==='dark'?'&#127769;':v==='light'?'&#9728;&#65039;':'&#10024;';}
 function _applyTheme(v){
   var r=document.documentElement;
   // Remove previous
@@ -691,9 +735,48 @@ function _applyTheme(v){
   else if(v==='light'){r.setAttribute('data-theme','light');r.style.colorScheme='light';}
   var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
 }
-function showCalSettings(){
+function showCalSettings(){ accEditCal1Source(); }
+function accEditCal1Source(){
   if(typeof _obOpenCalSettings==='function')_obOpenCalSettings();
-  else if(typeof showSettings==='function')showSettings();
+}
+function accEditCal1Style(){
+  if(document.getElementById('ob-overlay'))return;
+  _obCalSubStep=0;
+  var el=document.createElement('div');el.id='ob-overlay';
+  el.innerHTML='<div id="ob-sheet"><div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>'+
+    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>'+
+    '<button class="ob-x" onclick="_obClose()">×</button>'+
+    '<div id="ob-cal-content"></div><div id="ob-cal-bottom"></div></div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){el.classList.add('ob-in');_obCalStyleOnly();if(typeof _obInitDrag==='function')_obInitDrag(el);});
+}
+function accEditCal2(){
+  if(document.getElementById('ob-overlay'))return;
+  var el=document.createElement('div');el.id='ob-overlay';
+  el.innerHTML='<div id="ob-sheet"><div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>'+
+    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>'+
+    '<button class="ob-x" onclick="_obClose()">×</button>'+
+    '<div id="ob-cal-content"></div><div id="ob-cal-bottom"></div></div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){el.classList.add('ob-in');_obCal2Only();if(typeof _obInitDrag==='function')_obInitDrag(el);});
+}
+function _obClose(){var o=document.getElementById('ob-overlay');if(o){o.classList.add('ob-out');setTimeout(function(){o.remove();},380);}}
+function _obCalStyleOnly(){
+  if(typeof _obCalRender==='function'){_obCalSubStep=2;_obCalRender(2);}
+}
+function _obCal2Only(){
+  var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+  var c2=d.cal2Color||'lime';
+  var hasCal2=(d.calendars&&d.calendars[1])||d.cal2Ical;
+  var con=document.getElementById('ob-cal-content'),bot=document.getElementById('ob-cal-bottom');
+  if(!con||!bot)return;
+  con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Calendar 2</h2>'+
+    (hasCal2
+      ? '<p class="ob-p2">Colour for all events from Calendar 2.</p>'+
+        (typeof _obColorGrid==='function'?_obColorGrid('ob-c2g-acc',c2,'_obPickCal2Color'):'')
+      : '<p class="ob-p2">No Calendar 2 configured.</p>')+
+    '</div>';
+  bot.innerHTML='<button class="ob-btn-p ob-btn-full" onclick="_obClose()">Done</button>';
 }
 function accRefresh(){
   var ico=document.getElementById('acc-refresh-ico'),st=document.getElementById('acc-refresh-status');

@@ -387,6 +387,8 @@ function _obPickPreset(val, btn) {
   var d=_obLoad(); d.cal1Preset=val; _obSave(d);
   var cr=document.getElementById('ob-c1-color'); if(cr)cr.style.display=(val==='none'?'':'none');
   var sr=document.getElementById('ob-c1-subjs'); if(sr)sr.style.display=(val==='custom'?'':'none');
+  var cr2=document.getElementById('ob-cs-col1'); if(cr2)cr2.style.display=(val==='none'?'':'none');
+  var sr2=document.getElementById('ob-cs-subjs'); if(sr2)sr2.style.display=(val==='custom'?'':'none');
 }
 
 // ── Colour grid ───────────────────────────────────────────────────────────────
@@ -430,7 +432,7 @@ function _obSaveSubjs() {
   });
   var d=_obLoad(); d.cal1Subjects=subs; _obSave(d);
 }
-function _obSubjChange(){ _obSaveSubjs(); }
+function _obSubjChange(){ _obSaveSubjs(); if(typeof _obSaveSubjsCs==='function')_obSaveSubjsCs(); }
 function _obRemoveSubj(btn){ var r=btn.closest('.ob-subj-row');if(r)r.remove();_obSaveSubjs(); }
 function _obAddSubj(){
   var list=document.getElementById('ob-subj-list'); if(!list)return;
@@ -606,7 +608,63 @@ var _obCalSubStep=0;
 function _obCalRender(s){ _obCalSubStep=s; var fns=[_sCalSrc,_sCalIds,_sCalStyle,_sCalDone]; var r=fns[s]&&fns[s](); if(!r)return; var con=document.getElementById('ob-cal-content'),bot=document.getElementById('ob-cal-bottom'); if(!con||!bot)return; con.classList.remove('ob-slide'); con.innerHTML=r.c;bot.innerHTML=r.b; void con.offsetWidth;con.classList.add('ob-slide'); }
 function _sCalSrc(){ var d=_obLoad(),src=d.calSource||'api'; return {c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots"><div class="ob-dot ob-dot-on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div></div><h2 class="ob-h2">Source</h2>'+_srcBtn('api',src==='api','&#128273;','Google API','API key + Calendar ID.')+_srcBtn('ical',src==='ical','&#128241;','iCal Link','No API key needed.')+'</div>', b:'<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Next <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'}; }
 function _sCalIds(){ var d=_obLoad(),src=d.calSource||'api'; if(src==='ical'){return{c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div><div class="ob-dot"></div></div></div><h2 class="ob-h2">iCal URLs</h2><div class="ob-field"><label class="ob-lbl">CALENDAR 1 *</label><input type="url" id="ob-cs-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal1Ical||'')+'"/><div class="ob-err" id="ob-cs-ical0-err"></div></div><div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label><input type="url" id="ob-cs-ical1" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'"/></div></div>',b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obCalRender(0)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Next <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'};} var d2=_obLoad(); return{c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div><div class="ob-dot"></div></div></div><h2 class="ob-h2">Calendars</h2><div class="ob-field"><label class="ob-lbl">API KEY *</label><div class="ob-inp-wrap"><input type="password" id="ob-cs-api" class="ob-inp" placeholder="AIzaSy\u2026" value="'+_obEsc(d2.apiKey||'')+'"/><button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-cs-api\',this)">'+_eyeIcon(false)+'</button></div><div class="ob-err" id="ob-cs-api-err"></div></div><div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 1 *</label><input type="text" id="ob-cs-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d2.calendars&&d2.calendars[0])||'')+'"/><div class="ob-err" id="ob-cs-cal0-err"></div></div><div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label><input type="text" id="ob-cs-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d2.calendars&&d2.calendars[1])||'')+'"/></div></div>',b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obCalRender(0)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Next <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'}; }
-function _sCalStyle(){ var d=_obLoad(),p=d.cal1Preset||'ecam',c=d.cal1Color||'blue',c2=d.cal2Color||'lime'; return{c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div></div></div><h2 class="ob-h2">Colours</h2><p class="ob-p2">Calendar 1 style:</p>'+_srcBtn2('ecam',p==='ecam','&#127979;','ECAM Preset','Auto colour by subject.')+_srcBtn2('none',p==='none','&#128288;','Single colour','All events same colour.')+'<div id="ob-cs-col1" style="'+(p==='none'?'margin-top:10px':'display:none;margin-top:10px')+'"><label class="ob-lbl" style="display:block;margin-bottom:8px">CAL 1 COLOUR</label>'+_obColorGrid('ob-csg1',c,'_obPickCal1Color')+'</div><p class="ob-p2" style="margin-top:14px">Calendar 2 colour:</p>'+_obColorGrid('ob-csg2',c2,'_obPickCal2Color')+'</div>',b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obCalRender(1)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Save <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'}; }
+function _sCalStyle(){
+  var d=_obLoad(), p=d.cal1Preset||'ecam', c=d.cal1Color||'blue', c2=d.cal2Color||'lime';
+  var hasCal2=(d.calendars&&d.calendars[1])||d.cal2Ical;
+  var c1subjRows='';
+  var defaultSubs=[
+    {match:'math',color:'blue',label:'Maths'},{match:'physique',color:'cyan',label:'Physique'},
+    {match:'informatique',color:'violet',label:'Informatique'},{match:'sciences ind',color:'amber',label:'Sciences Ind.'},
+    {match:'anglais',color:'emerald',label:'Anglais'},{match:'sport',color:'rose',label:'Sport'},
+    {match:'culture',color:'orange',label:'Culture'},{match:'proj',color:'grey',label:'Projets'},
+  ];
+  var subjList=(d.cal1Subjects&&d.cal1Subjects.length)?d.cal1Subjects:defaultSubs;
+  subjList.forEach(function(s,i){c1subjRows+=_obSubjRow(s,i);});
+  return {
+    c: '<div class="ob-form" style="padding-bottom:8px">'+
+       '<div class="ob-step-row"><div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div></div></div>'+
+       '<h2 class="ob-h2">Colours</h2>'+
+       '<p style="font-size:11px;font-weight:600;letter-spacing:.05em;color:rgba(255,255,255,.35);margin-bottom:8px;text-transform:uppercase">CALENDAR 1 STYLE</p>'+
+       _srcBtn2('ecam',  p==='ecam',  '&#127979;','ECAM Preset','Auto colour by subject.')+
+       _srcBtn2('custom',p==='custom','&#127912;','Custom','Name subjects and pick colours.')+
+       _srcBtn2('none',  p==='none',  '&#11036;', 'Single colour','All events same colour.')+
+       '<div id="ob-cs-col1" style="'+(p==='none'?'margin-top:10px':'display:none;margin-top:10px')+'">'+
+         '<label class="ob-lbl" style="display:block;margin-bottom:8px">CAL 1 COLOUR</label>'+
+         _obColorGrid('ob-csg1',c,'_obPickCal1Color')+
+       '</div>'+
+       '<div id="ob-cs-subjs" style="'+(p==='custom'?'margin-top:10px':'display:none;margin-top:10px')+';position:relative">'+
+         '<label class="ob-lbl" style="display:block;margin-bottom:8px">SUBJECTS &amp; COLOURS</label>'+
+         '<div id="ob-cs-subj-list">'+c1subjRows+'</div>'+
+         '<button class="ob-btn-g" style="width:100%;margin-top:8px;font-size:13px" onclick="_obAddSubjCs()">+ Add</button>'+
+       '</div>'+
+       (hasCal2
+         ? '<p style="font-size:11px;font-weight:600;letter-spacing:.05em;color:rgba(255,255,255,.35);margin:16px 0 8px;text-transform:uppercase">CALENDAR 2 COLOUR</p>'+
+           _obColorGrid('ob-csg2',c2,'_obPickCal2Color')
+         : '')+
+       '</div>',
+    b: '<div class="ob-row">'+
+       '<button class="ob-btn-g" onclick="_obCalRender(1)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back</button>'+
+       '<div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Save <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
+  };
+}
+function _obAddSubjCs(){
+  var list=document.getElementById('ob-cs-subj-list');if(!list)return;
+  var i=list.querySelectorAll('.ob-subj-row').length;
+  list.insertAdjacentHTML('beforeend',_obSubjRow({match:'',color:'blue',label:''},i));
+  _obSaveSubjsCs();
+}
+function _obSaveSubjsCs(){
+  var rows=document.querySelectorAll('#ob-cs-subj-list .ob-subj-row');
+  var subs=[];
+  rows.forEach(function(row){
+    var inp=row.querySelector('.ob-subj-inp'), dot=row.querySelector('.ob-color-dot-btn');
+    var label=(inp&&inp.value.trim())||'';
+    var match=(inp&&inp.dataset.match)||label.toLowerCase();
+    var color=(dot&&dot.dataset.color)||'blue';
+    if(label)subs.push({match:match,color:color,label:label});
+  });
+  var d=_obLoad();d.cal1Subjects=subs;_obSave(d);
+}
 function _sCalDone(){ return{c:'<div class="ob-done"><div class="ob-check-wrap"><div class="ob-ring r1"></div><div class="ob-ring r2"></div><div class="ob-check-circle"><svg viewBox="0 0 48 48" fill="none" width="40" height="40"><path class="ob-check-path" d="M12 24l9 9 15-15" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><h2 class="ob-done-h">Saved!</h2><p class="ob-p2">Refreshing your calendar.</p></div>',b:'<button class="ob-btn-p ob-btn-full" onclick="_obCalFinish()">Done</button>'}; }
 function _obCalNext(){
   var d=_obLoad(),src=d.calSource||'api';
