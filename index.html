@@ -34,6 +34,26 @@
     --glass:rgba(242,242,247,.85);--gbdr:rgba(255,255,255,.9);
     --text:rgba(0,0,0,.88);
   }}
+  /* Force dark mode */
+  [data-theme="dark"]{
+    --bg:#000!important;--bg2:#1c1c1e!important;--bg3:#2c2c2e!important;
+    --lbl:rgba(255,255,255,.92)!important;--lbl2:rgba(255,255,255,.55)!important;--lbl3:rgba(255,255,255,.28)!important;
+    --sep:rgba(255,255,255,.10)!important;--sep2:rgba(255,255,255,.06)!important;--fill:rgba(255,255,255,.08)!important;
+    --tint:#0a84ff!important;--red:#ff453a!important;
+    --glass:rgba(28,28,30,.82)!important;--gbdr:rgba(255,255,255,.12)!important;
+    --text:rgba(255,255,255,.92)!important;
+    color-scheme:dark;
+  }
+  /* Force light mode */
+  [data-theme="light"]{
+    --bg:#f2f2f7!important;--bg2:#fff!important;--bg3:#efeff4!important;
+    --lbl:rgba(0,0,0,.88)!important;--lbl2:rgba(0,0,0,.50)!important;--lbl3:rgba(0,0,0,.28)!important;
+    --sep:rgba(0,0,0,.10)!important;--sep2:rgba(0,0,0,.05)!important;--fill:rgba(0,0,0,.06)!important;
+    --tint:#007aff!important;--red:#ff3b30!important;
+    --glass:rgba(242,242,247,.85)!important;--gbdr:rgba(255,255,255,.9)!important;
+    --text:rgba(0,0,0,.88)!important;
+    color-scheme:light;
+  }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{height:100%;background:var(--bg);color-scheme:dark light}
   body{height:100%;background:var(--bg);color:var(--lbl);
@@ -643,7 +663,11 @@ function accSetTheme(v){
 }
 function _applyTheme(v){
   var r=document.documentElement;
-  r.style.colorScheme=v==='dark'?'dark':v==='light'?'light':'';
+  // Remove previous
+  r.removeAttribute('data-theme');
+  r.style.colorScheme='';
+  if(v==='dark'){r.setAttribute('data-theme','dark');r.style.colorScheme='dark';}
+  else if(v==='light'){r.setAttribute('data-theme','light');r.style.colorScheme='light';}
   var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
 }
 function showCalSettings(){

@@ -258,9 +258,62 @@ function _s2b(d, src) {
   }
 }
 
+function _obSubjRow(s, i) {
+  var hex = (OB_COLORS.find(function(c){return c.k===(s.color||'blue');})||OB_COLORS[0]).hex;
+  return '<div class="ob-subj-row" data-idx="'+i+'">' +
+    '<input class="ob-inp ob-subj-inp" data-match="'+_obEsc(s.match||s.label||'')+
+    '" value="'+_obEsc(s.label||s.match||'')+'" placeholder="Subject name…" '+
+    'oninput="_obSubjChange()" style="flex:1;min-width:0;"/>' +
+    '<button class="ob-color-dot-btn" data-color="'+(s.color||'blue')+'" '+
+    'style="background:'+hex+';" '+
+    'onclick="_obOpenColorPop(this,'+i+')" title="Pick colour"></button>' +
+    '<button onclick="_obRemoveSubj(this)" class="ob-subj-del">×</button>' +
+  '</div>';
+}
+
+function _obOpenColorPop(btn, idx) {
+  // Close any existing pop
+  var existing = document.getElementById('ob-color-pop');
+  if (existing) { existing.remove(); if(existing.dataset.idx==idx) return; }
+  var pop = document.createElement('div');
+  pop.id = 'ob-color-pop'; pop.dataset.idx = idx;
+  pop.style.cssText = 'position:absolute;z-index:9999;background:#1c1c1e;border:.5px solid rgba(255,255,255,.15);'+
+    'border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;width:220px;'+
+    'box-shadow:0 8px 32px rgba(0,0,0,.5);';
+  OB_COLORS.forEach(function(c) {
+    var cur = btn.dataset.color === c.k;
+    var b = document.createElement('button');
+    b.style.cssText = 'width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:'+(cur?'2.5px solid #fff':'2px solid transparent')+
+      ';cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s;';
+    if(cur) b.innerHTML='<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>';
+    b.onclick = function(e) {
+      e.stopPropagation();
+      // Update the dot button
+      btn.style.background = c.hex;
+      btn.dataset.color = c.k;
+      pop.remove();
+      _obSaveSubjs();
+    };
+    pop.appendChild(b);
+  });
+  // Position below the dot button
+  var rect = btn.getBoundingClientRect();
+  var sheet = document.getElementById('ob-sheet');
+  var sheetRect = sheet ? sheet.getBoundingClientRect() : {left:0,top:0};
+  pop.style.top = (rect.bottom - sheetRect.top + 6) + 'px';
+  var left = rect.left - sheetRect.left - 90;
+  pop.style.left = Math.max(8, Math.min(left, 200)) + 'px';
+  document.getElementById('ob-content').appendChild(pop);
+  // Close on outside click
+  setTimeout(function(){
+    document.addEventListener('click', function close(ev) {
+      if(!pop.contains(ev.target)&&ev.target!==btn){pop.remove();document.removeEventListener('click',close);}
+    });
+  }, 10);
+}
+
 function _s2c(d) {
   var preset = d.cal1Preset||'ecam', color = d.cal1Color||'blue', subs = d.cal1Subjects||[];
-  var subjRows = '';
   var defaultSubs = [
     {match:'math',color:'blue',label:'Maths'},{match:'physique',color:'cyan',label:'Physique'},
     {match:'informatique',color:'violet',label:'Informatique'},{match:'sciences ind',color:'amber',label:'Sciences Ind.'},
@@ -268,13 +321,7 @@ function _s2c(d) {
     {match:'culture',color:'orange',label:'Culture'},{match:'proj',color:'grey',label:'Projets'},
   ];
   var subjList = subs.length ? subs : defaultSubs;
-  subjList.forEach(function(s,i){
-    subjRows += '<div class="ob-subj-row" data-idx="'+i+'">' +
-      '<input class="ob-inp ob-subj-inp" data-match="'+_obEsc(s.match||'')+'" value="'+_obEsc(s.label||s.match||'')+'" placeholder="Subject\u2026" style="flex:1;padding:8px 10px;font-size:13px" oninput="_obSubjChange()"/>' +
-      _obColorGrid('ob-sc-'+i, s.color||'blue', '_obPickSubjColor') +
-      '<button onclick="_obRemoveSubj(this)" style="background:none;border:none;color:#ff453a;font-size:20px;cursor:pointer;padding:0 4px;flex-shrink:0">\u00d7</button>' +
-    '</div>';
-  });
+  var subjRows = subjList.map(function(s,i){return _obSubjRow(s,i);}).join('');
   return {
     c: '<div class="ob-form">' +
        '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
@@ -289,10 +336,10 @@ function _s2c(d) {
          '<label class="ob-lbl" style="display:block;margin-bottom:8px">COLOUR</label>' +
          _obColorGrid('ob-c1g', color, '_obPickCal1Color') +
        '</div>' +
-       '<div id="ob-c1-subjs" style="' + (preset==='custom'?'':'display:none') + '">' +
-         '<label class="ob-lbl" style="display:block;margin-bottom:8px">SUBJECTS &amp; COLOURS</label>' +
-         subjRows +
-         '<button class="ob-btn-g" style="width:100%;margin-top:8px;font-size:13px" onclick="_obAddSubj()">+ Add subject</button>' +
+       '<div id="ob-c1-subjs" style="' + (preset==='custom'?'':'display:none') + ';position:relative">' +
+         '<label class="ob-lbl" style="display:block;margin-bottom:10px">SUBJECTS &amp; COLOURS</label>' +
+         '<div id="ob-subj-list">' + subjRows + '</div>' +
+         '<button class="ob-btn-g" style="width:100%;margin-top:10px;font-size:13px" onclick="_obAddSubj()">+ Add subject</button>' +
        '</div></div>',
     b: _obNavRow(false, 'Next', true)
   };
@@ -371,13 +418,14 @@ function _obPickSubjColor(k,g){ _obSelectColor(k,g); _obSaveSubjs(); }
 
 // Subject management
 function _obSaveSubjs() {
-  var rows=document.querySelectorAll('#ob-c1-subjs .ob-subj-row');
+  var rows=document.querySelectorAll('#ob-subj-list .ob-subj-row');
   var subs=[];
   rows.forEach(function(row){
-    var inp=row.querySelector('.ob-subj-inp'), onBtn=row.querySelector('.ob-cb.ob-cb-on');
+    var inp=row.querySelector('.ob-subj-inp');
+    var dotBtn=row.querySelector('.ob-color-dot-btn');
     var label=(inp&&inp.value.trim())||'';
     var match=(inp&&inp.dataset.match)||label.toLowerCase();
-    var color=(onBtn&&onBtn.dataset.color)||'blue';
+    var color=(dotBtn&&dotBtn.dataset.color)||'blue';
     if(label) subs.push({match:match,color:color,label:label});
   });
   var d=_obLoad(); d.cal1Subjects=subs; _obSave(d);
@@ -385,13 +433,11 @@ function _obSaveSubjs() {
 function _obSubjChange(){ _obSaveSubjs(); }
 function _obRemoveSubj(btn){ var r=btn.closest('.ob-subj-row');if(r)r.remove();_obSaveSubjs(); }
 function _obAddSubj(){
-  var cont=document.getElementById('ob-c1-subjs'); if(!cont)return;
-  var i=cont.querySelectorAll('.ob-subj-row').length;
-  var div=document.createElement('div'); div.className='ob-subj-row'; div.dataset.idx=i;
-  div.innerHTML='<input class="ob-inp ob-subj-inp" placeholder="Subject\u2026" style="flex:1;padding:8px 10px;font-size:13px" oninput="_obSubjChange()"/>'+
-    _obColorGrid('ob-sc-'+i,'blue','_obPickSubjColor')+
-    '<button onclick="_obRemoveSubj(this)" style="background:none;border:none;color:#ff453a;font-size:20px;cursor:pointer;padding:0 4px;flex-shrink:0">\u00d7</button>';
-  var addBtn=cont.querySelector('button.ob-btn-g'); if(addBtn)cont.insertBefore(div,addBtn); else cont.appendChild(div);
+  var list=document.getElementById('ob-subj-list'); if(!list)return;
+  var i=list.querySelectorAll('.ob-subj-row').length;
+  var div=document.createElement('div');
+  div.outerHTML; // force parse
+  list.insertAdjacentHTML('beforeend', _obSubjRow({match:'',color:'blue',label:''},i));
   _obSaveSubjs();
 }
 
@@ -701,8 +747,14 @@ var _origPickPreset = _obPickPreset;
 .ob-cb:active{transform:scale(.88)}
 .ob-cb.ob-cb-on{border-color:#fff;transform:scale(1.15)}
 @media(prefers-color-scheme:light){.ob-cb.ob-cb-on{border-color:rgba(0,0,0,.5)}}
-/* Subject rows */
+/* Subject rows — compact: input + color dot + delete */
 .ob-subj-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ob-color-dot-btn{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.25);
+  flex-shrink:0;cursor:pointer;transition:transform .12s,border-color .15s}
+.ob-color-dot-btn:active{transform:scale(.88)}
+.ob-color-dot-btn:hover{border-color:rgba(255,255,255,.6)}
+.ob-subj-del{background:none;border:none;color:#ff453a;font-size:20px;cursor:pointer;
+  padding:0 4px;flex-shrink:0;line-height:1;-webkit-tap-highlight-color:transparent}
 /* Avatar */
 .ob-avatar-row{display:flex;align-items:center;gap:16px;margin-bottom:4px}
 .ob-avatar-preview{width:72px;height:72px;border-radius:50%;flex-shrink:0;overflow:hidden;
