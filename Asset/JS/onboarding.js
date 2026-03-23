@@ -111,14 +111,14 @@ function _obShowUnconfigured() {
 }
 
 // Steps: 0=welcome, 1=API key, 2=calendars, 3=profile (optional), 4=done
-var _OB_STEPS = 5;
+var _OB_STEPS = 6;
 
 function _obRender() {
   var con = document.getElementById('ob-content');
   var bot = document.getElementById('ob-bottom');
   if (!con || !bot) return;
   con.classList.remove('ob-slide');
-  var fns = [_s0, _s1, _s2, _s3, _s4];
+  var fns = [_s0, _s1, _s2, _s3, _s3b, _s4];
   var r = fns[_obStep]();
   con.innerHTML = r.c; bot.innerHTML = r.b;
   void con.offsetWidth; con.classList.add('ob-slide');
@@ -229,6 +229,58 @@ function _s3() {
 }
 
 // ── Step 4: Done ──────────────────────────────────────────────────────────────
+// ── Step 3b: Language & Theme ──────────────────────────────────────────────────
+function _s3b() {
+  var d = _obLoad();
+  var lang = d.lang || 'en';
+  var theme = d.theme || 'auto';
+  return {
+    c: '<div class="ob-form">' +
+       '<div class="ob-step-row"><div class="ob-dots">' + _obDots(4) + '</div></div>' +
+       '<h2 class="ob-h2">Preferences</h2>' +
+       '<p class="ob-p2">Choose your language and display theme.</p>' +
+
+       // Language
+       '<div class="ob-pref-row">' +
+         '<div class="ob-pref-ico">&#127760;</div>' +
+         '<div class="ob-pref-label">Language</div>' +
+         '<div class="ob-pref-btns" id="ob-lang-btns">' +
+           '<button class="ob-pref-btn' + (lang==='en'?' ob-pref-on':'') + '" onclick="_obPickLang(\'en\',this)">English</button>' +
+           '<button class="ob-pref-btn' + (lang==='fr'?' ob-pref-on':'') + '" onclick="_obPickLang(\'fr\',this)">Fran\u00e7ais</button>' +
+         '</div>' +
+       '</div>' +
+
+       // Theme
+       '<div class="ob-pref-row" style="margin-top:14px">' +
+         '<div class="ob-pref-ico">&#127763;</div>' +
+         '<div class="ob-pref-label">Theme</div>' +
+         '<div class="ob-pref-btns" id="ob-theme-btns">' +
+           '<button class="ob-pref-btn' + (theme==='auto'?' ob-pref-on':'') + '" onclick="_obPickTheme(\'auto\',this)">Auto</button>' +
+           '<button class="ob-pref-btn' + (theme==='dark'?' ob-pref-on':'') + '" onclick="_obPickTheme(\'dark\',this)">Dark</button>' +
+           '<button class="ob-pref-btn' + (theme==='light'?' ob-pref-on':'') + '" onclick="_obPickTheme(\'light\',this)">Light</button>' +
+         '</div>' +
+       '</div>' +
+       '</div>',
+    b: _obNavRow(false)
+  };
+}
+
+function _obPickLang(val, btn) {
+  document.querySelectorAll('#ob-lang-btns .ob-pref-btn').forEach(function(b){ b.classList.remove('ob-pref-on'); });
+  btn.classList.add('ob-pref-on');
+  var d=_obLoad(); d.lang=val; _obSave(d);
+}
+function _obPickTheme(val, btn) {
+  document.querySelectorAll('#ob-theme-btns .ob-pref-btn').forEach(function(b){ b.classList.remove('ob-pref-on'); });
+  btn.classList.add('ob-pref-on');
+  var d=_obLoad(); d.theme=val; _obSave(d);
+  // Live preview
+  if(typeof _applyTheme==='function') _applyTheme(val);
+}
+function _obSaveLangTheme() {
+  // Already saved live — nothing extra needed
+}
+
 function _s4() {
   return {
     c: '<div class="ob-done">' +
@@ -241,10 +293,11 @@ function _s4() {
   };
 }
 
+
 // ── Dot progress indicator ────────────────────────────────────────────────────
-function _obDots(current) { // steps 1–3 have dots
+function _obDots(current) { // steps 1–4 have dots
   var out = '';
-  for (var i=1; i<=3; i++) {
+  for (var i=1; i<=4; i++) {
     out += '<div class="ob-dot' + (i===current?' ob-dot-on':'') + '"></div>';
   }
   return out;
@@ -281,6 +334,7 @@ function _obValidate() {
     _obSave(d); return true;
   }
   if (_obStep===3) { _obSaveProfile(); return true; }
+  if (_obStep===4) { _obSaveLangTheme(); return true; }
   return true;
 }
 
@@ -505,6 +559,17 @@ function _obToggleEye(id,btn) {
 .ob-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(99,102,241,.4);
   animation:ob-ring 2.5s ease-out infinite}
 .ob-ring.r2{animation-delay:.55s;border-color:rgba(59,130,246,.3)}
+.ob-pref-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid rgba(255,255,255,.08)}
+.ob-pref-row:last-child{border-bottom:none}
+.ob-pref-ico{font-size:22px;flex-shrink:0;width:30px;text-align:center}
+.ob-pref-label{flex:1;font-size:15px;font-weight:500;color:rgba(255,255,255,.88)}
+.ob-pref-btns{display:flex;gap:6px;flex-shrink:0}
+.ob-pref-btn{padding:6px 14px;border-radius:99px;border:.5px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.07);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;
+  font-family:inherit;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.ob-pref-btn:active{transform:scale(.93)}
+.ob-pref-btn.ob-pref-on{background:var(--tint,#0a84ff);border-color:transparent;color:#fff;
+  box-shadow:0 2px 10px rgba(10,132,255,.4)}
 @keyframes ob-ring{0%{transform:scale(.88);opacity:.7}100%{transform:scale(1.55);opacity:0}}
 .ob-check-circle{position:absolute;inset:10px;border-radius:50%;
   background:linear-gradient(135deg,#3b82f6,#6366f1);
