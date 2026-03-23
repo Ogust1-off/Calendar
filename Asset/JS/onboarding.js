@@ -106,15 +106,15 @@ function _obInitDrag(overlay) {
   document.addEventListener('mouseup', end);
 }
 
-// ── Steps: 0=welcome, 1=api-key, 2=calendars(sub), 3=profile, 4=prefs, 5=done
-var _OB_STEPS = 6;
+// ── Steps: 0=welcome, 1=calendars(sub), 2=profile, 3=prefs, 4=done
+var _OB_STEPS = 5;
 
 function _obRender() {
   var con = document.getElementById('ob-content');
   var bot = document.getElementById('ob-bottom');
   if (!con || !bot) return;
   con.classList.remove('ob-slide');
-  var fns = [_s0, _s1, _s2, _s3, _s4, _s5];
+  var fns = [_s0, _s1_cal, _s2, _s3, _s4];
   var r = fns[_obStep] ? fns[_obStep]() : {c:'',b:''};
   con.innerHTML = r.c; bot.innerHTML = r.b;
   void con.offsetWidth; con.classList.add('ob-slide');
@@ -124,25 +124,17 @@ function _obRender() {
 function _obNext() {
   if (!_obValidate()) return;
   // Handle calendar sub-steps
-  if (_obStep === 2) {
-    var d = _obLoad(), src = d.calSource||'api';
-    var subMax = src==='ical' ? 1 : 3; // ical: source+style; api: source+ids+style+cal2color
-    if (src==='api') subMax=3;
-    if (src==='ical') subMax=1;
+  if (_obStep === 1) {
+    var d = _obLoad(), src2 = d.calSource||'ical';
+    var subMax = src2==='ical' ? 2 : 3; // ical: source+ids+style; api: source+ids+style+cal2color
     if (_obCalSub < subMax) { _obCalSub++; _obRender(); return; }
-    // Done with cal subs
     _obCalSub=0; _obStep++; _obRender(); return;
   }
   if (_obStep < _OB_STEPS-1) { _obStep++; _obRender(); }
 }
 
 function _obBack() {
-  if (_obStep === 2 && _obCalSub > 0) {
-    _obCalSub--;
-    var d=_obLoad(), src=d.calSource||'api';
-    if (src==='ical' && _obCalSub===1) _obCalSub=0;
-    _obRender(); return;
-  }
+  if (_obStep === 1 && _obCalSub > 0) { _obCalSub--; _obRender(); return; }
   if (_obStep > (_obIsSettings?1:0)) { _obStep--; _obRender(); }
 }
 
@@ -190,12 +182,12 @@ function _s1() {
 }
 
 // ── Step 2: Calendars (sub-stepped) ──────────────────────────────────────────
-function _s2() {
-  var d = _obLoad(), src = d.calSource||'api';
+function _s1_cal() {
+  var d = _obLoad(), src = d.calSource||'ical';
   if (_obCalSub === 0) return _s2a(d, src);
-  if (_obCalSub === 1 && src==='api') return _s2b(d);
-  if ((_obCalSub===2&&src==='api') || (_obCalSub===1&&src==='ical')) return _s2c(d);
-  if (_obCalSub===3 && src==='api') return _s2d(d);
+  if (_obCalSub === 1) return _s2b(d, src); // ids for both ical and api
+  if (_obCalSub === 2) return _s2c(d);      // style/colours
+  if (_obCalSub === 3) return _s2d(d);      // cal2 colour (api only, auto-skip if no cal2)
   return _s2a(d, src);
 }
 
@@ -224,20 +216,46 @@ function _s2a(d, src) {
   };
 }
 
-function _s2b(d) {
-  return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
-       '<h2 class="ob-h2">Calendars</h2>' +
-       '<p class="ob-p2">Enter your Google Calendar IDs.</p>' +
-       '<div class="ob-field"><label class="ob-lbl">CALENDAR 1 — PRIMARY <span style="color:var(--red)">*</span></label>' +
-       '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="' + _obEsc((d.calendars&&d.calendars[0])||'') + '" autocomplete="off" spellcheck="false"/>' +
-       '<div class="ob-err" id="ob-cal0-err"></div></div>' +
-       '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label>' +
-       '<input type="text" id="ob-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="' + _obEsc((d.calendars&&d.calendars[1])||'') + '" autocomplete="off" spellcheck="false"/></div>' +
-       '</div>',
-    b: _obNavRow(false, 'Next', true)
-  };
+function _s2b(d, src) {
+  src = src || d.calSource || 'ical';
+  if (src === 'ical') {
+    return {
+      c: '<div class="ob-form">' +
+         '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
+         '<h2 class="ob-h2">iCal Links</h2>' +
+         '<p class="ob-p2">Paste the iCal links you copied from iPhone or Google.</p>' +
+         '<div class="ob-field"><label class="ob-lbl">CALENDAR 1 <span style="color:var(--red)">*</span></label>' +
+         '<input type="url" id="ob-ical0" class="ob-inp ob-mono" placeholder="webcal://p62-caldav.icloud.com/…" value="' + _obEsc(d.cal1Ical||'') + '" autocomplete="off" spellcheck="false"/>' +
+         '<div class="ob-err" id="ob-ical0-err"></div></div>' +
+         '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label>' +
+         '<input type="url" id="ob-ical1" class="ob-inp ob-mono" placeholder="webcal://… or https://…" value="' + _obEsc(d.cal2Ical||'') + '" autocomplete="off" spellcheck="false"/></div>' +
+         '</div>',
+      b: _obNavRow(false, 'Next', true)
+    };
+  } else {
+    // Google API
+    return {
+      c: '<div class="ob-form">' +
+         '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
+         '<h2 class="ob-h2">Google API</h2>' +
+         '<p class="ob-p2">Enter your API key and Calendar IDs.</p>' +
+         '<div class="ob-field"><label class="ob-lbl">API KEY <span style="color:var(--red)">*</span></label>' +
+         '<div class="ob-inp-wrap"><input type="password" id="ob-apikey" class="ob-inp" placeholder="AIzaSy…" value="' + _obEsc(d.apiKey||'') + '" autocomplete="off" spellcheck="false"/>' +
+         '<button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-apikey\',this)">' + _eyeIcon(false) + '</button></div>' +
+         '<div class="ob-err" id="ob-apikey-err"></div></div>' +
+         '<div class="ob-field" style="margin-top:12px"><label class="ob-lbl">CALENDAR 1 <span style="color:var(--red)">*</span></label>' +
+         '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="' + _obEsc((d.calendars&&d.calendars[0])||'') + '" autocomplete="off" spellcheck="false"/>' +
+         '<div class="ob-err" id="ob-cal0-err"></div></div>' +
+         '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label>' +
+         '<input type="text" id="ob-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="' + _obEsc((d.calendars&&d.calendars[1])||'') + '" autocomplete="off" spellcheck="false"/></div>' +
+         '<details class="ob-details"><summary class="ob-hint-t">&#128161; How to get a Calendar ID</summary>' +
+         '<ol class="ob-hint-l"><li>Go to <strong>console.cloud.google.com</strong> → enable Calendar API</li>' +
+         '<li>Create an API Key → restrict to Google Calendar API</li>' +
+         '<li>In Google Calendar: Settings → your calendar → Integrate → copy Calendar ID</li></ol></details>' +
+         '</div>',
+      b: _obNavRow(false, 'Next', true)
+    };
+  }
 }
 
 function _s2c(d) {
@@ -311,6 +329,8 @@ function _obPickSrc(val, btn) {
   document.querySelectorAll('#ob-content .ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
   btn.classList.add('ob-src-on'); var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
   var d=_obLoad(); d.calSource=val; _obSave(d);
+  // Hide/show the iphone hint based on selection
+  var hint=document.getElementById('ob-iphone-hint'); if(hint)hint.style.display=(val==='ical'?'':'');
   var f=document.getElementById('ob-ical-fields'); if(f)f.style.display=(val==='ical'?'':'none');
   if(val==='ical')f.style.marginTop='14px';
 }
@@ -376,7 +396,7 @@ function _obAddSubj(){
 }
 
 // ── Step 3: Profile (optional) ────────────────────────────────────────────────
-function _s3() {
+function _s2() {
   var d=_obLoad(), photo=d.photo||'', name=d.displayName||'';
   return {
     c: '<div class="ob-form">' +
@@ -399,7 +419,7 @@ function _s3() {
 }
 
 // ── Step 4: Preferences ───────────────────────────────────────────────────────
-function _s4() {
+function _s3() {
   var d=_obLoad(), lang=d.lang||'en', theme=d.theme||'auto';
   function lb(v,lbl){ return '<button class="ob-pref-btn'+(lang===v?' ob-pref-on':'')+'" onclick="_obPickLang(\''+v+'\',this)">'+lbl+'</button>'; }
   function tb(v,lbl){ return '<button class="ob-pref-btn'+(theme===v?' ob-pref-on':'')+'" onclick="_obPickTheme(\''+v+'\',this)">'+lbl+'</button>'; }
@@ -419,7 +439,7 @@ function _obPickLang(v,btn){ document.querySelectorAll('#ob-lang-btns .ob-pref-b
 function _obPickTheme(v,btn){ document.querySelectorAll('#ob-theme-btns .ob-pref-btn').forEach(function(b){b.classList.remove('ob-pref-on');}); btn.classList.add('ob-pref-on'); var d=_obLoad();d.theme=v;_obSave(d); if(typeof _applyTheme==='function')_applyTheme(v); }
 
 // ── Step 5: Done ──────────────────────────────────────────────────────────────
-function _s5() {
+function _s4() {
   return {
     c: '<div class="ob-done">' +
        '<div class="ob-check-wrap"><div class="ob-ring r1"></div><div class="ob-ring r2"></div>' +
@@ -438,28 +458,39 @@ function _obValidate() {
     if(!v.startsWith('AIza')){_obErr(e,'Should start with "AIza".');return false;}
     _obClear(e); var d=_obLoad();d.apiKey=v;_obSave(d); return true;
   }
-  if (_obStep===2) {
-    var d2=_obLoad(), src=d2.calSource||'api';
-    if (_obCalSub===0 && src==='ical') {
-      var u=((document.getElementById('ob-ical0')||{}).value||'').trim();
-      var eu=document.getElementById('ob-ical0-err');
-      if(!u){_obErr(eu,'iCal URL is required.');return false;}
-      _obClear(eu); var u2=((document.getElementById('ob-ical1')||{}).value||'').trim();
-      d2.cal1Ical=u; if(u2)d2.cal2Ical=u2; _obSave(d2);
+  if (_obStep===1) {
+    var d2=_obLoad(), src=d2.calSource||'ical';
+    if (_obCalSub===0) {
+      // Source chosen — always valid, just save
+      return true;
     }
-    if (_obCalSub===1 && src==='api') {
-      var v0=((document.getElementById('ob-cal0')||{}).value||'').trim();
-      var e0=document.getElementById('ob-cal0-err');
-      if(!v0){_obErr(e0,'Primary calendar ID is required.');return false;}
-      if(!v0.includes('@')){_obErr(e0,'Must contain an @.');return false;}
-      _obClear(e0);
-      var v1=((document.getElementById('ob-cal1')||{}).value||'').trim();
-      d2.calendars=[v0]; if(v1&&v1.includes('@'))d2.calendars.push(v1); _obSave(d2);
+    if (_obCalSub===1) {
+      if (src==='ical') {
+        var u=((document.getElementById('ob-ical0')||{}).value||'').trim();
+        var eu=document.getElementById('ob-ical0-err');
+        if(!u){_obErr(eu,'iCal URL is required.');return false;}
+        _obClear(eu);
+        var u2=((document.getElementById('ob-ical1')||{}).value||'').trim();
+        d2.cal1Ical=u; if(u2)d2.cal2Ical=u2; _obSave(d2);
+      } else {
+        var vk=((document.getElementById('ob-apikey')||{}).value||'').trim();
+        var ek=document.getElementById('ob-apikey-err');
+        if(!vk){_obErr(ek,'API key required.');return false;}
+        if(!vk.startsWith('AIza')){_obErr(ek,'Should start with "AIza".');return false;}
+        _obClear(ek);
+        var v0=((document.getElementById('ob-cal0')||{}).value||'').trim();
+        var e0=document.getElementById('ob-cal0-err');
+        if(!v0){_obErr(e0,'Calendar ID required.');return false;}
+        if(!v0.includes('@')){_obErr(e0,'Must contain @.');return false;}
+        _obClear(e0);
+        d2.apiKey=vk; var v1=((document.getElementById('ob-cal1')||{}).value||'').trim();
+        d2.calendars=[v0]; if(v1&&v1.includes('@'))d2.calendars.push(v1); _obSave(d2);
+      }
     }
-    if ((_obCalSub===2&&src==='api')||(_obCalSub===1&&src==='ical')) _obSaveSubjs();
+    if (_obCalSub===2) { _obSaveSubjs(); }
     return true;
   }
-  if (_obStep===3) { _obSaveProfile(); return true; }
+  if (_obStep===2) { _obSaveProfile(); return true; }
   return true;
 }
 
