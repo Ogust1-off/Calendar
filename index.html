@@ -613,19 +613,6 @@ function accSetTheme(v){
   _applyTheme(v);
 }
 function _applyTheme(v){
-  var root=document.documentElement;
-  if(v==='dark'){root.style.colorScheme='dark';}
-  else if(v==='light'){root.style.colorScheme='light';}
-  else{root.style.colorScheme='';}
-  var ico=document.getElementById('theme-ico');
-  if(ico)ico.textContent=v==='light'?'\u2600\ufe0f':v==='dark'?'\uD83CDF19':'\u2728';
-  var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
-}
-function accSetTheme(v){
-  try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.theme=v;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
-  _applyTheme(v);
-}
-function _applyTheme(v){
   var r=document.documentElement;
   if(v==='dark'){r.style.colorScheme='dark';}
   else if(v==='light'){r.style.colorScheme='light';}
