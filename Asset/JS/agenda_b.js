@@ -12,8 +12,20 @@ function _loadCfg() {
   AW_CALENDAR_ID   = c.calendars && c.calendars[0] ? c.calendars[0] : '';
   AW_CALENDAR_ID_2 = c.calendars && c.calendars[1] ? c.calendars[1] : '';
   AW_ICAL_URL      = c.icalUrl || '';
-  return !!(AW_API_KEY && AW_CALENDAR_ID);
+  // Cal 1 preset
+  AW_CAL1_PRESET   = c.cal1Preset  || 'ecam'; // 'ecam' | 'custom' | 'none'
+  AW_CAL1_COLOR    = c.cal1Color   || 'blue';  // used when preset='none'
+  AW_CAL1_SUBJECTS = c.cal1Subjects || [];     // [{match, color}] when preset='custom'
+  // Cal 2 color
+  AW_CAL2_COLOR_CFG = c.cal2Color  || 'lime';
+  // iCal source for cal 1 (alternative to Google API)
+  if (c.cal1Ical) AW_ICAL_URL = c.cal1Ical;
+  return !!(AW_API_KEY || c.cal1Ical) && !!(AW_CALENDAR_ID || c.cal1Ical);
 }
+let AW_CAL1_PRESET   = 'ecam';
+let AW_CAL1_COLOR    = 'blue';
+let AW_CAL1_SUBJECTS = [];
+let AW_CAL2_COLOR_CFG = 'lime';
 let AW_API_KEY      = '';
 let AW_CALENDAR_ID  = '';
 let AW_CALENDAR_ID_2 = '';
@@ -115,8 +127,25 @@ const AW_CAL2_COLOR_HEX = '#84cc16'; // lime-500
 function awNorm(s) {
   return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 }
-function awColorFor(name) {
+function awColorFor(name, isCal2) {
   if (!name) return 'blue';
+  // Cal 2: fixed color from config
+  if (isCal2) return AW_CAL2_COLOR_CFG || 'lime';
+  // Cal 1 presets
+  const preset = AW_CAL1_PRESET || 'ecam';
+  if (preset === 'none') return AW_CAL1_COLOR || 'blue';
+  if (preset === 'custom') {
+    const norm = awNorm(name);
+    for (const entry of AW_CAL1_SUBJECTS) {
+      if (norm.includes(awNorm(entry.match||''))) return entry.color || 'blue';
+    }
+    // fallback: hash
+    const word = norm.split(/[\s\-\u2013]/)[0];
+    let h = 0;
+    for (let i = 0; i < word.length; i++) h = (h * 31 + word.charCodeAt(i)) >>> 0;
+    return AW_COLORS[h % AW_COLORS.length];
+  }
+  // preset === 'ecam': use built-in ECAM color map
   const norm = awNorm(name);
   for (const entry of AW_COLOR_MAP) {
     if (norm.includes(awNorm(entry.match))) return entry.color;
@@ -283,7 +312,7 @@ function awRowHtml(ev, idx = -1) {
   const dur       = !allDay ? awFmtDuration(ev.start, ev.end) : '';
   const fullName  = ev.summary || '(No title)';
   const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
-  const color     = ev.cal2 ? AW_CAL2_COLOR : awColorFor(shortName);
+  const color     = awColorFor(shortName, ev.cal2);
 
   const typeMatch  = fullName.match(/\b(CM|TD|TP|DS|Exam|Cours)\b/i);
   const typeBadge  = typeMatch ? typeMatch[0].toUpperCase() : '';
@@ -435,7 +464,7 @@ function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackD
   const fullName  = ev.summary || '(No title)';
   const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
   const loc       = ev.location ? ev.location.split(',')[0].trim() : '';
-  const color     = ev.cal2 ? AW_CAL2_COLOR : awColorFor(shortName);
+  const color     = awColorFor(shortName, ev.cal2);
 
   const colorHex = {
     blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
@@ -543,7 +572,7 @@ function awPopOpen(el, idx) {
   const group = groupMatch ? groupMatch[0].trim() : '';
   const now   = awIsNow(ev.start, ev.end);
   const past  = !now && awIsPast(ev.end);
-  const color = ev.cal2 ? AW_CAL2_COLOR : awColorFor(shortName);
+  const color = awColorFor(shortName);
   const dur   = awFmtDuration(ev.start, ev.end);
   const pct   = now ? awProgress(ev.start, ev.end) : 0;
   const msTillStart = new Date(ev.start) - Date.now();
