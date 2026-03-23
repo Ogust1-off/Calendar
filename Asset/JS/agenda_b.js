@@ -46,7 +46,7 @@ function awToday() { return awDateStr(new Date()); }
 
 function awFmtTime(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleTimeString((window._appLocale||'en-GB'), { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { hour: '2-digit', minute: '2-digit' });
 }
 function awFmtRemaining(end) {
   const ms = new Date(end) - Date.now();
@@ -83,14 +83,14 @@ function awFmtDuration(start, end) {
 }
 function awFmtDayLabel(dateStr, long = false) {
   const d = new Date(dateStr + 'T00:00:00');
-  const s = d.toLocaleDateString((window._appLocale||'en-GB'), long
+  const s = d.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), long
     ? { weekday: 'long', day: 'numeric', month: 'long' }
     : { weekday: 'short', day: 'numeric', month: 'short' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function awWeekdayShort(dateStr) {
   return new Date(dateStr + 'T00:00:00')
-    .toLocaleDateString((window._appLocale||'en-GB'), { weekday: 'short' })
+    .toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { weekday: 'short' })
     .replace(/^./, c => c.toUpperCase());
 }
 function awDayNum(dateStr) { return new Date(dateStr + 'T00:00:00').getDate(); }
@@ -330,9 +330,11 @@ function awRowHtml(ev, idx = -1) {
       ${now         ? `<div class="aw-progress" style="background:${accent}${isLM?'18':'22'}"><div class="aw-progress-bar" data-ev-bar="${idx}" style="width:${pct}%;background:${accent}"></div></div>` : ''}
     </div>
     <div class="aw-time">
-      <span>${allDay ? 'Journ\u00e9e' : CLOCK_SVG + awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end) + (dur ? ` <span style="opacity:.45">(${dur})</span>` : '')}</span>
-      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">in ${awFmtRemaining(ev.start)}</div>` : ''}
-      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} left</div>` : ''}
+      ${allDay
+        ? `<span class="aw-time-single">${window._t?window._t('allDay'):'All day'}</span>`
+        : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur?` <span style="opacity:.4;font-size:9px">(${dur})</span>`:''}</span>`}
+      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">${window._t?window._t('in'):'in '}${awFmtRemaining(ev.start)}</div>` : ''}
+      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} ${window._t?window._t('left'):'left'}</div>` : ''}
     </div>
   </div>`;
 }
@@ -566,7 +568,7 @@ function awPopOpen(el, idx) {
       <div class="aw-pop-title">${fullName}</div>
       <div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span>${ev.start.length === 10 ? 'Journ\u00e9e enti\u00e8re' : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
+        <span>${ev.start.length === 10 ? (window._t?window._t('allDay'):'All day') : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
       </div>
       ${ev.location ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
@@ -589,14 +591,14 @@ function awPopOpen(el, idx) {
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
         ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
         ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
-        ${startsSoon ? `<span class="aw-pop-tag">STARTING SOON</span>` : ''}
+        ${startsSoon ? `<span class="aw-pop-tag">${window._t?window._t("startingSoon"):"STARTING SOON"}</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
         ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
         ${past ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
         <div class="aw-pop-progress-label" style="justify-content:flex-end;gap:4px">
-        <span>In</span>
+        <span>${window._t?window._t('inLabel'):'In'}</span>
         <span id="aw-pop-soon-cnt" style="font-weight:600;color:${accent}">${awFmtRemainingLong(ev.start)}</span>
       </div>` : ''}
       ${now ? `<div class="aw-pop-progress-wrap">
@@ -635,8 +637,8 @@ function awPopOpen(el, idx) {
         if (!bar || !pctEl || !remEl) { clearInterval(window._awPopTimer); return; }
         const p = awProgress(ev.start, ev.end);
         bar.style.width = p + '%';
-        pctEl.textContent = p + '% elapsed';
-        remEl.textContent = awFmtRemainingLong(ev.end) + ' left';
+        pctEl.textContent = p + '% ' + (window._t?window._t('elapsed'):'elapsed');
+        remEl.textContent = awFmtRemainingLong(ev.end) + ' ' + (window._t?window._t('left'):'left');
       }
       if (startsSoon) {
         const cntEl = document.getElementById('aw-pop-soon-cnt');
@@ -695,9 +697,9 @@ function awRenderCompact(byDay, today) {
     html += shown.map(ds => {
       const isToday = ds === today;
       const label   = awFmtDayLabel(ds, true);
-      const msg     = 'No more events today';
+      const msg = window._t?window._t('noMoreToday'):'No more events today';
       return `<div class="aw-skipped-row">
-        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class="aw-skipped-today-pill">Today</span>' : ''}</span>
+        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class="aw-skipped-today-pill">'+(window._t?window._t('today2'):'Today')+'</span>' : ''}</span>
         <span class="aw-skipped-msg">${msg}</span>
       </div>`;
     }).join('');
@@ -734,7 +736,7 @@ function awRenderCompact(byDay, today) {
 
   html += `<div class="aw-compact-day-hd">
     <span class="aw-compact-day-label${isToday ? ' today' : ''}">${dayLabel}</span>
-    ${isToday ? '<span class="aw-today-pill">Today</span>' : ''}
+    ${isToday ? '<span class="aw-today-pill">'+(window._t?window._t('today2'):'Today')+'</span>' : ''}
   </div>`;
 
   html += targetDay.items.map((ev) => {
@@ -768,12 +770,12 @@ function awRenderCalendar(byDay, today) {
 
   // "March 2026" — if week spans two months show "Mar – Apr 2026"
   const monthLabel = (() => {
-    const month0 = d0.toLocaleDateString((window._appLocale||'en-GB'), { month: 'long' });
+    const month0 = d0.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'long' });
     const year0  = d0.getFullYear();
     if (d0.getMonth() === d6.getMonth()) {
       return `<strong>${month0}</strong> <span class="aw-cal-year">${year0}</span>`;
     }
-    const month6 = d6.toLocaleDateString((window._appLocale||'en-GB'), { month: 'short' });
+    const month6 = d6.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'short' });
     const year6  = d6.getFullYear();
     const yearSuffix = year0 === year6 ? ` <span class="aw-cal-year">${year6}</span>` : ` <span class="aw-cal-year">${year0}</span> \u2013 <span class="aw-cal-year">${year6}</span>`;
     return `<strong>${month0.slice(0,3)} \u2013 ${month6}</strong>${yearSuffix}`;
@@ -996,7 +998,7 @@ setInterval(() => {
     const ev  = awEvCache[idx];
     if (!ev) return;
     if (!awIsNow(ev.start, ev.end)) return;
-    el.textContent = awFmtRemaining(ev.end) + ' left';
+    el.textContent = awFmtRemaining(ev.end) + ' ' + (window._t?window._t('left'):'left');
     // Update progress bar
     const bar = document.querySelector(`[data-ev-bar="${idx}"]`);
     if (bar) bar.style.width = awProgress(ev.start, ev.end) + '%';
@@ -1009,7 +1011,7 @@ setInterval(() => {
     if (!ev) return;
     const msTill = new Date(ev.start) - Date.now();
     if (msTill <= 0 || msTill >= 10800000) return;
-    el.textContent = 'in ' + awFmtRemaining(ev.start);
+    el.textContent = (window._t?window._t('in'):'in ') + awFmtRemaining(ev.start);
   });
 }, 1000);
 // ── DAY GRID (Week view) ──────────────────────────────────────────────────────
