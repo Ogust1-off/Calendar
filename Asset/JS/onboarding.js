@@ -498,13 +498,6 @@ function _s4() {
 // ── Validation ────────────────────────────────────────────────────────────────
 function _obValidate() {
   if (_obStep===1) {
-    var v=((document.getElementById('ob-apikey')||{}).value||'').trim();
-    var e=document.getElementById('ob-apikey-err');
-    if(!v){_obErr(e,'API key is required.');return false;}
-    if(!v.startsWith('AIza')){_obErr(e,'Should start with "AIza".');return false;}
-    _obClear(e); var d=_obLoad();d.apiKey=v;_obSave(d); return true;
-  }
-  if (_obStep===1) {
     var d2=_obLoad(), src=d2.calSource||'ical';
     if (_obCalSub===0) {
       // Source chosen — always valid, just save
