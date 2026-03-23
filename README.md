@@ -6,7 +6,7 @@ Your ECAM schedule, always with you.
 
 ## Install on iPhone
 
-1. Open the app link in **Safari** (not Chrome)
+1. Open the [app link](https://ogust1-off.github.io/Calendar/) in **Safari** (not Chrome)
 2. Tap the **Share** button ⎙ at the bottom
 3. Tap **"Add to Home Screen"**
 4. Tap **Add** — the app appears on your home screen
