@@ -240,13 +240,13 @@
   @media(prefers-color-scheme:light){#tb-pill{background:rgba(248,248,250,.94);
     border-color:rgba(0,0,0,.10);box-shadow:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.95)}}
   #tb-slider{position:absolute;top:5px;bottom:5px;border-radius:99px;
-    background:rgba(10,132,255,.18);pointer-events:none;
+    background:rgba(10,132,255,.18);pointer-events:none;z-index:0;
     transition:left .25s cubic-bezier(.4,0,.2,1),width .25s}
   @media(prefers-color-scheme:light){#tb-slider{background:rgba(0,122,255,.12)}}
   .tbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     padding:0 22px;height:100%;min-width:80px;border:none;background:none;cursor:pointer;
     color:var(--lbl3);font-family:inherit;-webkit-tap-highlight-color:transparent;
-    border-radius:99px;transition:color .2s,transform .1s;position:relative;z-index:1}
+    border-radius:99px;transition:color .2s,transform .1s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
   .tbtn:active{transform:scale(.88)}
   .tbtn.on{color:var(--tint)}
   .tbtn svg{width:24px;height:24px}
@@ -580,27 +580,48 @@ function _updateSlider(){
 }
 function _initPillSwipe(){
   var pill=document.getElementById('tb-pill');if(!pill)return;
-  var startX=0,startTab=0,moved=false;
-  pill.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;startTab=_tab;moved=false;var sl=document.getElementById('tb-slider');if(sl)sl.style.transition='none';},{passive:true});
-  pill.addEventListener('touchmove',function(e){
-    var dx=e.touches[0].clientX-startX;
-    if(Math.abs(dx)>6){moved=true;
-      var sl=document.getElementById('tb-slider');if(!sl)return;
-      var btns=pill.querySelectorAll('.tbtn');if(!btns.length)return;
-      var w=btns[startTab].offsetWidth;var base=btns[startTab].offsetLeft;
-      var cl=Math.max(-w,Math.min(w,dx));sl.style.left=(base+cl)+'px';sl.style.width=w+'px';}
+  var startX=0,startTab=0,swipeActive=false,swipeDist=0;
+  var SWIPE_THRESH=40; // px to trigger tab change
+
+  pill.addEventListener('touchstart',function(e){
+    startX=e.touches[0].clientX;
+    startTab=_tab;
+    swipeActive=false;
+    swipeDist=0;
+    var sl=document.getElementById('tb-slider');
+    if(sl)sl.style.transition='none';
   },{passive:true});
+
+  pill.addEventListener('touchmove',function(e){
+    swipeDist=e.touches[0].clientX-startX;
+    if(Math.abs(swipeDist)>8){
+      swipeActive=true;
+      // Drag slider visually
+      var sl=document.getElementById('tb-slider');if(!sl)return;
+      var btns=pill.querySelectorAll('.tbtn');if(!btns[startTab])return;
+      var w=btns[startTab].offsetWidth;
+      var base=btns[startTab].offsetLeft;
+      var clamped=Math.max(-w,Math.min(w,swipeDist));
+      sl.style.left=(base+clamped)+'px';
+      sl.style.width=w+'px';
+    }
+  },{passive:true});
+
   pill.addEventListener('touchend',function(e){
-    var sl=document.getElementById('tb-slider');if(sl)sl.style.transition='left .25s cubic-bezier(.4,0,.2,1),width .25s';
-    if(!moved){_updateSlider();return;}
-    var dx=e.changedTouches[0].clientX-startX;
-    var thresh=(pill.offsetWidth||240)/5;
+    var sl=document.getElementById('tb-slider');
+    if(sl)sl.style.transition='left .25s cubic-bezier(.4,0,.2,1),width .25s';
+    if(!swipeActive){
+      // It was a tap — let onclick handle it, just re-sync slider
+      setTimeout(_updateSlider,50);
+      return;
+    }
+    // It was a swipe — change tab based on direction
     var newTab=startTab;
-    if(dx<-thresh&&startTab<2)newTab=startTab+1;
-    else if(dx>thresh&&startTab>0)newTab=startTab-1;
+    if(swipeDist<-SWIPE_THRESH&&startTab<2)newTab=startTab+1;
+    else if(swipeDist>SWIPE_THRESH&&startTab>0)newTab=startTab-1;
     if(newTab!==startTab)goTab(newTab);
     else _updateSlider();
-    moved=false;
+    swipeActive=false;
   },{passive:true});
 }
 
