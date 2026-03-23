@@ -1,6 +1,6 @@
 # Calendar by Shortcut™
 
-Your ECAM schedule, always with you.
+Your Agenda, always with you.
 
 ---
 
