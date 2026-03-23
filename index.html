@@ -6,7 +6,7 @@
   <title>Calendar · Shortcut</title>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="Calendar by Shortcut™"/>
+  <meta name="apple-mobile-web-app-title" content="Calendar"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#000" media="(prefers-color-scheme:dark)"/>
   <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme:light)"/>
@@ -14,8 +14,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="Asset/Picture/icon-180.png"/>
   <link rel="apple-touch-icon" sizes="152x152" href="Asset/Picture/icon-152.png"/>
   <link rel="apple-touch-icon" sizes="120x120" href="Asset/Picture/icon-120.png"/>
-  <!--<link rel="icon" sizes="32x32" href="Asset/Picture/icon-32.png"/>-->
-  <link rel="icon" type="image/png" href="Asset/Picture/favicon.png">
+  <link rel="icon" sizes="32x32" href="Asset/Picture/icon-32.png"/>
   <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
   <style>
   :root{--bg:#000;--bg2:#1c1c1e;--bg3:#2c2c2e;
@@ -191,7 +190,9 @@
   .acc-icon img{width:100%;height:100%;object-fit:cover;display:block}
   .acc-name{font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--lbl);cursor:pointer}
   .acc-sub{font-size:13px;color:var(--lbl3)}
-  .acc-rows{width:100%;background:var(--bg2);border-radius:10px;overflow:hidden;border:.5px solid var(--sep)}
+  .acc-section-label{width:100%;font-size:12px;font-weight:600;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--lbl3);padding:0 6px 8px}
+  .acc-rows{width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;border:.5px solid var(--sep)}
   .acc-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border:none;
     background:none;color:var(--lbl);font-size:16px;font-family:inherit;cursor:pointer;
     text-align:left;width:100%;border-bottom:.5px solid var(--sep2);
@@ -229,8 +230,8 @@
     color:var(--lbl3);font-family:inherit;-webkit-tap-highlight-color:transparent;
     border-radius:99px;transition:color .2s,background .2s,transform .1s}
   .tbtn:active{transform:scale(.88)}
-  .tbtn.on{color:var(--tint);background:rgba(10,132,255,.15)}
-  @media(prefers-color-scheme:light){.tbtn.on{background:rgba(0,122,255,.12)}}
+  .tbtn.on{color:var(--tint);background:none}
+
   .tbtn svg{width:24px;height:24px}
   .tbtn span{font-size:11px;font-weight:500;letter-spacing:.01em}
   .tb-line{display:none}
@@ -343,13 +344,23 @@
         <div class="acc-sub">by Shortcut&#8482; &middot; &copy; 2026 Ogust&apos;1</div>
         <input type="file" id="acc-photo-input" accept="image/*" style="display:none" onchange="accChangePhoto(this)"/>
       </div>
+      <div class="acc-section-label">Preferences</div>
       <div class="acc-rows">
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico">&#127760;</span>
-          <span class="acc-row-lbl">Language</span>
+          <span class="acc-row-lbl" id="lbl-lang">Language</span>
           <select class="acc-select" id="acc-lang" onchange="accSetLang(this.value)">
             <option value="en">English</option>
             <option value="fr">Fran&#231;ais</option>
+          </select>
+        </div>
+        <div class="acc-row acc-row-static">
+          <span class="acc-row-ico" id="theme-ico">&#10024;</span>
+          <span class="acc-row-lbl" id="lbl-theme">Theme</span>
+          <select class="acc-select" id="acc-theme" onchange="accSetTheme(this.value)">
+            <option value="auto">Auto</option>
+            <option value="dark">Dark</option>
+            <option value="light">Light</option>
           </select>
         </div>
         <button class="acc-row" onclick="showCalSettings()">
@@ -421,9 +432,14 @@
       updatedM30Ago:function(m){return'Updated '+m+'min 30s ago';},
       offline:'Offline',updateFailed:'Update failed',
       configure:'Please configure your calendar in Settings.',
-      noMoreToday:'No more events today',noUpcoming:'No upcoming classes',
+      noMoreToday:'No more events today',noUpcoming:'No upcoming events',
       enjoyBreak:'Enjoy the break!',haveGreatWe:'Have a great weekend!',
       nextClass:'Next class',
+      tabAgenda:'Agenda',tabWeek:'Week',tabAccount:'Account',
+      locale:'en-GB',in:'in',inLabel:'In',elapsed:'elapsed',
+      refreshBtn:'Refresh calendar',settingsTitle:'Calendar API & Calendars',
+      updateAppBtn:'Update app',langLabel:'Language',themeLabel:'Theme',
+      byShortcut:'by Shortcut\u2122',themeDark:'Dark',themeLight:'Light',themeAuto:'Auto',
     },
     fr:{today:"Aujourd\u2019hui",allDay:'Toute la journ\u00e9e',inProgress:'En cours',
       completed:'TERMIN\u00c9',startingSoon:'BIENT\u00d4T',left:'restant',
@@ -436,6 +452,11 @@
       noMoreToday:'Plus d\u2019\u00e9v\u00e9nements aujourd\u2019hui',noUpcoming:'Aucun \u00e9v\u00e9nement \u00e0 venir',
       enjoyBreak:'Profitez-en\u00a0!',haveGreatWe:'Bon week-end\u00a0!',
       nextClass:'Prochain cours',
+      tabAgenda:'Agenda',tabWeek:'Semaine',tabAccount:'Compte',
+      locale:'fr-FR',in:'dans',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',
+      refreshBtn:'Actualiser l\u2019agenda',settingsTitle:'API & Agendas',
+      updateAppBtn:'Mettre \u00e0 jour l\u2019app',langLabel:'Langue',themeLabel:'Th\u00e8me',
+      byShortcut:'by Shortcut\u2122',themeDark:'Sombre',themeLight:'Clair',themeAuto:'Auto',
     }
   };
   window._getLang=function(){try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';}};
@@ -529,6 +550,8 @@ function goTab(i){
     if(_wkByDay&&(_wkDirty||!document.getElementById('wk-strip').children.length))wkInit(_wkByDay,_wkToday);
     else if(_wkCur)setTimeout(function(){wkSnap(_wkCur,false,false);},50);
   }
+  // Update sliding indicator
+  setTimeout(function(){if(typeof _updateSlider==='function')_updateSlider();},10);
 }
 function appRefresh(){_wkDirty=true;if(typeof awInit==='function')awInit();}
 function forceRefresh(){appRefresh();}
@@ -539,6 +562,7 @@ function appShowWeek(){goTab(1);}
 function _applyProfile(){
   try{
     var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+    _applyTheme(cfg.theme||'auto');
     var photo=cfg.photo||'';
     if(photo){
       var ni=document.getElementById('nb-avatar-img'),nw=document.getElementById('nb-avatar-wrap'),ai=document.getElementById('acc-avatar-img');
@@ -571,6 +595,30 @@ function accSetLang(lang){
 function showCalSettings(){
   if(typeof _obOpenCalSettings==='function')_obOpenCalSettings();
   else if(typeof showSettings==='function')showSettings();
+}
+function accSetTheme(v){
+  try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.theme=v;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
+  _applyTheme(v);
+}
+function _applyTheme(v){
+  var root=document.documentElement;
+  if(v==='dark'){root.style.colorScheme='dark';}
+  else if(v==='light'){root.style.colorScheme='light';}
+  else{root.style.colorScheme='';}
+  var ico=document.getElementById('theme-ico');
+  if(ico)ico.textContent=v==='light'?'\u2600\ufe0f':v==='dark'?'\uD83CDF19':'\u2728';
+  var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
+}
+function accSetTheme(v){
+  try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.theme=v;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
+  _applyTheme(v);
+}
+function _applyTheme(v){
+  var r=document.documentElement;
+  if(v==='dark'){r.style.colorScheme='dark';}
+  else if(v==='light'){r.style.colorScheme='light';}
+  else{r.style.colorScheme='';}
+  var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
 }
 function accLogout(){
   var lang='en';try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');if(d&&d.lang)lang=d.lang;}catch(e){}
@@ -656,8 +704,7 @@ var _STRINGS = {
   }
 };
 function _lang(){ try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';} }
-function _t(k,a){ var s=_STRINGS[_lang()]||_STRINGS.en; var v=s[k]||_STRINGS.en[k]||k; if(a!==undefined&&typeof v==='function')return v(a); return v; }
-window._t=_t;
+function _t(k,a){ return window._t?window._t(k,a):(a!==undefined?k+' '+a:k); }
 
 function _applyLang(){
   var l=_lang();
@@ -681,6 +728,16 @@ function _applyLang(){
   // Install banner
   var it=document.querySelector('.ib-txt strong');if(it)it.textContent=_t('installTitle');
   var is2=document.querySelector('.ib-txt small');if(is2)is2.textContent=_t('installSub');
+  // Lang/theme labels
+  var langLbl=document.getElementById('acc-lang-lbl');if(langLbl)langLbl.textContent=_t('langLabel')||'Language';
+  var themeLbl=document.getElementById('acc-theme-lbl');if(themeLbl)themeLbl.textContent=_t('themeLabel')||'Theme';
+  var thSel=document.getElementById('acc-theme');
+  if(thSel){
+    thSel.options[0].text=_t('themeAuto')||'Auto';
+    thSel.options[1].text=_t('themeDark')||'Dark';
+    thSel.options[2].text=_t('themeLight')||'Light';
+    try{var d2=JSON.parse(localStorage.getItem('shortcut_config')||'null');if(d2&&d2.theme)thSel.value=d2.theme;}catch(e){}
+  }
   // Logout label
   var ll=document.getElementById('acc-logout-lbl');
   if(ll)ll.textContent=l==='fr'?"Se déconnecter & réinitialiser":'Sign out & reset';
@@ -719,42 +776,72 @@ window.addEventListener('load',function(){
   _applyProfile();
   _applyLang();
   _initPillSwipe();
+  // Apply saved theme
+  try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');if(d&&d.theme)_applyTheme(d.theme);}catch(e){}
 });
 
 function _initPillSwipe(){
   var pill=document.getElementById('tb-pill');
   if(!pill)return;
-  var startX=0,startTab=0,moved=false;
+  var startX=0,startTab=0,moved=false,activeBg=null;
+
+  // Find or create the sliding active background
+  var slider=document.getElementById('tb-slider');
+  if(!slider){
+    slider=document.createElement('div');
+    slider.id='tb-slider';
+    slider.style.cssText='position:absolute;top:5px;bottom:5px;border-radius:99px;background:rgba(10,132,255,.18);transition:left .25s cubic-bezier(.4,0,.2,1),width .25s;pointer-events:none;z-index:0;';
+    pill.style.position='relative';
+    pill.insertBefore(slider,pill.firstChild);
+    _updateSlider(slider);
+  }
 
   pill.addEventListener('touchstart',function(e){
     startX=e.touches[0].clientX;
     startTab=_tab;
     moved=false;
+    slider.style.transition='none';
   },{passive:true});
 
   pill.addEventListener('touchmove',function(e){
     var dx=e.touches[0].clientX-startX;
     if(Math.abs(dx)>6){
       moved=true;
-      // Slight visual feedback on pill
-      var clamped=Math.max(-40,Math.min(40,dx*0.2));
-      pill.style.transform='translateX('+clamped+'px)';
+      // Move slider proportionally between tabs
+      var btns=pill.querySelectorAll('.tbtn');
+      if(!btns.length)return;
+      var w=btns[0].offsetWidth;
+      var baseLeft=btns[startTab].offsetLeft;
+      var clampedDx=Math.max(-w,Math.min(w,dx));
+      slider.style.left=(baseLeft+clampedDx)+'px';
+      slider.style.width=w+'px';
     }
   },{passive:true});
 
   pill.addEventListener('touchend',function(e){
-    pill.style.transform='';
-    pill.style.transition='transform .2s cubic-bezier(.34,1.4,.64,1)';
-    setTimeout(function(){pill.style.transition='';},220);
-    if(!moved)return;
+    slider.style.transition='left .25s cubic-bezier(.4,0,.2,1),width .25s';
+    if(!moved){_updateSlider(slider);return;}
     var dx=e.changedTouches[0].clientX-startX;
-    var thresh=pill.offsetWidth/5;
+    var pill2=document.getElementById('tb-pill');
+    var thresh=(pill2?pill2.offsetWidth:240)/5;
     var newTab=startTab;
     if(dx<-thresh&&startTab<2)newTab=startTab+1;
     else if(dx>thresh&&startTab>0)newTab=startTab-1;
     if(newTab!==startTab)goTab(newTab);
+    else _updateSlider(slider);
     moved=false;
   },{passive:true});
+}
+
+function _updateSlider(slider){
+  if(!slider)slider=document.getElementById('tb-slider');
+  if(!slider)return;
+  var pill=document.getElementById('tb-pill');
+  if(!pill)return;
+  var btns=pill.querySelectorAll('.tbtn');
+  if(!btns[_tab])return;
+  slider.style.left=btns[_tab].offsetLeft+'px';
+  slider.style.width=btns[_tab].offsetWidth+'px';
 }
 
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});

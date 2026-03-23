@@ -510,19 +510,22 @@ let awLastUpdated = null;
 
 function awUpdateTimer() {
   if (!awLastUpdated) return;
-  const secs = Math.round((Date.now() - awLastUpdated) / 1000);
-  const rounded = Math.round(secs / 30) * 30;
-  const mins = Math.floor(rounded / 60);
-  const remSecs = rounded % 60;
-  var _wt=window._t||function(k,a){return a!==undefined?k+' '+a:k;};
-  var txt = secs < 10 ? _wt('justUpdated')
-    : secs < 60 ? _wt('updatedSAgo',secs)
-    : remSecs === 0 ? _wt('updatedMAgo',mins)
-    : _wt('updatedM30Ago',mins);
-  // Write to all indicator elements directly
+  var secs = Math.round((Date.now() - awLastUpdated) / 1000);
+  var mins = Math.floor(secs / 60);
+  var fr = (typeof window._getLang === 'function') && window._getLang() === 'fr';
+  var txt;
+  if (secs < 10) {
+    txt = fr ? 'Mis à jour' : 'Just updated';
+  } else if (secs < 60) {
+    txt = fr ? ('Mis à jour il y a ' + secs + 's') : ('Updated ' + secs + 's ago');
+  } else if (secs < 120) {
+    txt = fr ? 'Mis à jour il y a 1min' : 'Updated 1min ago';
+  } else {
+    txt = fr ? ('Mis à jour il y a ' + mins + 'min') : ('Updated ' + mins + 'min ago');
+  }
   ['aw-last-updated','nb-upd','acc-upd'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el){el.textContent=txt;el.style.color='';}
+    var el = document.getElementById(id);
+    if (el) { el.textContent = txt; el.style.color = ''; }
   });
 }
 
