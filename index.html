@@ -550,6 +550,18 @@ function goTab(i){
     if(_wkByDay&&(_wkDirty||!document.getElementById('wk-strip').children.length))wkInit(_wkByDay,_wkToday);
     else if(_wkCur)setTimeout(function(){wkSnap(_wkCur,false,false);},50);
   }
+  if(i===0){
+    // Scroll agenda to today's section
+    setTimeout(function(){
+      var agenda=document.getElementById('v-agenda');
+      if(!agenda)return;
+      var today=document.querySelector('#v-agenda .aw-compact-day-hd .aw-today-pill');
+      if(today){
+        var hd=today.closest('.aw-compact-day-hd');
+        if(hd)hd.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+    },60);
+  }
   // Update sliding indicator
   setTimeout(function(){if(typeof _updateSlider==='function')_updateSlider();},10);
 }

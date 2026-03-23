@@ -302,7 +302,7 @@ function awRowHtml(ev, idx = -1) {
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
     group     ? `<span class="aw-row-badge aw-row-badge--group">${group}</span>` : '',
-    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">'+(window._t?window._t('inProgress'):'In progress')+'</span>` : '',
+    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">${window._t?window._t('inProgress'):'In progress'}</span>` : '',
   ].filter(Boolean).join('');
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
@@ -605,24 +605,24 @@ function awPopOpen(el, idx) {
       ${typeBadge || group || startsSoon? `<div class="aw-pop-tags">
         ${typeBadge ? `<span class="aw-pop-tag" style="border-color:${accent};color:${accent}">${typeBadge}</span>` : ''}
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
-        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">'+(window._t?window._t('inProgress'):'In progress')+'</span>` : ''}
-        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">'+(window._t?window._t('completed'):'COMPLETED')+'</span>` : ''}
-        ${startsSoon ? `<span class="aw-pop-tag">'+(window._t?window._t('startingSoon'):'STARTING SOON')+'</span>` : ''}
+        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
+        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'COMPLETED'}</span>` : ''}
+        ${startsSoon ? `<span class="aw-pop-tag">${window._t?window._t('startingSoon'):'STARTING SOON'}</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
-        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">'+(window._t?window._t('inProgress'):'In progress')+'</span>` : ''}
-        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">'+(window._t?window._t('completed'):'COMPLETED')+'</span>` : ''}
+        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
+        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'COMPLETED'}</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
         <div class="aw-pop-progress-label" style="justify-content:flex-end;gap:4px">
-        <span>'+(window._t?window._t('inLabel'):'In')+'</span>
+        <span>${window._t?window._t('inLabel'):'In'}</span>
         <span id="aw-pop-soon-cnt" style="font-weight:600;color:${accent}">${awFmtRemainingLong(ev.start)}</span>
       </div>` : ''}
       ${now ? `<div class="aw-pop-progress-wrap">
         <div id="aw-pop-bar" class="aw-pop-progress-bar" style="width:${pct}%;background:${accent}"></div>
       </div>
       <div class="aw-pop-progress-label">
-        <span id="aw-pop-pct">${pct}% '+(window._t?window._t('elapsed'):'elapsed')+'</span>
-        <span id="aw-pop-rem">${awFmtRemainingLong(ev.end)} '+(window._t?window._t('left'):'left')+'</span>
+        <span id="aw-pop-pct">${pct}% ${window._t?window._t('elapsed'):'elapsed'}</span>
+        <span id="aw-pop-rem">${awFmtRemainingLong(ev.end)} ${window._t?window._t('left'):'left'}</span>
       </div>` : ''}
     </div>`;
 
@@ -748,14 +748,14 @@ function awRenderCompact(byDay, today) {
     if (isWE) {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u{1F33F}</div>
-        <div class="aw-empty-title">'+(window._t?window._t('haveGreatWe'):'Have a great weekend!')+'</div>
-        <div class="aw-empty-sub">'+(window._t?window._t('nextClass'):'Next class')+': ${nextMonday}+'</div>
+        <div class="aw-empty-title">${window._t?window._t('haveGreatWe'):'Have a great weekend!'}</div>
+        <div class="aw-empty-sub">${window._t?window._t('nextClass'):'Next class'}: ${nextMonday}</div>
       </div>`;
     } else {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u2705</div>
-        <div class="aw-empty-title">'+(window._t?window._t('noUpcoming'):'No upcoming classes')+'</div>
-        <div class="aw-empty-sub">'+(window._t?window._t('enjoyBreak'):'Enjoy the break!')+'</div>
+        <div class="aw-empty-title">${window._t?window._t('noUpcoming'):'No upcoming events'}</div>
+        <div class="aw-empty-sub">${window._t?window._t('enjoyBreak'):'Enjoy the break!'}</div>
       </div>`;
     }
     compact.innerHTML = html;
