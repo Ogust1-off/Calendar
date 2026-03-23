@@ -328,9 +328,9 @@ function _s2c(d) {
        '<h2 class="ob-h2">Calendar 1 Style</h2>' +
        '<p class="ob-p2">How should event colours be assigned?</p>' +
        '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">' +
-         _srcBtn2('ecam',   preset==='ecam',   '&#127979;', 'ECAM Preset',     'Auto-detects subjects and assigns colours.') +
-         _srcBtn2('custom', preset==='custom', '&#127912;', 'Custom',          'Name your subjects and pick a colour each.') +
-         _srcBtn2('none',   preset==='none',   '&#128288;', 'Single colour',   'All events in one colour.') +
+         _srcBtn2('ecam',   preset==='ecam',   '&#127979;', 'ECAM Preset',       'Auto-detects subjects by name and assigns colours.') +
+         _srcBtn2('custom', preset==='custom', '&#127912;', 'Custom',            'Set your own subject names and colours.') +
+         _srcBtn2('none',   preset==='none',   '&#11036;',  'Single colour',     'All events use one colour.') +
        '</div>' +
        '<div id="ob-c1-color" style="' + (preset==='none'?'':'display:none') + '">' +
          '<label class="ob-lbl" style="display:block;margin-bottom:8px">COLOUR</label>' +
@@ -367,7 +367,7 @@ function _srcBtn(val, active, ico, title, sub) {
     '<div class="ob-src-chk">'+(active?'&#10003;':'')+'</div></button>';
 }
 function _srcBtn2(val, active, ico, title, sub) {
-  return '<button class="ob-src-btn'+(active?' ob-src-on':'')+'" onclick="_obPickPreset(\''+val+'\',this)">' +
+  return '<button class="ob-preset-btn'+(active?' ob-preset-on':'')+'" onclick="_obPickPreset(\''+val+'\',this)">' +
     '<div class="ob-src-ico">'+ico+'</div><div class="ob-src-body"><div class="ob-src-title">'+title+'</div><div class="ob-src-sub">'+sub+'</div></div>' +
     '<div class="ob-src-chk">'+(active?'&#10003;':'')+'</div></button>';
 }
@@ -382,8 +382,8 @@ function _obPickSrc(val, btn) {
   if(val==='ical')f.style.marginTop='14px';
 }
 function _obPickPreset(val, btn) {
-  document.querySelectorAll('#ob-content .ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
-  btn.classList.add('ob-src-on'); var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
+  document.querySelectorAll('#ob-content .ob-preset-btn').forEach(function(b){b.classList.remove('ob-preset-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
+  btn.classList.add('ob-preset-on'); var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
   var d=_obLoad(); d.cal1Preset=val; _obSave(d);
   var cr=document.getElementById('ob-c1-color'); if(cr)cr.style.display=(val==='none'?'':'none');
   var sr=document.getElementById('ob-c1-subjs'); if(sr)sr.style.display=(val==='custom'?'':'none');
@@ -725,14 +725,14 @@ var _origPickPreset = _obPickPreset;
 .ob-hint-l strong{color:rgba(255,255,255,.65)} .ob-hint-l em{color:rgba(96,165,250,.9);font-style:normal}
 @media(prefers-color-scheme:light){.ob-hint-l{color:rgba(0,0,0,.44)}.ob-hint-l strong{color:rgba(0,0,0,.72)}}
 /* Source / preset buttons */
-.ob-src-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
+.ob-src-btn,.ob-preset-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
   border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);
   color:rgba(255,255,255,.85);font-family:inherit;cursor:pointer;text-align:left;width:100%;
   -webkit-tap-highlight-color:transparent;transition:all .15s;margin-bottom:8px}
 .ob-src-btn:last-child{margin-bottom:0}
 .ob-src-btn:active{transform:scale(.98)}
-.ob-src-btn.ob-src-on{border-color:#3b82f6;background:rgba(59,130,246,.12)}
-@media(prefers-color-scheme:light){.ob-src-btn{border-color:rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.8)}.ob-src-btn.ob-src-on{border-color:#007aff;background:rgba(0,122,255,.08)}}
+.ob-src-btn.ob-src-on,.ob-preset-btn.ob-preset-on{border-color:#3b82f6;background:rgba(59,130,246,.12)}
+@media(prefers-color-scheme:light){.ob-src-btn{border-color:rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.8)}.ob-src-btn.ob-src-on,.ob-preset-btn.ob-preset-on{border-color:#007aff;background:rgba(0,122,255,.08)}}
 .ob-src-ico{font-size:22px;flex-shrink:0;width:30px;text-align:center}
 .ob-src-body{flex:1;min-width:0}
 .ob-src-title{font-size:14px;font-weight:600;margin-bottom:2px}
