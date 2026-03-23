@@ -2,41 +2,26 @@
 Copyright © 2026 Ogust'1. All rights reserved.
 */
 
-// Config lue depuis localStorage
-function _getCfg() {
-  try { return JSON.parse(localStorage.getItem('shortcut_config') || 'null'); } catch(e) { return null; }
-}
+function _getCfg() { try { return JSON.parse(localStorage.getItem('shortcut_config')||'null'); } catch(e){ return null; } }
 function _loadCfg() {
-  var c = _getCfg(); if (!c) return false;
-  AW_API_KEY       = c.apiKey      || '';
-  AW_CALENDAR_ID   = c.calendars && c.calendars[0] ? c.calendars[0] : '';
-  AW_CALENDAR_ID_2 = c.calendars && c.calendars[1] ? c.calendars[1] : '';
-  AW_ICAL_URL      = c.icalUrl || '';
-  // Cal 1 preset
-  AW_CAL1_PRESET   = c.cal1Preset  || 'ecam'; // 'ecam' | 'custom' | 'none'
-  AW_CAL1_COLOR    = c.cal1Color   || 'blue';  // used when preset='none'
-  AW_CAL1_SUBJECTS = c.cal1Subjects || [];     // [{match, color}] when preset='custom'
-  // Cal 2 color
-  AW_CAL2_COLOR_CFG = c.cal2Color  || 'lime';
-  // iCal source for cal 1 (alternative to Google API)
-  if (c.cal1Ical) AW_ICAL_URL = c.cal1Ical;
-  return !!(AW_API_KEY || c.cal1Ical) && !!(AW_CALENDAR_ID || c.cal1Ical);
+  const c = _getCfg(); if (!c) return false;
+  AW_API_KEY        = c.apiKey       || '';
+  AW_CALENDAR_ID    = c.calendars && c.calendars[0] ? c.calendars[0] : '';
+  AW_CALENDAR_ID_2  = c.calendars && c.calendars[1] ? c.calendars[1] : '';
+  AW_ICAL_URL       = c.cal1Ical || c.icalUrl || '';
+  AW_CAL1_PRESET    = c.cal1Preset   || 'ecam';
+  AW_CAL1_COLOR_CFG = c.cal1Color    || 'blue';
+  AW_CAL1_SUBJECTS  = c.cal1Subjects || [];
+  AW_CAL2_COLOR_CFG = c.cal2Color    || 'lime';
+  return !!(AW_API_KEY && AW_CALENDAR_ID) || !!(c.cal1Ical);
 }
-let AW_CAL1_PRESET   = 'ecam';
-let AW_CAL1_COLOR    = 'blue';
-let AW_CAL1_SUBJECTS = [];
-let AW_CAL2_COLOR_CFG = 'lime';
-let AW_API_KEY      = '';
-let AW_CALENDAR_ID  = '';
-let AW_CALENDAR_ID_2 = '';
+let AW_API_KEY = '', AW_CALENDAR_ID = '', AW_CALENDAR_ID_2 = '', AW_ICAL_URL = '';
+let AW_CAL1_PRESET = 'ecam', AW_CAL1_COLOR_CFG = 'blue', AW_CAL1_SUBJECTS = [], AW_CAL2_COLOR_CFG = 'lime';
 const AW_CAL2_COLOR = 'lime';
-let AW_ICAL_URL     = '';
-const AW_FETCH_DAYS  = 49;
+const AW_FETCH_DAYS = 49;
 
-// Grid 0-24h, px/heure calculé dynamiquement dans awRenderDay
-const AW_HOUR_START  = 0;
-const AW_HOUR_END    = 24;
-let   AW_PX_PER_HOUR = 60;
+// Grid config: show hours from AW_HOUR_START to AW_HOUR_END
+const AW_HOUR_START=0, AW_HOUR_END=24; let AW_PX_PER_HOUR=60;
 
 // ── 🎨 COULEURS PAR MATIÈRE ──────────────────────────────────────────────────
 const AW_COLOR_MAP = [
@@ -127,32 +112,21 @@ const AW_CAL2_COLOR_HEX = '#84cc16'; // lime-500
 function awNorm(s) {
   return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 }
+const AW_COLOR_HEX = {
+  blue:'#3b82f6',violet:'#8b5cf6',emerald:'#10b981',
+  amber:'#f59e0b',rose:'#f43f5e',cyan:'#06b6d4',
+  orange:'#f97316',grey:'#94a3b8',lime:'#84cc16',
+};
 function awColorFor(name, isCal2) {
   if (!name) return 'blue';
-  // Cal 2: fixed color from config
   if (isCal2) return AW_CAL2_COLOR_CFG || 'lime';
-  // Cal 1 presets
   const preset = AW_CAL1_PRESET || 'ecam';
-  if (preset === 'none') return AW_CAL1_COLOR || 'blue';
-  if (preset === 'custom') {
-    const norm = awNorm(name);
-    for (const entry of AW_CAL1_SUBJECTS) {
-      if (norm.includes(awNorm(entry.match||''))) return entry.color || 'blue';
-    }
-    // fallback: hash
-    const word = norm.split(/[\s\-\u2013]/)[0];
-    let h = 0;
-    for (let i = 0; i < word.length; i++) h = (h * 31 + word.charCodeAt(i)) >>> 0;
-    return AW_COLORS[h % AW_COLORS.length];
-  }
-  // preset === 'ecam': use built-in ECAM color map
+  if (preset === 'none') return AW_CAL1_COLOR_CFG || 'blue';
   const norm = awNorm(name);
-  for (const entry of AW_COLOR_MAP) {
-    if (norm.includes(awNorm(entry.match))) return entry.color;
-  }
-  const word = norm.split(/[\s\-\u2013]/)[0];
-  let h = 0;
-  for (let i = 0; i < word.length; i++) h = (h * 31 + word.charCodeAt(i)) >>> 0;
+  const map = preset === 'custom' ? AW_CAL1_SUBJECTS : AW_COLOR_MAP;
+  for (const e of map) { if (norm.includes(awNorm(e.match||''))) return e.color||'blue'; }
+  const word = norm.split(/[\s\-–]/)[0];
+  let h = 0; for (let i=0;i<word.length;i++) h=(h*31+word.charCodeAt(i))>>>0;
   return AW_COLORS[h % AW_COLORS.length];
 }
 
@@ -310,7 +284,7 @@ function awRowHtml(ev, idx = -1) {
   const past      = !allDay && !now && awIsPast(ev.end);
   const pct       = now ? awProgress(ev.start, ev.end) : 0;
   const dur       = !allDay ? awFmtDuration(ev.start, ev.end) : '';
-  const fullName  = ev.summary || '(No title)';
+  const fullName  = ev.summary || '(Sans titre)';
   const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
   const color     = awColorFor(shortName, ev.cal2);
 
@@ -319,11 +293,7 @@ function awRowHtml(ev, idx = -1) {
   const groupMatch = fullName.match(/(?:AB|CD|EF|GH|A&M\d[A-Z\s]*(?:S\d+)?)/i);
   const group      = groupMatch ? groupMatch[0].trim() : '';
 
-  const colorHex = {
-    blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
-    amber:'#f59e0b', rose:'#f43f5e', cyan:'#06b6d4', orange:'#f97316', grey:'#94a3b8',
-    lime: AW_CAL2_COLOR_HEX,
-  };
+  const colorHex = AW_COLOR_HEX;
   const accent = colorHex[color] || '#3b82f6';
 
   const isLM = window.matchMedia('(prefers-color-scheme: light)').matches;
@@ -331,7 +301,7 @@ function awRowHtml(ev, idx = -1) {
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
     group     ? `<span class="aw-row-badge aw-row-badge--group">${group}</span>` : '',
-    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">${window._t?window._t('inProgress'):'In progress'}</span>` : '',
+    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">In progress</span>` : '',
   ].filter(Boolean).join('');
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
@@ -349,7 +319,7 @@ function awRowHtml(ev, idx = -1) {
 
   const CLOCK_SVG = `<svg style="display:inline;vertical-align:middle;margin-right:3px;opacity:.5" width="11" height="11" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>`;
 
-  return `<div class="aw-event${now ? ' aw-event-now' : ''}${past ? ' aw-event-past' : ''}" data-ev="${idx}" style="${nowStyle}cursor:pointer;" onclick="awPopOpen(this,${idx})">
+  return `<div class="aw-event${now ? ' aw-event-now' : ''}${past ? ' aw-event-past' : ''}" data-ev="${idx}" onclick="awPopOpen(this,${idx})" style="${nowStyle}cursor:pointer;">
     <div class="aw-color-dot" data-color="${color}"></div>
     <div class="aw-body">
       <div class="aw-name">${shortName}${badges ? `<span class="aw-row-badges">${badges}</span>` : ''}</div>
@@ -360,12 +330,9 @@ function awRowHtml(ev, idx = -1) {
       ${now         ? `<div class="aw-progress" style="background:${accent}${isLM?'18':'22'}"><div class="aw-progress-bar" data-ev-bar="${idx}" style="width:${pct}%;background:${accent}"></div></div>` : ''}
     </div>
     <div class="aw-time">
-      ${allDay
-        ? '<span class="aw-time-single">'+(window._t?window._t('allDay'):'All day')+'</span>'
-        : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur ? ' <span style="opacity:.4;font-size:9px">('+dur+')</span>' : ''}</span>`
-      }
-      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">${(window._t?window._t('in',''):'')}${awFmtRemaining(ev.start)}</div>` : ''}
-      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} ${(window._t?window._t('left'):'left')}</div>` : ''}
+      <span>${allDay ? 'Journ\u00e9e' : CLOCK_SVG + awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end) + (dur ? ` <span style="opacity:.45">(${dur})</span>` : '')}</span>
+      ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">in ${awFmtRemaining(ev.start)}</div>` : ''}
+      ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} left</div>` : ''}
     </div>
   </div>`;
 }
@@ -461,16 +428,12 @@ function awLayoutColumns(timedItems) {
 function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackDepth = 0, isTopStacked = true, visibleHeight = null, nextCoverStart = null) {
   const now       = awIsNow(ev.start, ev.end);
   const past      = !now && awIsPast(ev.end);
-  const fullName  = ev.summary || '(No title)';
+  const fullName  = ev.summary || '(Sans titre)';
   const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
   const loc       = ev.location ? ev.location.split(',')[0].trim() : '';
   const color     = awColorFor(shortName, ev.cal2);
 
-  const colorHex = {
-    blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
-    amber:'#f59e0b', rose:'#f43f5e', cyan:'#06b6d4', orange:'#f97316', grey:'#94a3b8',
-    lime: AW_CAL2_COLOR_HEX,
-  };
+  const colorHex = AW_COLOR_HEX;
   const accent = colorHex[color] || '#3b82f6';
   const isLM = window.matchMedia('(prefers-color-scheme: light)').matches;
 
@@ -539,22 +502,16 @@ let awLastUpdated = null;
 
 function awUpdateTimer() {
   if (!awLastUpdated) return;
-  var secs = Math.round((Date.now() - awLastUpdated) / 1000);
-  var mins = Math.floor(secs / 60);
-  var fr = (typeof window._getLang === 'function') && window._getLang() === 'fr';
-  var txt;
-  if (secs < 10) {
-    txt = fr ? 'Mis à jour' : 'Just updated';
-  } else if (secs < 60) {
-    txt = fr ? ('Mis à jour il y a ' + secs + 's') : ('Updated ' + secs + 's ago');
-  } else if (secs < 120) {
-    txt = fr ? 'Mis à jour il y a 1min' : 'Updated 1min ago';
-  } else {
-    txt = fr ? ('Mis à jour il y a ' + mins + 'min') : ('Updated ' + mins + 'min ago');
-  }
-  ['aw-last-updated','nb-upd','acc-upd'].forEach(function(id){
-    var el = document.getElementById(id);
-    if (el) { el.textContent = txt; el.style.color = ''; }
+  const secs = Math.round((Date.now()-awLastUpdated)/1000);
+  const mins = Math.floor(secs/60);
+  const fr = typeof window._getLang==='function' && window._getLang()==='fr';
+  const txt = secs<10 ? (fr?'Mis à jour':'Just updated')
+    : secs<60  ? (fr?`Mis à jour il y a ${secs}s`:`Updated ${secs}s ago`)
+    : secs<120 ? (fr?'Mis à jour il y a 1min':'Updated 1min ago')
+    : (fr?`Mis à jour il y a ${mins}min`:`Updated ${mins}min ago`);
+  ['aw-last-updated','nb-upd','acc-upd'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=txt;el.style.color='';}
   });
 }
 
@@ -564,7 +521,7 @@ function awPopOpen(el, idx) {
   const ev      = awEvCache[idx];
   if (!ev) return;
 
-  const fullName  = ev.summary || '(No title)';
+  const fullName  = ev.summary || '(Sans titre)';
   const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
   const typeMatch = fullName.match(/\b(CM|TD|TP|DS|Exam|Cours)\b/i);
   const typeBadge = typeMatch ? typeMatch[0].toUpperCase() : '';
@@ -572,7 +529,7 @@ function awPopOpen(el, idx) {
   const group = groupMatch ? groupMatch[0].trim() : '';
   const now   = awIsNow(ev.start, ev.end);
   const past  = !now && awIsPast(ev.end);
-  const color = awColorFor(shortName);
+  const color = awColorFor(shortName, ev.cal2);
   const dur   = awFmtDuration(ev.start, ev.end);
   const pct   = now ? awProgress(ev.start, ev.end) : 0;
   const msTillStart = new Date(ev.start) - Date.now();
@@ -580,11 +537,7 @@ function awPopOpen(el, idx) {
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
 
-  const colorHex = {
-    blue:'#3b82f6', violet:'#8b5cf6', emerald:'#10b981',
-    amber:'#f59e0b', rose:'#f43f5e', cyan:'#06b6d4', orange:'#f97316', grey:'#94a3b8',
-    lime: AW_CAL2_COLOR_HEX,
-  };
+  const colorHex = AW_COLOR_HEX;
   const accent = colorHex[color] || '#3b82f6';
 
   const pop = document.createElement('div');
@@ -613,7 +566,7 @@ function awPopOpen(el, idx) {
       <div class="aw-pop-title">${fullName}</div>
       <div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span>${ev.start.length === 10 ? (window._t?window._t('allDay'):'All day') : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
+        <span>${ev.start.length === 10 ? 'Journ\u00e9e enti\u00e8re' : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
       </div>
       ${ev.location ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
@@ -634,55 +587,40 @@ function awPopOpen(el, idx) {
       ${typeBadge || group || startsSoon? `<div class="aw-pop-tags">
         ${typeBadge ? `<span class="aw-pop-tag" style="border-color:${accent};color:${accent}">${typeBadge}</span>` : ''}
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
-        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
-        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'COMPLETED'}</span>` : ''}
-        ${startsSoon ? `<span class="aw-pop-tag">${window._t?window._t('startingSoon'):'STARTING SOON'}</span>` : ''}
+        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
+        ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
+        ${startsSoon ? `<span class="aw-pop-tag">STARTING SOON</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
-        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
-        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'COMPLETED'}</span>` : ''}
+        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">In progress</span>` : ''}
+        ${past ? `<span class="aw-pop-tag aw-pop-tag-past">COMPLETED</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
         <div class="aw-pop-progress-label" style="justify-content:flex-end;gap:4px">
-        <span>${window._t?window._t('inLabel'):'In'}</span>
+        <span>In</span>
         <span id="aw-pop-soon-cnt" style="font-weight:600;color:${accent}">${awFmtRemainingLong(ev.start)}</span>
       </div>` : ''}
       ${now ? `<div class="aw-pop-progress-wrap">
         <div id="aw-pop-bar" class="aw-pop-progress-bar" style="width:${pct}%;background:${accent}"></div>
       </div>
       <div class="aw-pop-progress-label">
-        <span id="aw-pop-pct">${pct}% ${window._t?window._t('elapsed'):'elapsed'}</span>
-        <span id="aw-pop-rem">${awFmtRemainingLong(ev.end)} ${window._t?window._t('left'):'left'}</span>
+        <span id="aw-pop-pct">${pct}% elapsed</span>
+        <span id="aw-pop-rem">${awFmtRemainingLong(ev.end)} left</span>
       </div>` : ''}
     </div>`;
 
   document.body.appendChild(pop);
-
-  pop.style.position = 'fixed';
-  pop.style.zIndex   = '9999';
-  if (window.innerWidth < 600) {
-    pop.style.left         = '10px';
-    pop.style.right        = '10px';
-    pop.style.bottom       = 'calc(49px + env(safe-area-inset-bottom,0px) + 10px)';
-    pop.style.top          = 'auto';
-    pop.style.width        = 'auto';
-    pop.style.maxWidth     = 'none';
-    pop.style.borderRadius = '20px';
-    pop.style.transformOrigin = 'bottom center';
+  pop.style.position='fixed'; pop.style.zIndex='9999';
+  if (window.innerWidth<600) {
+    pop.style.left='10px'; pop.style.right='10px'; pop.style.top='auto';
+    pop.style.bottom='calc(64px + env(safe-area-inset-bottom,0px))';
+    pop.style.maxWidth='none'; pop.style.borderRadius='20px';
   } else {
-    const rect = el.getBoundingClientRect();
-    const popW = 260, m = 10;
-    let left = rect.right + m;
-    if (left + popW > window.innerWidth - m) left = rect.left - popW - m;
-    if (left < m) left = m;
-    let top = rect.top;
-    requestAnimationFrame(() => {
-      const popH = pop.offsetHeight;
-      if (top + popH > window.innerHeight - m) top = window.innerHeight - popH - m;
-      if (top < m) top = m;
-      pop.style.top = top + 'px';
-    });
-    pop.style.left = left + 'px';
-    pop.style.top  = rect.top + 'px';
+    const rect=el.getBoundingClientRect(), popW=280, m=10;
+    let left=rect.right+m;
+    if(left+popW>window.innerWidth-m) left=rect.left-popW-m;
+    if(left<m) left=m;
+    pop.style.left=left+'px';
+    pop.style.top=Math.max(m,Math.min(rect.top,window.innerHeight-320))+'px';
   }
 
   requestAnimationFrame(() => pop.classList.add('visible'));
@@ -697,8 +635,8 @@ function awPopOpen(el, idx) {
         if (!bar || !pctEl || !remEl) { clearInterval(window._awPopTimer); return; }
         const p = awProgress(ev.start, ev.end);
         bar.style.width = p + '%';
-        pctEl.textContent = p + '% ' + (window._t?window._t('elapsed'):'elapsed');
-        remEl.textContent = awFmtRemainingLong(ev.end) + ' '+(window._t?window._t('left'):'left');
+        pctEl.textContent = p + '% elapsed';
+        remEl.textContent = awFmtRemainingLong(ev.end) + ' left';
       }
       if (startsSoon) {
         const cntEl = document.getElementById('aw-pop-soon-cnt');
@@ -757,9 +695,9 @@ function awRenderCompact(byDay, today) {
     html += shown.map(ds => {
       const isToday = ds === today;
       const label   = awFmtDayLabel(ds, true);
-      const msg     = window._t?window._t('noMoreToday'):'No more events today';
+      const msg     = 'No more events today';
       return `<div class="aw-skipped-row">
-        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class=\"aw-skipped-today-pill\">'+( window._t?window._t('today'):'Today')+'</span>' : ''}</span>
+        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class="aw-skipped-today-pill">Today</span>' : ''}</span>
         <span class="aw-skipped-msg">${msg}</span>
       </div>`;
     }).join('');
@@ -777,14 +715,14 @@ function awRenderCompact(byDay, today) {
     if (isWE) {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u{1F33F}</div>
-        <div class="aw-empty-title">${window._t?window._t('haveGreatWe'):'Have a great weekend!'}</div>
-        <div class="aw-empty-sub">${window._t?window._t('nextClass'):'Next class'}: ${nextMonday}</div>
+        <div class="aw-empty-title">Bon week-end !</div>
+        <div class="aw-empty-sub">Prochain cours : ${nextMonday}</div>
       </div>`;
     } else {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u2705</div>
-        <div class="aw-empty-title">${window._t?window._t('noUpcoming'):'No upcoming events'}</div>
-        <div class="aw-empty-sub">${window._t?window._t('enjoyBreak'):'Enjoy the break!'}</div>
+        <div class="aw-empty-title">Aucun cours \u00e0 venir</div>
+        <div class="aw-empty-sub">Profites-en !</div>
       </div>`;
     }
     compact.innerHTML = html;
@@ -796,7 +734,7 @@ function awRenderCompact(byDay, today) {
 
   html += `<div class="aw-compact-day-hd">
     <span class="aw-compact-day-label${isToday ? ' today' : ''}">${dayLabel}</span>
-    ${isToday ? '<span class="aw-today-pill">'+(window._t?window._t('today'):'Today')+'</span>' : ''}
+    ${isToday ? '<span class="aw-today-pill">Today</span>' : ''}
   </div>`;
 
   html += targetDay.items.map((ev) => {
@@ -999,11 +937,11 @@ async function awInit() {
   } catch(e) {
     const c = document.getElementById('aw-compact');
     if (c && !awEvCache.length) {
-      c.innerHTML = '<div class="aw-state">'+(window._t?window._t('unableLoad',e.message):'Unable to load: '+e.message)+'</div>';
+      c.innerHTML = `<div class="aw-state">Unable to load agenda.<br><small style="opacity:.5">${e.message}</small></div>`;
     }
     // Show subtle error on last-updated label
     const el = document.getElementById('aw-last-updated');
-    if (el) { el.textContent = (window._t?window._t('updateFailed'):'Update failed'); el.style.color = 'var(--rose, #f43f5e)'; }
+    if (el) { el.textContent = 'Update failed'; el.style.color = 'var(--rose, #f43f5e)'; }
   }
   awScheduleReload();
 }
@@ -1030,7 +968,7 @@ window.addEventListener('online', () => {
 window.addEventListener('offline', () => {
   awIsOnline = false;
   const el = document.getElementById('aw-last-updated');
-  if (el) { el.textContent = (window._t?window._t('offline'):'Offline'); el.style.color = 'var(--amber, #f59e0b)'; }
+  if (el) { el.textContent = 'Offline'; el.style.color = 'var(--amber, #f59e0b)'; }
 });
 
 awInit();
@@ -1058,7 +996,7 @@ setInterval(() => {
     const ev  = awEvCache[idx];
     if (!ev) return;
     if (!awIsNow(ev.start, ev.end)) return;
-    el.textContent = awFmtRemaining(ev.end) + ' '+(window._t?window._t('left'):'left');
+    el.textContent = awFmtRemaining(ev.end) + ' left';
     // Update progress bar
     const bar = document.querySelector(`[data-ev-bar="${idx}"]`);
     if (bar) bar.style.width = awProgress(ev.start, ev.end) + '%';
@@ -1071,70 +1009,38 @@ setInterval(() => {
     if (!ev) return;
     const msTill = new Date(ev.start) - Date.now();
     if (msTill <= 0 || msTill >= 10800000) return;
-    el.textContent = (window._t?window._t('in',''):'')+awFmtRemaining(ev.start);
+    el.textContent = 'in ' + awFmtRemaining(ev.start);
   });
 }, 1000);
-// ── ONE-DAY GRID VIEW ──────────────────────────────────────────────────────
+// ── DAY GRID (Week view) ──────────────────────────────────────────────────────
 function awRenderDay(ds, container) {
   if (!container) return;
-  const byDay   = window._awByDay || {};
-  const today   = awToday();
-  const isToday = ds === today;
-
-  // Responsive: 11 heures visibles
-  const HOURS_VIS = 11;
-  const navH = document.getElementById('nb') ? document.getElementById('nb').offsetHeight : 56;
-  const wkH  = document.getElementById('wk-hdr') ? document.getElementById('wk-hdr').offsetHeight : 80;
-  const availH = window.innerHeight - navH - wkH - 49;
-  AW_PX_PER_HOUR = Math.max(48, Math.round(availH / HOURS_VIS));
-
-  const HOURS = 24;
-  const gridH = HOURS * AW_PX_PER_HOUR;
-  const items  = byDay[ds] || [];
-  const timed  = items.filter(({ev}) => ev.start.length > 10);
-  const laid   = awLayoutColumns(timed);
-  const now    = new Date();
-  const nowH   = now.getHours() + now.getMinutes() / 60;
-
-  let html = '<div class="awd-grid" style="height:' + gridH + 'px">';
-  html += '<div class="awd-gutter">';
-  for (let h = 1; h < HOURS; h++) {
-    html += '<div class="awd-hour-lbl" style="top:' + (h * AW_PX_PER_HOUR) + 'px">' + String(h).padStart(2,'0') + ':00</div>';
-  }
-  html += '</div><div class="awd-col">';
-  for (let h = 0; h <= HOURS; h++) {
-    const cls = (h % 6 === 0) ? 'awd-hline major' : 'awd-hline';
-    html += '<div class="' + cls + '" style="top:' + (h * AW_PX_PER_HOUR) + 'px"></div>';
-  }
-  if (isToday) {
-    html += '<div class="awd-now" style="top:' + (nowH * AW_PX_PER_HOUR) + 'px"><div class="awd-now-dot"></div></div>';
-  }
-  html += laid.map(({ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart}) =>
-    awGridEvHtml(ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart)
-  ).join('');
-  html += '</div></div>';
-  container.innerHTML = html;
-
-  // Scroll to shared position or smart default
+  const byDay=window._awByDay||{}, today=awToday(), isToday=ds===today;
+  const navH=(document.getElementById('nb')||{offsetHeight:56}).offsetHeight;
+  const wkH=(document.getElementById('wk-hdr')||{offsetHeight:80}).offsetHeight;
+  const availH=Math.max(200, window.innerHeight-navH-wkH-64);
+  AW_PX_PER_HOUR=Math.max(48,Math.round(availH/11));
+  const gridH=24*AW_PX_PER_HOUR;
+  const items=byDay[ds]||[], timed=items.filter(x=>x.ev.start.length>10);
+  const laid=awLayoutColumns(timed);
+  const now=new Date(), nowH=now.getHours()+now.getMinutes()/60;
+  let html=`<div class="awd-grid" style="height:${gridH}px"><div class="awd-gutter">`;
+  for(let h=1;h<24;h++) html+=`<div class="awd-hour-lbl" style="top:${h*AW_PX_PER_HOUR}px">${String(h).padStart(2,'0')}:00</div>`;
+  html+=`</div><div class="awd-col">`;
+  for(let h=0;h<=24;h++) html+=`<div class="${h%6===0?'awd-hline major':'awd-hline'}" style="top:${h*AW_PX_PER_HOUR}px"></div>`;
+  if(isToday) html+=`<div class="awd-now" style="top:${nowH*AW_PX_PER_HOUR}px"><div class="awd-now-dot"></div></div>`;
+  html+=laid.map(({ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart})=>
+    awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart)).join('');
+  html+='</div></div>';
+  container.innerHTML=html;
   let scrollTo;
-  if (typeof window._wkScrollTop === 'number') {
-    scrollTo = window._wkScrollTop;
-  } else if (isToday) {
-    scrollTo = nowH * AW_PX_PER_HOUR - availH * 0.38;
-    window._wkScrollTop = Math.max(0, scrollTo);
-  } else if (timed.length > 0) {
-    scrollTo = awTimeToHours(timed[0].ev.start) * AW_PX_PER_HOUR - availH * 0.25;
-  } else {
-    scrollTo = 7 * AW_PX_PER_HOUR;
-  }
-  container.scrollTop = Math.max(0, scrollTo);
-
-  // Sync scroll across all day pages
-  container.addEventListener('scroll', function() {
-    const top = container.scrollTop;
-    window._wkScrollTop = top;
-    document.querySelectorAll('.wk-grid-host').forEach(function(host) {
-      if (host !== container && host.children.length > 0) host.scrollTop = top;
-    });
-  }, { passive: true });
+  if(typeof window._wkScrollTop==='number') scrollTo=window._wkScrollTop;
+  else if(isToday){scrollTo=nowH*AW_PX_PER_HOUR-availH*0.38; window._wkScrollTop=Math.max(0,scrollTo);}
+  else if(timed.length>0) scrollTo=awTimeToHours(timed[0].ev.start)*AW_PX_PER_HOUR-availH*0.25;
+  else scrollTo=7*AW_PX_PER_HOUR;
+  container.scrollTop=Math.max(0,scrollTo);
+  container.addEventListener('scroll',function(){
+    const top=container.scrollTop; window._wkScrollTop=top;
+    document.querySelectorAll('.wk-grid-host').forEach(h=>{if(h!==container&&h.children.length>0)h.scrollTop=top;});
+  },{passive:true});
 }

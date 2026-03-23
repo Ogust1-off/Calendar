@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-  <title>Calendar · Shortcut</title>
+  <title>Calendar &middot; Shortcut</title>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Calendar"/>
@@ -17,21 +17,23 @@
   <link rel="icon" sizes="32x32" href="Asset/Picture/icon-32.png"/>
   <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
   <style>
-  :root{--bg:#000;--bg2:#1c1c1e;--bg3:#2c2c2e;
+  /* ── Tokens ── */
+  :root{
+    --bg:#000;--bg2:#1c1c1e;--bg3:#2c2c2e;
     --lbl:rgba(255,255,255,.92);--lbl2:rgba(255,255,255,.55);--lbl3:rgba(255,255,255,.28);
     --sep:rgba(255,255,255,.10);--sep2:rgba(255,255,255,.06);--fill:rgba(255,255,255,.08);
     --tint:#0a84ff;--red:#ff453a;
     --glass:rgba(28,28,30,.82);--gblur:blur(32px) saturate(180%);--gbdr:rgba(255,255,255,.12);
-    --text:var(--lbl);--muted:var(--lbl2);--faint:var(--lbl3);
-    --border:var(--sep);--border-hi:rgba(255,255,255,.2);
-    --accent:var(--tint);--sys-red:var(--red);--r-pill:999px;--nb:52px;--tb:49px;}
+    --text:var(--lbl);--nb:52px;--tb:49px;
+  }
   @media(prefers-color-scheme:light){:root{
     --bg:#f2f2f7;--bg2:#fff;--bg3:#efeff4;
     --lbl:rgba(0,0,0,.88);--lbl2:rgba(0,0,0,.50);--lbl3:rgba(0,0,0,.28);
     --sep:rgba(0,0,0,.10);--sep2:rgba(0,0,0,.05);--fill:rgba(0,0,0,.06);
-    --tint:#007aff;--red:#ff3b30;--glass:rgba(242,242,247,.85);--gbdr:rgba(255,255,255,.9);
-    --text:rgba(0,0,0,.88);--muted:rgba(0,0,0,.50);--faint:rgba(0,0,0,.28);
-    --border:rgba(0,0,0,.10);--accent:#007aff;--sys-red:#ff3b30;}}
+    --tint:#007aff;--red:#ff3b30;
+    --glass:rgba(242,242,247,.85);--gbdr:rgba(255,255,255,.9);
+    --text:rgba(0,0,0,.88);
+  }}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{height:100%;background:var(--bg);color-scheme:dark light}
   body{height:100%;background:var(--bg);color:var(--lbl);
@@ -39,11 +41,10 @@
     -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
     overscroll-behavior:none;overflow:hidden}
   @media(orientation:landscape){body::after{content:'Please rotate to portrait';
-    position:fixed;inset:0;background:var(--bg);color:var(--lbl2);
-    display:flex;align-items:center;justify-content:center;
-    font-size:17px;font-weight:500;z-index:99999;text-align:center;}}
+    position:fixed;inset:0;z-index:99999;background:var(--bg);color:var(--lbl2);
+    display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:500;}}
 
-  /* Splash */
+  /* ── Splash ── */
   #splash{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
     justify-content:center;background:var(--bg);
     transition:opacity .4s ease,transform .4s ease;pointer-events:none}
@@ -52,16 +53,16 @@
   #splash-logo{animation:sp-pop .5s cubic-bezier(.34,1.56,.64,1) both;
     filter:drop-shadow(0 8px 24px rgba(99,102,241,.5))}
   #splash-logo svg{border-radius:16px}
-  @keyframes sp-pop{from{opacity:0;transform:scale(.7) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+  @keyframes sp-pop{from{opacity:0;transform:scale(.7) translateY(10px)}to{opacity:1;transform:scale(1)}}
   #splash-name{font-size:28px;font-weight:800;letter-spacing:-.04em;color:var(--lbl);
     animation:sp-fade .4s .15s ease both;font-family:-apple-system,"SF Pro Display",sans-serif}
   #splash-sub{font-size:14px;color:var(--lbl3);animation:sp-fade .4s .25s ease both}
   @keyframes sp-fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 
-  /* App */
-  #app{position:fixed;inset:0;display:flex;flex-direction:column;height:100%;height:100dvh}
+  /* ── Shell ── */
+  #app{position:fixed;inset:0;display:flex;flex-direction:column;height:100dvh}
 
-  /* Navbar */
+  /* ── Navbar ── */
   #nb{flex-shrink:0;display:flex;align-items:flex-end;gap:10px;
     padding:0 14px 10px;padding-top:calc(env(safe-area-inset-top,0px) + 4px);
     background:var(--glass);backdrop-filter:var(--gblur);-webkit-backdrop-filter:var(--gblur);
@@ -69,25 +70,20 @@
   .nb-brand{display:flex;align-items:center;gap:10px;flex:1;text-decoration:none;min-width:0}
   .nb-ico{width:30px;height:30px;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.3)}
   .nb-ico img{width:100%;height:100%;object-fit:cover;display:block}
-  .nb-name{font-size:17px;font-weight:600;letter-spacing:-.025em;color:var(--lbl);line-height:1.1;white-space:nowrap}
+  .nb-name{font-size:17px;font-weight:600;letter-spacing:-.025em;color:var(--lbl);line-height:1.1}
   .nb-sub{font-size:11px;color:var(--lbl3);display:block;font-weight:400}
   #nb-upd{font-size:11px;color:var(--lbl3);white-space:nowrap;flex-shrink:0}
-  .nb-btn{width:32px;height:32px;border-radius:50%;border:none;background:var(--fill);
-    color:var(--lbl2);display:flex;align-items:center;justify-content:center;
-    cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:opacity .15s,transform .1s}
-  .nb-btn:active{opacity:.55;transform:scale(.9)}
-  .nb-btn svg{width:15px;height:15px}
   #nb-avatar-wrap.has-photo{border-radius:50%!important}
   #nb-avatar-wrap.has-photo img{border-radius:50%}
 
-  /* Views */
+  /* ── Views ── */
   .view{display:none;flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
     -webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;
     padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 80px)}
   .view.on{display:block}
   #v-week.on{display:flex;flex-direction:column;overflow:hidden;padding-bottom:0}
 
-  /* Agenda */
+  /* ── Agenda ── */
   #v-agenda .agenda-widget{background:none!important;border:none!important;
     box-shadow:none!important;backdrop-filter:none!important;margin:0!important;overflow:visible!important}
   #v-agenda .aw-header{display:none!important}
@@ -115,8 +111,9 @@
   .aw-time-start{font-size:12px;color:var(--lbl2);font-weight:500;line-height:1.3}
   .aw-time-end{font-size:11px;color:var(--lbl3);line-height:1.3}
   .aw-time-single{font-size:12px;color:var(--lbl2)}
+  .aw-pop{position:fixed!important;z-index:9999!important}
 
-  /* Week header */
+  /* ── Week header ── */
   #wk-hdr{flex-shrink:0;background:var(--glass);backdrop-filter:var(--gblur);
     -webkit-backdrop-filter:var(--gblur);border-bottom:.5px solid var(--gbdr);z-index:100;padding:12px 16px 0}
   #wk-month-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
@@ -128,14 +125,15 @@
   .wk-today-btn:active{transform:scale(.93)}
   .wk-today-btn.active{background:var(--tint);color:#fff}
   #wk-days{display:grid;grid-template-columns:repeat(7,1fr);margin:0 -16px;padding:0 4px 10px}
-  .wk-mini{display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0;cursor:pointer;
-    border-radius:10px;-webkit-tap-highlight-color:transparent;transition:background .1s;
+  .wk-mini{display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0;
+    cursor:pointer;border-radius:10px;-webkit-tap-highlight-color:transparent;transition:background .1s;
     appearance:none;-webkit-appearance:none;background:none;border:none;font-family:inherit}
   .wk-mini:active{background:var(--fill)}
   .wk-mini-dow{font-size:11px;font-weight:500;letter-spacing:.02em;text-transform:uppercase;color:var(--lbl3);line-height:1}
   .wk-mini.is-today .wk-mini-dow{color:var(--red)}
   .wk-mini-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:16px;font-weight:400;color:var(--lbl);font-variant-numeric:tabular-nums;line-height:1;transition:background .15s,color .15s}
+    font-size:16px;font-weight:400;color:var(--lbl);font-variant-numeric:tabular-nums;line-height:1;
+    transition:background .15s,color .15s}
   .wk-mini.is-today .wk-mini-num{color:var(--red);font-weight:600}
   .wk-mini.is-sel .wk-mini-num{background:var(--tint);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(10,132,255,.35)}
   .wk-mini.is-today.is-sel .wk-mini-num{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(255,69,58,.35)}
@@ -148,16 +146,16 @@
   #wk-strip::-webkit-scrollbar{display:none}
   .wk-page{flex:0 0 100%;scroll-snap-align:start;overflow:hidden;display:flex;flex-direction:column;min-height:0}
   .wk-grid-host{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
-    -webkit-overflow-scrolling:touch;scroll-behavior:auto;
-    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 32px)}
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 80px)}
 
-  /* Day grid */
+  /* ── Day grid ── */
   .awd-grid{display:flex;position:relative}
   .awd-gutter{width:52px;flex-shrink:0;position:relative;border-right:.5px solid var(--sep);background:var(--bg)}
   .awd-hour-lbl{position:absolute;right:7px;font-size:10px;font-weight:400;color:var(--lbl3);
     font-variant-numeric:tabular-nums;transform:translateY(-50%);white-space:nowrap;line-height:1;user-select:none}
   .awd-col{flex:1;min-width:0;position:relative;background:var(--bg2)}
-  .awd-hline{position:absolute;left:0;right:0;height:.5px;background:var(--sep2);pointer-events:none;z-index:0}
+  .awd-hline{position:absolute;left:0;right:0;height:.5px;background:var(--sep2);pointer-events:none}
   .awd-hline.major{background:var(--sep)}
   .awd-now{position:absolute;left:0;right:0;height:2px;background:var(--red);z-index:10;pointer-events:none}
   .awd-now-dot{position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--red)}
@@ -168,21 +166,18 @@
     white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
     line-height:1.3!important;letter-spacing:-.01em!important;display:block!important}
   .aw-gev-time{font-size:9.5px!important;color:rgba(255,255,255,.6)!important;margin-top:1px!important;
-    display:flex!important;align-items:center!important;white-space:nowrap!important;
-    overflow:hidden!important;text-overflow:ellipsis!important;font-variant-numeric:tabular-nums!important}
+    white-space:nowrap!important;overflow:hidden!important;font-variant-numeric:tabular-nums!important}
   .aw-gev-loc{font-size:9px!important;color:rgba(255,255,255,.45)!important;margin-top:1px!important;
-    display:flex!important;align-items:center!important;white-space:nowrap!important;
-    overflow:hidden!important;text-overflow:ellipsis!important}
+    white-space:nowrap!important;overflow:hidden!important}
   .aw-gev:hover{filter:saturate(1.5) brightness(1.25)!important}
   .aw-gev-past{opacity:.5!important;filter:saturate(.6)!important}
   @media(prefers-color-scheme:light){
     .aw-gev-name{color:rgba(10,20,40,.88)!important}
     .aw-gev-time{color:rgba(10,20,40,.52)!important}
     .aw-gev-loc{color:rgba(10,20,40,.38)!important}}
-  .aw-pop{position:fixed!important;z-index:9999!important}
 
-  /* Account */
-  .acc-page{padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:28px}
+  /* ── Account ── */
+  .acc-page{padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:24px}
   .acc-hero{display:flex;flex-direction:column;align-items:center;gap:12px}
   .acc-icon{width:78px;height:78px;border-radius:50%;overflow:hidden;position:relative;
     box-shadow:0 0 0 3px rgba(255,255,255,.1),0 4px 20px rgba(0,0,0,.25);cursor:pointer;transition:opacity .15s}
@@ -190,9 +185,9 @@
   .acc-icon img{width:100%;height:100%;object-fit:cover;display:block}
   .acc-name{font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--lbl);cursor:pointer}
   .acc-sub{font-size:13px;color:var(--lbl3)}
-  .acc-section-label{width:100%;font-size:12px;font-weight:600;letter-spacing:.04em;
-    text-transform:uppercase;color:var(--lbl3);padding:0 6px 8px}
-  .acc-rows{width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;border:.5px solid var(--sep)}
+  .acc-rows{width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;
+    border:.5px solid var(--sep);box-shadow:0 2px 16px rgba(0,0,0,.18)}
+  @media(prefers-color-scheme:light){.acc-rows{box-shadow:0 2px 16px rgba(0,0,0,.07)}}
   .acc-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border:none;
     background:none;color:var(--lbl);font-size:16px;font-family:inherit;cursor:pointer;
     text-align:left;width:100%;border-bottom:.5px solid var(--sep2);
@@ -200,43 +195,44 @@
   .acc-row:last-child{border-bottom:none}
   .acc-row:active{background:var(--bg3)}
   .acc-row-static{cursor:default!important}.acc-row-static:active{background:none!important}
-  .acc-row-danger .acc-row-lbl{color:#ff453a}
-  @media(prefers-color-scheme:light){.acc-row-danger .acc-row-lbl{color:#ff3b30}}
   .acc-row-ico{font-size:18px;flex-shrink:0}
   .acc-row-lbl{flex:1}
   .acc-row-chv{width:12px;height:12px;color:var(--lbl3);flex-shrink:0}
   .acc-row-status{font-size:12px;color:var(--lbl3);flex-shrink:0}
   .acc-select{background:none;border:none;color:var(--tint);font-size:14px;font-family:inherit;
-    outline:none;cursor:pointer;text-align:right;flex-shrink:0}
+    outline:none;cursor:pointer;flex-shrink:0}
+  .acc-row-danger .acc-row-lbl{color:#ff453a}
+  @media(prefers-color-scheme:light){.acc-row-danger .acc-row-lbl{color:#ff3b30}}
   #acc-upd{font-size:12px;color:var(--lbl3)}
 
-  /* Tab bar pill */
-  /* Tab bar — pilule flottante, fond transparent */
+  /* ── Tab bar ── */
   #tb{position:fixed;bottom:0;left:0;right:0;
     height:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 14px);
     padding-bottom:env(safe-area-inset-bottom,0px);
     display:flex;align-items:flex-start;justify-content:center;z-index:200;
-    background:none;border-top:none;}
-  #tb-pill{display:flex;align-items:center;background:rgba(28,28,30,.88);
+    background:none;border-top:none}
+  #tb-pill{position:relative;display:flex;align-items:center;
+    background:rgba(28,28,30,.88);
     backdrop-filter:blur(48px) saturate(200%);-webkit-backdrop-filter:blur(48px) saturate(200%);
     border:.5px solid rgba(255,255,255,.18);border-radius:99px;
     box-shadow:0 8px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.14);
-    margin-top:8px;padding:5px 8px;gap:2px;height:calc(var(--tb) - 2px);
-    position:relative;}
+    margin-top:8px;padding:5px 8px;gap:2px;height:calc(var(--tb) - 2px)}
   @media(prefers-color-scheme:light){#tb-pill{background:rgba(248,248,250,.94);
     border-color:rgba(0,0,0,.10);box-shadow:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.95)}}
+  #tb-slider{position:absolute;top:5px;bottom:5px;border-radius:99px;
+    background:rgba(10,132,255,.18);pointer-events:none;
+    transition:left .25s cubic-bezier(.4,0,.2,1),width .25s}
+  @media(prefers-color-scheme:light){#tb-slider{background:rgba(0,122,255,.12)}}
   .tbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     padding:0 22px;height:100%;min-width:80px;border:none;background:none;cursor:pointer;
     color:var(--lbl3);font-family:inherit;-webkit-tap-highlight-color:transparent;
-    border-radius:99px;transition:color .2s,background .2s,transform .1s}
+    border-radius:99px;transition:color .2s,transform .1s;position:relative;z-index:1}
   .tbtn:active{transform:scale(.88)}
-  .tbtn.on{color:var(--tint);background:none}
-
+  .tbtn.on{color:var(--tint)}
   .tbtn svg{width:24px;height:24px}
   .tbtn span{font-size:11px;font-weight:500;letter-spacing:.01em}
-  .tb-line{display:none}
 
-  /* Install banner */
+  /* ── Install banner ── */
   #ib{display:none;position:fixed;bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 10px);
     left:16px;right:16px;background:var(--glass);backdrop-filter:var(--gblur);
     -webkit-backdrop-filter:var(--gblur);border:.5px solid var(--gbdr);border-radius:14px;
@@ -252,7 +248,7 @@
 </head>
 <body>
 
-<!-- SPLASH (visible seulement si configuré — retiré immédiatement sinon) -->
+<!-- SPLASH -->
 <div id="splash">
   <div id="splash-inner">
     <div id="splash-logo">
@@ -269,35 +265,68 @@
   </div>
 </div>
 
-<!-- SPLASH SCRIPT — doit être immédiatement après le div#splash -->
+<!-- Splash script — immediately after splash div so it can remove it synchronously -->
 <script>
 (function(){
   var hasCfg=false;
   try{var c=JSON.parse(localStorage.getItem('shortcut_config')||'null');
-    hasCfg=!!(c&&c.apiKey&&c.calendars&&c.calendars[0]);}catch(e){}
-
-  if(!hasCfg){
-    // Pas configuré : retirer le splash maintenant (le div est déjà dans le DOM)
-    var s=document.getElementById('splash');
-    if(s)s.remove();
-  }
-
-  // _hideSplash sera appelé par awRender() dès que les données arrivent
+    hasCfg=!!(c&&(c.apiKey||c.cal1Ical)&&((c.calendars&&c.calendars[0])||c.cal1Ical));}catch(e){}
+  if(!hasCfg){var s=document.getElementById('splash');if(s)s.remove();}
   var done=false;
   window._hideSplash=function(){
     if(done)return;done=true;
-    var s=document.getElementById('splash');
-    if(!s)return;
-    s.classList.add('hide');
-    setTimeout(function(){if(s.parentNode)s.remove();},450);
+    var s=document.getElementById('splash');if(!s)return;
+    s.classList.add('hide');setTimeout(function(){if(s.parentNode)s.remove();},450);
   };
-
-  // Sécurité : jamais bloqué plus de 4s même si le fetch échoue
   if(hasCfg)setTimeout(window._hideSplash,4000);
+  // Expose lang helper early
+  window._getLang=function(){try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';}};
 })();
 </script>
 
+<!-- i18n IIFE — before external scripts -->
+<script>
+(function(){
+  var S={
+    en:{today:'Today',allDay:'All day',inProgress:'In progress',completed:'COMPLETED',
+      startingSoon:'STARTING SOON',left:'left',in:'in ',inLabel:'In',elapsed:'elapsed',
+      justUpdated:'Just updated',offline:'Offline',updateFailed:'Update failed',
+      noMoreToday:'No more events today',noUpcoming:'No upcoming events',
+      enjoyBreak:'Enjoy the break!',haveGreatWe:'Have a great weekend!',
+      nextClass:'Next class',tabAgenda:'Agenda',tabWeek:'Week',tabAccount:'Account',
+      today2:'Today',locale:'en-GB',
+      refreshBtn:'Refresh calendar',settingsTitle:'Calendar API & Calendars',
+      updateAppBtn:'Update app',langLabel:'Language',themeLabel:'Theme',
+      themeDark:'Dark',themeLight:'Light',themeAuto:'Auto',
+      logoutBtn:'Sign out & reset',byShortcut:'by Shortcut\u2122',
+    },
+    fr:{today:'Aujourd\u2019hui',allDay:'Toute la journ\u00e9e',inProgress:'En cours',
+      completed:'TERMIN\u00c9',startingSoon:'BIENT\u00d4T',left:'restant',in:'dans ',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',
+      justUpdated:'Mis \u00e0 jour',offline:'Hors ligne',updateFailed:'\u00c9chec',
+      noMoreToday:'Plus d\u2019\u00e9v\u00e9nements aujourd\u2019hui',noUpcoming:'Aucun \u00e9v\u00e9nement \u00e0 venir',
+      enjoyBreak:'Profitez-en\u00a0!',haveGreatWe:'Bon week-end\u00a0!',
+      nextClass:'Prochain cours',tabAgenda:'Agenda',tabWeek:'Semaine',tabAccount:'Compte',
+      today2:'Aujourd\u2019hui',locale:'fr-FR',
+      refreshBtn:'Actualiser l\u2019agenda',settingsTitle:'API & Agendas',
+      updateAppBtn:'Mettre \u00e0 jour l\u2019app',langLabel:'Langue',themeLabel:'Th\u00e8me',
+      themeDark:'Sombre',themeLight:'Clair',themeAuto:'Auto',
+      logoutBtn:'D\u00e9connexion & r\u00e9init.',byShortcut:'by Shortcut\u2122',
+    }
+  };
+  window._t=function(k,a){
+    var lang=window._getLang?window._getLang():'en';
+    var s=S[lang]||S.en; var v=s[k]; if(v===undefined)v=S.en[k];
+    if(typeof v==='function')return v(a); return v!==undefined?v:k;
+  };
+  window._appLocale=function(){return window._getLang()==='fr'?'fr-FR':'en-GB';};
+})();
+</script>
+
+<script src="Asset/JS/onboarding.js"></script>
+<script src="Asset/JS/agenda_b.js"></script>
+
 <div id="app">
+  <!-- NAVBAR -->
   <header id="nb">
     <a class="nb-brand" href="#">
       <div class="nb-ico" id="nb-avatar-wrap">
@@ -306,9 +335,9 @@
       <div><div class="nb-name">Calendar<span class="nb-sub">by Shortcut&#8482;</span></div></div>
     </a>
     <span id="nb-upd"></span>
-
   </header>
 
+  <!-- AGENDA -->
   <div id="v-agenda" class="view on">
     <div class="agenda-widget">
       <div id="aw-compact"><div class="aw-state"><span class="aw-spinner"></span>Loading&#8230;</div></div>
@@ -320,6 +349,7 @@
     </div>
   </div>
 
+  <!-- WEEK -->
   <div id="v-week" class="view">
     <div id="wk-hdr">
       <div id="wk-month-row">
@@ -331,6 +361,7 @@
     <div id="wk-strip"></div>
   </div>
 
+  <!-- ACCOUNT -->
   <div id="v-account" class="view">
     <div class="acc-page">
       <div class="acc-hero">
@@ -344,19 +375,18 @@
         <div class="acc-sub">by Shortcut&#8482; &middot; &copy; 2026 Ogust&apos;1</div>
         <input type="file" id="acc-photo-input" accept="image/*" style="display:none" onchange="accChangePhoto(this)"/>
       </div>
-      <div class="acc-section-label">Preferences</div>
       <div class="acc-rows">
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico">&#127760;</span>
-          <span class="acc-row-lbl" id="lbl-lang">Language</span>
+          <span class="acc-row-lbl" id="acc-lang-lbl">Language</span>
           <select class="acc-select" id="acc-lang" onchange="accSetLang(this.value)">
             <option value="en">English</option>
             <option value="fr">Fran&#231;ais</option>
           </select>
         </div>
         <div class="acc-row acc-row-static">
-          <span class="acc-row-ico" id="theme-ico">&#10024;</span>
-          <span class="acc-row-lbl" id="lbl-theme">Theme</span>
+          <span class="acc-row-ico">&#127763;</span>
+          <span class="acc-row-lbl" id="acc-theme-lbl">Theme</span>
           <select class="acc-select" id="acc-theme" onchange="accSetTheme(this.value)">
             <option value="auto">Auto</option>
             <option value="dark">Dark</option>
@@ -365,17 +395,17 @@
         </div>
         <button class="acc-row" onclick="showCalSettings()">
           <span class="acc-row-ico">&#128197;</span>
-          <span class="acc-row-lbl">Calendar API &amp; Calendars</span>
+          <span class="acc-row-lbl" id="acc-settings-lbl">Calendar API &amp; Calendars</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="acc-row" id="acc-refresh-btn" onclick="accRefresh()">
           <span class="acc-row-ico" id="acc-refresh-ico">&#128260;</span>
-          <span class="acc-row-lbl">Refresh calendar</span>
+          <span class="acc-row-lbl" id="acc-refresh-lbl">Refresh calendar</span>
           <span id="acc-refresh-status" class="acc-row-status"></span>
         </button>
         <button class="acc-row" onclick="accUpdateApp()">
           <span class="acc-row-ico">&#11014;&#65039;</span>
-          <span class="acc-row-lbl">Update app</span>
+          <span class="acc-row-lbl" id="acc-update-lbl">Update app</span>
           <span id="acc-update-status" class="acc-row-status"></span>
         </button>
         <button class="acc-row acc-row-danger" onclick="accLogout()">
@@ -389,88 +419,45 @@
 
   <div style="display:none" aria-hidden="true"><div id="aw-full"></div></div>
 
+  <!-- TAB BAR -->
   <nav id="tb">
     <div id="tb-pill">
+      <div id="tb-slider"></div>
       <button class="tbtn on" id="tb-0" onclick="goTab(0)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
           <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
         </svg>
-        <span>Agenda</span>
+        <span id="tab-lbl-0">Agenda</span>
       </button>
       <button class="tbtn" id="tb-1" onclick="goTab(1)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="3"/>
           <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
         </svg>
-        <span>Week</span>
+        <span id="tab-lbl-1">Week</span>
       </button>
       <button class="tbtn" id="tb-2" onclick="goTab(2)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
         </svg>
-        <span>Account</span>
+        <span id="tab-lbl-2">Account</span>
       </button>
     </div>
   </nav>
 </div>
 
+<!-- INSTALL BANNER -->
 <div id="ib">
   <div class="ib-ico">&#128242;</div>
-  <div class="ib-txt"><strong>Install the app</strong><small>Share &#9638; &#8594; Add to Home Screen</small></div>
+  <div class="ib-txt"><strong>Install the app</strong><small>Share &#8594; Add to Home Screen</small></div>
   <button class="ib-x" onclick="dismissBanner()">&#215;</button>
 </div>
 
-<!-- i18n global — avant agenda_b.js -->
-<script>
-(function(){
-  var S={
-    en:{today:'Today',allDay:'All day',inProgress:'In progress',completed:'COMPLETED',
-      startingSoon:'STARTING SOON',left:'left',justUpdated:'Just updated',
-      updatedSAgo:function(s){return'Updated '+s+'s ago';},
-      updatedMAgo:function(m){return'Updated '+m+'min ago';},
-      updatedM30Ago:function(m){return'Updated '+m+'min 30s ago';},
-      offline:'Offline',updateFailed:'Update failed',
-      configure:'Please configure your calendar in Settings.',
-      noMoreToday:'No more events today',noUpcoming:'No upcoming events',
-      enjoyBreak:'Enjoy the break!',haveGreatWe:'Have a great weekend!',
-      nextClass:'Next class',
-      tabAgenda:'Agenda',tabWeek:'Week',tabAccount:'Account',
-      locale:'en-GB',in:'in',inLabel:'In',elapsed:'elapsed',
-      refreshBtn:'Refresh calendar',settingsTitle:'Calendar API & Calendars',
-      updateAppBtn:'Update app',langLabel:'Language',themeLabel:'Theme',
-      byShortcut:'by Shortcut\u2122',themeDark:'Dark',themeLight:'Light',themeAuto:'Auto',
-    },
-    fr:{today:"Aujourd\u2019hui",allDay:'Toute la journ\u00e9e',inProgress:'En cours',
-      completed:'TERMIN\u00c9',startingSoon:'BIENT\u00d4T',left:'restant',
-      justUpdated:'Mis \u00e0 jour',
-      updatedSAgo:function(s){return'Mis \u00e0 jour il y a '+s+'s';},
-      updatedMAgo:function(m){return'Mis \u00e0 jour il y a '+m+'min';},
-      updatedM30Ago:function(m){return'Mis \u00e0 jour il y a '+m+'min 30s';},
-      offline:'Hors ligne',updateFailed:'\u00c9chec',
-      configure:'Veuillez configurer votre agenda dans les r\u00e9glages.',
-      noMoreToday:'Plus d\u2019\u00e9v\u00e9nements aujourd\u2019hui',noUpcoming:'Aucun \u00e9v\u00e9nement \u00e0 venir',
-      enjoyBreak:'Profitez-en\u00a0!',haveGreatWe:'Bon week-end\u00a0!',
-      nextClass:'Prochain cours',
-      tabAgenda:'Agenda',tabWeek:'Semaine',tabAccount:'Compte',
-      locale:'fr-FR',in:'dans',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',
-      refreshBtn:'Actualiser l\u2019agenda',settingsTitle:'API & Agendas',
-      updateAppBtn:'Mettre \u00e0 jour l\u2019app',langLabel:'Langue',themeLabel:'Th\u00e8me',
-      byShortcut:'by Shortcut\u2122',themeDark:'Sombre',themeLight:'Clair',themeAuto:'Auto',
-    }
-  };
-  window._getLang=function(){try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';}};
-  window._t=function(k,a){var s=S[window._getLang()]||S.en;var v=s[k];if(v===undefined)v=S.en[k];if(typeof v==='function')return v(a);return v!==undefined?v:k;};
-  window._locale=function(){return window._getLang()==='fr'?'fr-FR':'en-GB';};
-})();
-</script>
-
-<script src="Asset/JS/onboarding.js"></script>
-<script src="Asset/JS/agenda_b.js"></script>
 <script>
 'use strict';
 
-/* Week view */
+/* ── Week view ── */
 var _wkByDay=null,_wkToday=null,_wkDates=[],_wkCur=null,_wkDirty=false;
 function _ds(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 
@@ -517,10 +504,12 @@ function wkUpdateHdr(){
   if(!_wkCur)return;
   var byDay=window._awByDay||{};
   var d=new Date(_wkCur+'T00:00:00');
-  var mo=d.toLocaleDateString(window._locale?window._locale():'en-GB',{month:'long'});mo=mo[0].toUpperCase()+mo.slice(1);
+  var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var mo=d.toLocaleDateString(locale,{month:'long'});mo=mo[0].toUpperCase()+mo.slice(1);
   var ml=document.getElementById('wk-month-lbl');
   if(ml)ml.innerHTML='<strong>'+mo+'</strong> <span>'+d.getFullYear()+'</span>';
-  var tb=document.getElementById('wk-today-btn');if(tb)tb.classList.toggle('active',_wkCur===_wkToday);
+  var tb=document.getElementById('wk-today-btn');
+  if(tb){tb.textContent=window._t?window._t('today2'):'Today';tb.classList.toggle('active',_wkCur===_wkToday);}
   var dow=d.getDay(),mon=new Date(d);mon.setDate(d.getDate()-(dow===0?6:dow-1));
   var days=document.getElementById('wk-days');if(!days)return;
   days.innerHTML='';
@@ -536,7 +525,7 @@ function wkUpdateHdr(){
 }
 function wkGoToday(){_wkCur=_wkToday;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 
-/* Tabs */
+/* ── Tabs ── */
 var VIDS=['v-agenda','v-week','v-account'],TIDS=['tb-0','tb-1','tb-2'],_tab=0;
 function goTab(i){
   _tab=i;
@@ -546,67 +535,107 @@ function goTab(i){
     else{el.classList.remove('on');el.style.display='none';}
   });
   TIDS.forEach(function(id,j){var el=document.getElementById(id);if(el)el.classList.toggle('on',j===i);});
+  setTimeout(function(){if(typeof _updateSlider==='function')_updateSlider();},10);
   if(i===1){
     if(_wkByDay&&(_wkDirty||!document.getElementById('wk-strip').children.length))wkInit(_wkByDay,_wkToday);
     else if(_wkCur)setTimeout(function(){wkSnap(_wkCur,false,false);},50);
   }
   if(i===0){
-    // Scroll agenda to today's section
     setTimeout(function(){
-      var agenda=document.getElementById('v-agenda');
-      if(!agenda)return;
-      var today=document.querySelector('#v-agenda .aw-compact-day-hd .aw-today-pill');
-      if(today){
-        var hd=today.closest('.aw-compact-day-hd');
-        if(hd)hd.scrollIntoView({behavior:'smooth',block:'start'});
-      }
+      var pill=document.querySelector('#v-agenda .aw-today-pill');
+      if(pill){var hd=pill.closest('.aw-compact-day-hd');if(hd)hd.scrollIntoView({behavior:'smooth',block:'start'});}
     },60);
   }
-  // Update sliding indicator
-  setTimeout(function(){if(typeof _updateSlider==='function')_updateSlider();},10);
 }
 function appRefresh(){_wkDirty=true;if(typeof awInit==='function')awInit();}
 function forceRefresh(){appRefresh();}
 function appShowAgenda(){goTab(0);}
 function appShowWeek(){goTab(1);}
 
-/* Profile */
+/* ── Pill swipe ── */
+function _updateSlider(){
+  var pill=document.getElementById('tb-pill'),sl=document.getElementById('tb-slider');if(!pill||!sl)return;
+  var btns=pill.querySelectorAll('.tbtn');if(!btns[_tab])return;
+  sl.style.left=btns[_tab].offsetLeft+'px';sl.style.width=btns[_tab].offsetWidth+'px';
+}
+function _initPillSwipe(){
+  var pill=document.getElementById('tb-pill');if(!pill)return;
+  var startX=0,startTab=0,moved=false;
+  pill.addEventListener('touchstart',function(e){startX=e.touches[0].clientX;startTab=_tab;moved=false;var sl=document.getElementById('tb-slider');if(sl)sl.style.transition='none';},{passive:true});
+  pill.addEventListener('touchmove',function(e){
+    var dx=e.touches[0].clientX-startX;
+    if(Math.abs(dx)>6){moved=true;
+      var sl=document.getElementById('tb-slider');if(!sl)return;
+      var btns=pill.querySelectorAll('.tbtn');if(!btns.length)return;
+      var w=btns[startTab].offsetWidth;var base=btns[startTab].offsetLeft;
+      var cl=Math.max(-w,Math.min(w,dx));sl.style.left=(base+cl)+'px';sl.style.width=w+'px';}
+  },{passive:true});
+  pill.addEventListener('touchend',function(e){
+    var sl=document.getElementById('tb-slider');if(sl)sl.style.transition='left .25s cubic-bezier(.4,0,.2,1),width .25s';
+    if(!moved){_updateSlider();return;}
+    var dx=e.changedTouches[0].clientX-startX;
+    var thresh=(pill.offsetWidth||240)/5;
+    var newTab=startTab;
+    if(dx<-thresh&&startTab<2)newTab=startTab+1;
+    else if(dx>thresh&&startTab>0)newTab=startTab-1;
+    if(newTab!==startTab)goTab(newTab);
+    else _updateSlider();
+    moved=false;
+  },{passive:true});
+}
+
+/* ── Profile ── */
 function _applyProfile(){
   try{
     var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-    _applyTheme(cfg.theme||'auto');
-    var photo=cfg.photo||'';
-    if(photo){
+    if(cfg.photo){
       var ni=document.getElementById('nb-avatar-img'),nw=document.getElementById('nb-avatar-wrap'),ai=document.getElementById('acc-avatar-img');
-      if(ni)ni.src=photo;
+      if(ni)ni.src=cfg.photo;if(ai)ai.src=cfg.photo;
       if(nw){nw.classList.add('has-photo');nw.style.borderRadius='50%';}
-      if(ai)ai.src=photo;
     }
-    var name=cfg.displayName||'';
-    var ne=document.getElementById('acc-display-name');if(ne&&name)ne.textContent=name;
+    if(cfg.displayName){var ne=document.getElementById('acc-display-name');if(ne)ne.textContent=cfg.displayName;}
     var sel=document.getElementById('acc-lang');if(sel&&cfg.lang)sel.value=cfg.lang;
+    var tsel=document.getElementById('acc-theme');if(tsel&&cfg.theme)tsel.value=cfg.theme;
+    if(cfg.theme)_applyTheme(cfg.theme);
   }catch(e){}
 }
 
-/* Account */
-function accRefresh(){
-  var ico=document.getElementById('acc-refresh-ico'),st=document.getElementById('acc-refresh-status');
-  if(ico)ico.textContent='⏳';if(st)st.textContent='Updating…';
-  _wkDirty=true;
-  if(typeof awInit==='function'){
-    var p=awInit();
-    var done=function(){if(ico)ico.textContent='🔄';if(st)st.textContent='';};
-    var ok=function(){if(ico)ico.textContent='✅';if(st)st.textContent='Done!';setTimeout(done,2500);};
-    if(p&&p.then)p.then(ok);else setTimeout(ok,1200);
+/* ── i18n apply ── */
+function _applyLang(){
+  var l=typeof window._getLang==='function'?window._getLang():'en';
+  var t=window._t||function(k){return k;};
+  var locale=t('locale')||'en-GB'; window._currentLocale=locale;
+  // Tab labels
+  ['Agenda','Week','Account'].forEach(function(def,i){
+    var keys=['tabAgenda','tabWeek','tabAccount'];
+    var el=document.getElementById('tab-lbl-'+i);if(el)el.textContent=t(keys[i])||def;
+  });
+  // Account labels
+  var map={
+    'acc-lang-lbl':'langLabel','acc-theme-lbl':'themeLabel',
+    'acc-settings-lbl':'settingsTitle','acc-refresh-lbl':'refreshBtn',
+    'acc-update-lbl':'updateAppBtn','acc-logout-lbl':'logoutBtn'
+  };
+  Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=t(map[id]);});
+  // Theme select options
+  var tsel=document.getElementById('acc-theme');
+  if(tsel){tsel.options[0].text=t('themeAuto');tsel.options[1].text=t('themeDark');tsel.options[2].text=t('themeLight');}
+  // Navbar sub
+  var sub=document.querySelector('.nb-sub');if(sub)sub.textContent=t('byShortcut');
+  // Lang selector
+  var lsel=document.getElementById('acc-lang');if(lsel)lsel.value=l;
+  // Rerender if data available
+  if(window._awByDay&&typeof awRenderCompact==='function'){
+    var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+    awRenderCompact(window._awByDay,today);
   }
+  wkUpdateHdr();
 }
+
+/* ── Account actions ── */
 function accSetLang(lang){
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.lang=lang;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
   location.reload();
-}
-function showCalSettings(){
-  if(typeof _obOpenCalSettings==='function')_obOpenCalSettings();
-  else if(typeof showSettings==='function')showSettings();
 }
 function accSetTheme(v){
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.theme=v;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
@@ -614,26 +643,39 @@ function accSetTheme(v){
 }
 function _applyTheme(v){
   var r=document.documentElement;
-  if(v==='dark'){r.style.colorScheme='dark';}
-  else if(v==='light'){r.style.colorScheme='light';}
-  else{r.style.colorScheme='';}
+  r.style.colorScheme=v==='dark'?'dark':v==='light'?'light':'';
   var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
 }
-function accLogout(){
-  var lang='en';try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');if(d&&d.lang)lang=d.lang;}catch(e){}
-  var msg=lang==='fr'?"Réinitialiser et se déconnecter ?":'Sign out and reset the app?';
-  if(!confirm(msg))return;
-  localStorage.removeItem('shortcut_config');
-  location.reload();
+function showCalSettings(){
+  if(typeof _obOpenCalSettings==='function')_obOpenCalSettings();
+  else if(typeof showSettings==='function')showSettings();
+}
+function accRefresh(){
+  var ico=document.getElementById('acc-refresh-ico'),st=document.getElementById('acc-refresh-status');
+  if(ico)ico.textContent='&#9203;';if(st)st.textContent='Updating\u2026';
+  _wkDirty=true;
+  if(typeof awInit==='function'){
+    var p=awInit();
+    var ok=function(){if(ico)ico.textContent='&#128260;';if(st)st.textContent='';};
+    var done2=function(){if(ico)ico.textContent='&#9989;';if(st)st.textContent='Done!';setTimeout(ok,2500);};
+    if(p&&p.then)p.then(done2);else setTimeout(done2,1200);
+  }
 }
 function accUpdateApp(){
-  var st=document.getElementById('acc-update-status');if(st)st.textContent='⌛ Clearing…';
+  var st=document.getElementById('acc-update-status');if(st)st.textContent='&#8987; Clearing\u2026';
   var p='caches' in window?caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c);}));}):Promise.resolve();
   p.then(function(){
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister();}));}).then(function(){if(st)st.textContent='✅ Done!';setTimeout(function(){location.reload(true);},800);});
-    }else{if(st)st.textContent='✅ Done!';setTimeout(function(){location.reload(true);},800);}
+      navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister();}));}).then(function(){if(st)st.textContent='&#9989; Done!';setTimeout(function(){location.reload(true);},800);});
+    }else{if(st)st.textContent='&#9989; Done!';setTimeout(function(){location.reload(true);},800);}
   });
+}
+function accLogout(){
+  var lang=typeof window._getLang==='function'?window._getLang():'en';
+  var msg=lang==='fr'?'R\u00e9initialiser et se d\u00e9connecter\u00a0?':'Sign out and reset the app?';
+  if(!confirm(msg))return;
+  localStorage.removeItem('shortcut_config');
+  location.reload();
 }
 function accEditProfile(){
   var ed=document.getElementById('acc-avatar-edit');
@@ -666,98 +708,9 @@ function accEditName(){
   inp.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();save();}});
 }
 
-
-/* ── i18n ── */
-var _STRINGS = {
-  en: {
-    tabAgenda:'Agenda', tabWeek:'Week', tabAccount:'Account',
-    today:'Today', loading:'Loading…',
-    settingsTitle:'Calendar API & Calendars',
-    refreshBtn:'Refresh calendar', langLabel:'Language',
-    updateAppBtn:'Update app', byShortcut:'by Shortcut™',
-    installTitle:'Install the app', installSub:'Share ⌘ → Add to Home Screen',
-    noMoreToday:'No more events today', noUpcoming:'No upcoming classes',
-    enjoyBreak:'Enjoy the break!', haveGreatWe:'Have a great weekend!',
-    nextClass:'Next class', allDay:'All day',
-    inProgress:'In progress', completed:'COMPLETED', startingSoon:'STARTING SOON',
-    justUpdated:'Just updated', offline:'Offline', updateFailed:'Update failed',
-    locale:'en-GB',
-    in:'in',inLabel:'In',elapsed:'elapsed',left:'left',
-    unableLoad:'Unable to load',configureMsg:'Please set up your calendar.',
-  },
-  fr: {
-    tabAgenda:'Agenda', tabWeek:'Semaine', tabAccount:'Compte',
-    today:'Aujourd’hui', loading:'Chargement…',
-    settingsTitle:'API & Agendas',
-    refreshBtn:'Actualiser l’agenda', langLabel:'Langue',
-    updateAppBtn:'Mettre à jour l’app', byShortcut:'by Shortcut™',
-    installTitle:'Installer l’app', installSub:'Partager ⌘ → Sur l’écran d’accueil',
-    noMoreToday:'Plus d’événements aujourd’hui', noUpcoming:'Aucun événement à venir',
-    enjoyBreak:'Profitez-en !', haveGreatWe:'Bon week-end !',
-    nextClass:'Prochain cours', allDay:'Toute la journée',
-    inProgress:'En cours', completed:'TERMINÉ', startingSoon:'BIENTÔT',
-    justUpdated:'Mis à jour', offline:'Hors ligne', updateFailed:'Échec',
-    locale:'fr-FR',
-    in:'dans',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',left:'restant',
-    unableLoad:'Impossible de charger',configureMsg:'Veuillez configurer votre agenda.',
-  }
-};
-function _lang(){ try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';} }
-function _t(k,a){ return window._t?window._t(k,a):(a!==undefined?k+' '+a:k); }
-
-function _applyLang(){
-  var l=_lang();
-  window._appLocale = _t('locale')||'en-GB';
-  // Tabs
-  [['tb-0','tabAgenda'],['tb-1','tabWeek'],['tb-2','tabAccount']].forEach(function(t){
-    var el=document.getElementById(t[0]);
-    if(el){var sp=el.querySelector('span');if(sp)sp.textContent=_t(t[1]);}
-  });
-  // Today button
-  var tb=document.getElementById('wk-today-btn');if(tb)tb.textContent=_t('today');
-  // Navbar sub
-  var sub=document.querySelector('.nb-sub');if(sub)sub.textContent=_t('byShortcut');
-  // Account rows
-  var sr=document.querySelector('button.acc-row[onclick="showCalSettings()"] .acc-row-lbl');
-  if(sr)sr.textContent=_t('settingsTitle');
-  var ur=document.querySelector('button.acc-row[onclick="accUpdateApp()"] .acc-row-lbl');
-  if(ur)ur.textContent=_t('updateAppBtn');
-  var rr=document.getElementById('acc-refresh-btn');
-  if(rr){var rl=rr.querySelector('.acc-row-lbl');if(rl)rl.textContent=_t('refreshBtn');}
-  // Install banner
-  var it=document.querySelector('.ib-txt strong');if(it)it.textContent=_t('installTitle');
-  var is2=document.querySelector('.ib-txt small');if(is2)is2.textContent=_t('installSub');
-  // Lang/theme labels
-  var langLbl=document.getElementById('acc-lang-lbl');if(langLbl)langLbl.textContent=_t('langLabel')||'Language';
-  var themeLbl=document.getElementById('acc-theme-lbl');if(themeLbl)themeLbl.textContent=_t('themeLabel')||'Theme';
-  var thSel=document.getElementById('acc-theme');
-  if(thSel){
-    thSel.options[0].text=_t('themeAuto')||'Auto';
-    thSel.options[1].text=_t('themeDark')||'Dark';
-    thSel.options[2].text=_t('themeLight')||'Light';
-    try{var d2=JSON.parse(localStorage.getItem('shortcut_config')||'null');if(d2&&d2.theme)thSel.value=d2.theme;}catch(e){}
-  }
-  // Logout label
-  var ll=document.getElementById('acc-logout-lbl');
-  if(ll)ll.textContent=l==='fr'?"Se déconnecter & réinitialiser":'Sign out & reset';
-  // Lang selector sync
-  var sel=document.getElementById('acc-lang');if(sel)sel.value=l;
-  // Re-render agenda and week with new locale
-  if(window._awByDay&&typeof awRenderCompact==='function'){
-    var today2=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
-    awRenderCompact(window._awByDay,today2);
-  }
-  wkUpdateHdr();
-  _wkDirty=true;
-}
-/* Sync loop */
+/* ── Sync loop ── */
 var _lastTs=0;
 setInterval(function(){
-  var src=document.getElementById('aw-last-updated');
-  ['nb-upd','acc-upd'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(src&&el){el.textContent=src.textContent;el.style.color=src.style.color||'';}
-  });
   if(typeof awLastUpdated!=='undefined'&&window._awByDay&&awLastUpdated!==_lastTs){
     _lastTs=awLastUpdated;
     var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
@@ -770,81 +723,19 @@ setInterval(function(){
   if(lm!==_lm){_lm=lm;_wkDirty=true;if(_tab===1&&_wkByDay)wkInit(_wkByDay,_wkToday);}
 },700);
 
+/* ── Init ── */
 window.addEventListener('load',function(){
   goTab(0);
   _applyProfile();
   _applyLang();
   _initPillSwipe();
-  // Apply saved theme
-  try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');if(d&&d.theme)_applyTheme(d.theme);}catch(e){}
+  setTimeout(_updateSlider,100);
 });
 
-function _initPillSwipe(){
-  var pill=document.getElementById('tb-pill');
-  if(!pill)return;
-  var startX=0,startTab=0,moved=false,activeBg=null;
-
-  // Find or create the sliding active background
-  var slider=document.getElementById('tb-slider');
-  if(!slider){
-    slider=document.createElement('div');
-    slider.id='tb-slider';
-    slider.style.cssText='position:absolute;top:5px;bottom:5px;border-radius:99px;background:rgba(10,132,255,.18);transition:left .25s cubic-bezier(.4,0,.2,1),width .25s;pointer-events:none;z-index:0;';
-    pill.style.position='relative';
-    pill.insertBefore(slider,pill.firstChild);
-    _updateSlider(slider);
-  }
-
-  pill.addEventListener('touchstart',function(e){
-    startX=e.touches[0].clientX;
-    startTab=_tab;
-    moved=false;
-    slider.style.transition='none';
-  },{passive:true});
-
-  pill.addEventListener('touchmove',function(e){
-    var dx=e.touches[0].clientX-startX;
-    if(Math.abs(dx)>6){
-      moved=true;
-      // Move slider proportionally between tabs
-      var btns=pill.querySelectorAll('.tbtn');
-      if(!btns.length)return;
-      var w=btns[0].offsetWidth;
-      var baseLeft=btns[startTab].offsetLeft;
-      var clampedDx=Math.max(-w,Math.min(w,dx));
-      slider.style.left=(baseLeft+clampedDx)+'px';
-      slider.style.width=w+'px';
-    }
-  },{passive:true});
-
-  pill.addEventListener('touchend',function(e){
-    slider.style.transition='left .25s cubic-bezier(.4,0,.2,1),width .25s';
-    if(!moved){_updateSlider(slider);return;}
-    var dx=e.changedTouches[0].clientX-startX;
-    var pill2=document.getElementById('tb-pill');
-    var thresh=(pill2?pill2.offsetWidth:240)/5;
-    var newTab=startTab;
-    if(dx<-thresh&&startTab<2)newTab=startTab+1;
-    else if(dx>thresh&&startTab>0)newTab=startTab-1;
-    if(newTab!==startTab)goTab(newTab);
-    else _updateSlider(slider);
-    moved=false;
-  },{passive:true});
-}
-
-function _updateSlider(slider){
-  if(!slider)slider=document.getElementById('tb-slider');
-  if(!slider)return;
-  var pill=document.getElementById('tb-pill');
-  if(!pill)return;
-  var btns=pill.querySelectorAll('.tbtn');
-  if(!btns[_tab])return;
-  slider.style.left=btns[_tab].offsetLeft+'px';
-  slider.style.width=btns[_tab].offsetWidth+'px';
-}
-
+/* ── SW ── */
 if('serviceWorker' in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
 
+/* ── Install banner ── */
 function dismissBanner(){document.getElementById('ib').classList.remove('on');localStorage.setItem('ib','1');}
 window.addEventListener('load',function(){
   if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone&&!localStorage.getItem('ib'))

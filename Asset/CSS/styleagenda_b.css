@@ -151,8 +151,8 @@ Copyright © 2026 Ogust'1. All rights reserved.
 
 /* Liquid Glass popover upgrade */
 .aw-pop {
-  position: fixed;
-  z-index: 9999;
+  position: absolute;
+  z-index: 999;
   width: 260px;
   background: rgba(22,26,40,0.92);
   border: 1px solid rgba(255,255,255,0.1);
@@ -160,9 +160,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
   box-shadow: 0 24px 70px rgba(0,0,0,0.55), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
   overflow: hidden;
   opacity: 0;
-  transform: scale(0.94) translateY(6px);
-  transform-origin: top center;
-  transition: opacity 0.16s ease, transform 0.2s cubic-bezier(.34,1.4,.64,1);
+  transform: scale(0.93) translateY(6px);
+  transform-origin: top left;
+  transition: opacity 0.18s ease, transform 0.2s cubic-bezier(.34,1.56,.64,1);
   pointer-events: none;
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
