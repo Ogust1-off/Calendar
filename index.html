@@ -245,26 +245,36 @@
     display:flex;align-items:flex-start;justify-content:center;z-index:200;
     background:none;border-top:none}
   #tb-pill{position:relative;display:flex;align-items:center;
-    background:rgba(28,28,30,.88);
-    backdrop-filter:blur(48px) saturate(200%);-webkit-backdrop-filter:blur(48px) saturate(200%);
-    border:.5px solid rgba(255,255,255,.18);border-radius:99px;
-    box-shadow:0 8px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.14);
-    margin-top:8px;padding:5px 8px;gap:2px;height:calc(var(--tb) - 2px)}
-  /* tb-pill stays dark always - iOS style */
+    background:rgba(28,28,30,.9);
+    backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);
+    border:.5px solid rgba(255,255,255,.16);border-radius:99px;
+    box-shadow:0 8px 32px rgba(0,0,0,.5),0 2px 8px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.12);
+    margin-top:8px;padding:5px 8px;gap:0;height:calc(var(--tb) - 2px)}
+  @media(prefers-color-scheme:light){#tb-pill{
+    background:rgba(255,255,255,.9);
+    border-color:rgba(0,0,0,.08);
+    box-shadow:0 4px 24px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.08),inset 0 1px 0 rgba(255,255,255,.8)}}
+  [data-theme="dark"] #tb-pill{background:rgba(28,28,30,.9);border-color:rgba(255,255,255,.16)}
+  [data-theme="light"] #tb-pill{background:rgba(255,255,255,.9);border-color:rgba(0,0,0,.08);
+    box-shadow:0 4px 24px rgba(0,0,0,.12),0 1px 4px rgba(0,0,0,.08)}
   #tb-slider{position:absolute;top:5px;bottom:5px;border-radius:99px;
-    background:rgba(10,132,255,.18);pointer-events:none;z-index:0;
-    transition:left .25s cubic-bezier(.4,0,.2,1),width .25s}
+    background:rgba(10,132,255,.15);pointer-events:none;z-index:0;
+    will-change:left,width;
+    transition:left .3s cubic-bezier(.34,1.2,.64,1),width .3s cubic-bezier(.34,1.2,.64,1)}
   @media(prefers-color-scheme:light){#tb-slider{background:rgba(0,122,255,.12)}}
+  [data-theme="light"] #tb-slider{background:rgba(0,122,255,.12)}
   .tbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
     padding:0 22px;height:100%;min-width:80px;border:none;background:none;cursor:pointer;
-    color:var(--lbl3);font-family:inherit;-webkit-tap-highlight-color:transparent;
-    border-radius:99px;transition:color .2s,transform .1s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
+    color:rgba(150,150,160,.8);
+    font-family:inherit;-webkit-tap-highlight-color:transparent;
+    border-radius:99px;transition:color .18s ease,transform .1s;position:relative;z-index:1}
+  @media(prefers-color-scheme:light){.tbtn{color:rgba(100,100,110,.7)}}
+  [data-theme="dark"] .tbtn{color:rgba(150,150,160,.8)}
+  [data-theme="light"] .tbtn{color:rgba(100,100,110,.7)}
   .tbtn:active{transform:scale(.88)}
-  .tbtn.on{color:#0a84ff}
-  .tbtn{color:rgba(255,255,255,.45)}
-  .tbtn.on{color:#0a84ff}
+  .tbtn.on{color:var(--tint)}
   .tbtn svg{width:24px;height:24px}
-  .tbtn span{font-size:11px;font-weight:500;letter-spacing:.01em}
+  .tbtn span{font-size:10.5px;font-weight:500;letter-spacing:.01em}
 
   /* ── Install banner ── */
   #ib{display:none;position:fixed;bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 10px);
@@ -629,7 +639,7 @@ function goTab(i){
     else{el.classList.remove('on');el.style.display='none';}
   });
   TIDS.forEach(function(id,j){var el=document.getElementById(id);if(el)el.classList.toggle('on',j===i);});
-  setTimeout(function(){if(typeof _updateSlider==='function')_updateSlider();},10);
+  setTimeout(function(){if(typeof _updateSlider==='function')_updateSlider();},0);
   if(i===1){
     if(_wkByDay&&(_wkDirty||!document.getElementById('wk-strip').children.length))wkInit(_wkByDay,_wkToday);
     else if(_wkCur)setTimeout(function(){wkSnap(_wkCur,false,false);},50);
@@ -650,46 +660,81 @@ function appShowWeek(){goTab(1);}
 function _updateSlider(){
   var pill=document.getElementById('tb-pill'),sl=document.getElementById('tb-slider');if(!pill||!sl)return;
   var btns=pill.querySelectorAll('.tbtn');if(!btns[_tab])return;
+  sl.style.transition='left .32s cubic-bezier(.34,1.15,.64,1),width .32s cubic-bezier(.34,1.15,.64,1)';
   sl.style.left=btns[_tab].offsetLeft+'px';sl.style.width=btns[_tab].offsetWidth+'px';
 }
 function _initPillSwipe(){
   var pill=document.getElementById('tb-pill');if(!pill)return;
-  var startX=0,startTab=0,active=false,dist=0;
-  var THRESH=36;
+  var sx=0,sy=0,tab0=0,live=false,dx=0;
+  // Transitions CSS gèrent le spring — on désactive pendant le drag
+  function _sl(){return document.getElementById('tb-slider');}
+  function _btns(){return pill.querySelectorAll('.tbtn');}
 
   pill.addEventListener('touchstart',function(e){
-    startX=e.touches[0].clientX;startTab=_tab;active=false;dist=0;
-    var sl=document.getElementById('tb-slider');if(sl)sl.style.transition='none';
+    var t=e.touches[0];sx=t.clientX;sy=t.clientY;tab0=_tab;live=false;dx=0;
+    var sl=_sl();if(sl){sl.style.transition='none';sl.style.willChange='left,width';}
   },{passive:true});
 
   pill.addEventListener('touchmove',function(e){
-    dist=e.touches[0].clientX-startX;
-    if(Math.abs(dist)<8)return;
-    active=true;
-    // Interpoler le slider vers l'onglet cible
-    var sl=document.getElementById('tb-slider');if(!sl)return;
-    var btns=pill.querySelectorAll('.tbtn');
-    if(!btns[startTab])return;
-    // Swipe droite (dist>0) → onglet suivant (index+1); gauche → précédent
-    var targetTab=dist>0?Math.min(startTab+1,2):Math.max(startTab-1,0);
-    if(targetTab===startTab){_updateSlider();return;}
-    var progress=Math.min(Math.abs(dist)/THRESH,1);
-    var fromL=btns[startTab].offsetLeft,fromW=btns[startTab].offsetWidth;
-    var toL=btns[targetTab].offsetLeft,toW=btns[targetTab].offsetWidth;
-    sl.style.left=(fromL+(toL-fromL)*progress)+'px';
-    sl.style.width=(fromW+(toW-fromW)*progress)+'px';
-  },{passive:true});
+    var t=e.touches[0];
+    dx=t.clientX-sx;
+    var dy=t.clientY-sy;
+    if(!live&&Math.abs(dx)<6&&Math.abs(dy)<6)return;
+    if(!live&&Math.abs(dy)>Math.abs(dx)){return;} // scroll vertical, ignorer
+    live=true;
+    var sl=_sl(),btns=_btns();if(!sl||!btns[tab0])return;
+    // Le slider suit le doigt avec résistance aux bords
+    // Swipe gauche (dx<0) = aller vers tab suivant (droite, index+1)
+    // Swipe droite (dx>0) = aller vers tab précédent (gauche, index-1)
+    var targetTab=dx<0?Math.min(tab0+1,btns.length-1):Math.max(tab0-1,0);
+    var progress=Math.min(Math.abs(dx)/80,1);
+    // Résistance si on est aux bords
+    if(targetTab===tab0)progress*=0.3;
+    var fL=btns[tab0].offsetLeft,fW=btns[tab0].offsetWidth;
+    var tL=btns[targetTab].offsetLeft,tW=btns[targetTab].offsetWidth;
+    sl.style.left=(fL+(tL-fL)*progress)+'px';
+    sl.style.width=(fW+(tW-fW)*progress)+'px';
+    if(e.cancelable)e.preventDefault();
+  },{passive:false});
 
   pill.addEventListener('touchend',function(e){
-    var sl=document.getElementById('tb-slider');
-    if(sl)sl.style.transition='left .22s cubic-bezier(.4,0,.2,1),width .22s';
-    if(!active){setTimeout(_updateSlider,50);return;}
-    var newTab=startTab;
-    if(dist>THRESH&&startTab<2)newTab=startTab+1;
-    else if(dist<-THRESH&&startTab>0)newTab=startTab-1;
-    if(newTab!==startTab)goTab(newTab);
+    var sl=_sl();
+    if(sl){
+      sl.style.transition='left .32s cubic-bezier(.34,1.15,.64,1),width .32s cubic-bezier(.34,1.15,.64,1)';
+      sl.style.willChange='auto';
+    }
+    if(!live){setTimeout(_updateSlider,30);return;}
+    // Décider le tab final
+    var btns=_btns();
+    var newTab=tab0;
+    var THRESH=40;
+    if(dx<-THRESH&&tab0<btns.length-1)newTab=tab0+1;
+    else if(dx>THRESH&&tab0>0)newTab=tab0-1;
+    if(newTab!==tab0)goTab(newTab);
     else _updateSlider();
-    active=false;
+    live=false;
+  },{passive:true});
+
+  // Swipe depuis n'importe où sur l'écran (plus naturel)
+  var bodyStart={x:0,y:0,tab:0,ok:false,dx2:0};
+  document.addEventListener('touchstart',function(e){
+    if(pill.contains(e.target))return; // géré ci-dessus
+    var t=e.touches[0];
+    bodyStart={x:t.clientX,y:t.clientY,tab:_tab,ok:true,dx2:0};
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!bodyStart.ok)return;
+    bodyStart.dx2=e.touches[0].clientX-bodyStart.x;
+    var dy=e.touches[0].clientY-bodyStart.y;
+    if(Math.abs(dy)>Math.abs(bodyStart.dx2)*1.5){bodyStart.ok=false;return;}
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(!bodyStart.ok)return;bodyStart.ok=false;
+    var dx2=bodyStart.dx2,THRESH2=60;
+    var newTab=bodyStart.tab;
+    if(dx2<-THRESH2&&bodyStart.tab<2)newTab=bodyStart.tab+1;
+    else if(dx2>THRESH2&&bodyStart.tab>0)newTab=bodyStart.tab-1;
+    if(newTab!==bodyStart.tab)goTab(newTab);
   },{passive:true});
 }
 

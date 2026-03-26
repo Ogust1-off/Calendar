@@ -126,7 +126,7 @@ function _obNext() {
   // Handle calendar sub-steps
   if (_obStep === 1) {
     var d = _obLoad(), src2 = d.calSource||'google';
-    var subMax = src2==='ical' ? 2 : 3; // google/both: 4 sub-steps; ical: 3
+    var subMax = src2==='ical' ? 2 : 3;
     if (_obCalSub < subMax) { _obCalSub++; _obRender(); return; }
     _obCalSub=0; _obStep++; _obRender(); return;
   }
@@ -199,73 +199,6 @@ function _s1_cal() {
     if (_obCalSub === 3) return _s2c(d);
   }
   return _s2a(d, src);
-}
-
-function _s2a(d, src) {
-  return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
-       '<h2 class="ob-h2">Calendar Source</h2>' +
-       '<p class="ob-p2">How should the app access your calendar?</p>' +
-       '<div style="display:flex;flex-direction:column;gap:10px;margin-top:4px">' +
-         _srcBtn('api', src==='api', '&#128273;', 'Google Calendar API', 'API key + Calendar ID. Full control, real-time.') +
-         _srcBtn('ical', src==='ical', '&#128241;', 'iPhone Calendar (iCal)', 'Paste an iCal link — no API key needed.') +
-       '</div>' +
-       '<div id="ob-ical-fields" style="' + (src==='ical'?'margin-top:14px':'display:none;margin-top:14px') + '">' +
-         '<div class="ob-field"><label class="ob-lbl">ICAL URL — CALENDAR 1 <span style="color:var(--red)">*</span></label>' +
-         '<input type="url" id="ob-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026 or https://\u2026" value="' + _obEsc(d.cal1Ical||'') + '" autocomplete="off" spellcheck="false"/>' +
-         '<div class="ob-err" id="ob-ical0-err"></div></div>' +
-         '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">ICAL URL — CALENDAR 2 <span class="ob-opt">optional</span></label>' +
-         '<input type="url" id="ob-ical1" class="ob-inp ob-mono" placeholder="webcal://\u2026 or https://\u2026" value="' + _obEsc(d.cal2Ical||'') + '" autocomplete="off" spellcheck="false"/></div>' +
-         '<details class="ob-details" style="margin-top:10px"><summary class="ob-hint-t">&#128161; Get iCal from iPhone or Google</summary>' +
-         '<ol class="ob-hint-l"><li><strong>Google Calendar</strong>: Settings &#8594; your calendar &#8594; Integrate &#8594; iCal</li>' +
-         '<li><strong>iPhone</strong>: Settings &#8594; Calendar &#8594; Accounts &#8594; your account</li>' +
-         '<li>Copy the link starting with <strong>webcal://</strong></li></ol></details>' +
-       '</div></div>',
-    b: _obNavRow(true, 'Next', true)
-  };
-}
-
-function _s2b(d, src) {
-  src = src || d.calSource || 'ical';
-  if (src === 'ical') {
-    return {
-      c: '<div class="ob-form">' +
-         '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
-         '<h2 class="ob-h2">iCal Links</h2>' +
-         '<p class="ob-p2">Paste the iCal links you copied from iPhone or Google.</p>' +
-         '<div class="ob-field"><label class="ob-lbl">CALENDAR 1 <span style="color:var(--red)">*</span></label>' +
-         '<input type="url" id="ob-ical0" class="ob-inp ob-mono" placeholder="webcal://p62-caldav.icloud.com/…" value="' + _obEsc(d.cal1Ical||'') + '" autocomplete="off" spellcheck="false"/>' +
-         '<div class="ob-err" id="ob-ical0-err"></div></div>' +
-         '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label>' +
-         '<input type="url" id="ob-ical1" class="ob-inp ob-mono" placeholder="webcal://… or https://…" value="' + _obEsc(d.cal2Ical||'') + '" autocomplete="off" spellcheck="false"/></div>' +
-         '</div>',
-      b: _obNavRow(false, 'Next', true)
-    };
-  } else {
-    // Google API
-    return {
-      c: '<div class="ob-form">' +
-         '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
-         '<h2 class="ob-h2">Google API</h2>' +
-         '<p class="ob-p2">Enter your API key and Calendar IDs.</p>' +
-         '<div class="ob-field"><label class="ob-lbl">API KEY <span style="color:var(--red)">*</span></label>' +
-         '<div class="ob-inp-wrap"><input type="password" id="ob-apikey" class="ob-inp" placeholder="AIzaSy…" value="' + _obEsc(d.apiKey||'') + '" autocomplete="off" spellcheck="false"/>' +
-         '<button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-apikey\',this)">' + _eyeIcon(false) + '</button></div>' +
-         '<div class="ob-err" id="ob-apikey-err"></div></div>' +
-         '<div class="ob-field" style="margin-top:12px"><label class="ob-lbl">CALENDAR 1 <span style="color:var(--red)">*</span></label>' +
-         '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="' + _obEsc((d.calendars&&d.calendars[0])||'') + '" autocomplete="off" spellcheck="false"/>' +
-         '<div class="ob-err" id="ob-cal0-err"></div></div>' +
-         '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label>' +
-         '<input type="text" id="ob-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="' + _obEsc((d.calendars&&d.calendars[1])||'') + '" autocomplete="off" spellcheck="false"/></div>' +
-         '<details class="ob-details"><summary class="ob-hint-t">&#128161; How to get a Calendar ID</summary>' +
-         '<ol class="ob-hint-l"><li>Go to <strong>console.cloud.google.com</strong> → enable Calendar API</li>' +
-         '<li>Create an API Key → restrict to Google Calendar API</li>' +
-         '<li>In Google Calendar: Settings → your calendar → Integrate → copy Calendar ID</li></ol></details>' +
-         '</div>',
-      b: _obNavRow(false, 'Next', true)
-    };
-  }
 }
 
 function _obSubjRow(s, i) {
