@@ -60,13 +60,13 @@
     font-family:-apple-system,"SF Pro Text",ui-sans-serif,system-ui,sans-serif;
     -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
     overscroll-behavior:none;overflow:hidden}
-  @media(orientation:landscape){
-    #v-week,#v-account{display:none!important}
-    #v-agenda.on{display:block!important}
-    #tb{display:none!important}
-    #app{height:100svh}
-    #v-agenda.on{padding-bottom:8px}
-  }
+  @media(orientation:landscape){body::after{
+    content:'Veuillez tourner votre iPhone';
+    position:fixed;inset:0;z-index:99999;
+    background:var(--bg);color:var(--lbl2);
+    display:flex;align-items:center;justify-content:center;
+    font-size:17px;font-weight:500;pointer-events:all;
+  }}
 
   /* ── Splash ── */
   #splash{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;
@@ -94,6 +94,14 @@
   .nb-brand{display:flex;align-items:center;gap:10px;flex:1;text-decoration:none;min-width:0}
   .nb-ico{width:30px;height:30px;border-radius:8px;overflow:hidden;flex-shrink:0;box-shadow:0 1px 6px rgba(0,0,0,.3)}
   .nb-ico img{width:100%;height:100%;object-fit:cover;display:block}
+  .nb-ico.no-photo{background:linear-gradient(135deg,#3b82f6,#6366f1);display:flex;align-items:center;justify-content:center}
+  .nb-ico.no-photo img{display:none}
+  .nb-ico.no-photo::after{content:'';display:block;width:18px;height:18px;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='8' r='4' stroke='white' stroke-width='1.8'/%3E%3Cpath d='M4 20c0-4 3.6-7 8-7s8 3 8 7' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") center/contain no-repeat}
+  .acc-icon.no-photo{background:linear-gradient(135deg,#3b82f6,#6366f1)}
+  .acc-icon.no-photo img{display:none}
+  .acc-icon.no-photo::after{content:'';position:absolute;inset:0;
+    background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Ccircle cx='12' cy='8' r='4' stroke='white' stroke-width='1.6'/%3E%3Cpath d='M4 20c0-4 3.6-7 8-7s8 3 8 7' stroke='white' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") center/50% no-repeat}
   .nb-name{font-size:17px;font-weight:600;letter-spacing:-.025em;color:var(--lbl);line-height:1.1}
   .nb-sub{font-size:11px;color:var(--lbl3);display:block;font-weight:400}
   #nb-upd{font-size:11px;color:var(--lbl3);white-space:nowrap;flex-shrink:0}
@@ -242,8 +250,7 @@
     border:.5px solid rgba(255,255,255,.18);border-radius:99px;
     box-shadow:0 8px 32px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.14);
     margin-top:8px;padding:5px 8px;gap:2px;height:calc(var(--tb) - 2px)}
-  @media(prefers-color-scheme:light){#tb-pill{background:rgba(248,248,250,.94);
-    border-color:rgba(0,0,0,.10);box-shadow:0 8px 32px rgba(0,0,0,.14),0 2px 8px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.95)}}
+  /* tb-pill stays dark always - iOS style */
   #tb-slider{position:absolute;top:5px;bottom:5px;border-radius:99px;
     background:rgba(10,132,255,.18);pointer-events:none;z-index:0;
     transition:left .25s cubic-bezier(.4,0,.2,1),width .25s}
@@ -253,7 +260,9 @@
     color:var(--lbl3);font-family:inherit;-webkit-tap-highlight-color:transparent;
     border-radius:99px;transition:color .2s,transform .1s;position:relative;z-index:1;-webkit-tap-highlight-color:transparent}
   .tbtn:active{transform:scale(.88)}
-  .tbtn.on{color:var(--tint)}
+  .tbtn.on{color:#0a84ff}
+  .tbtn{color:rgba(255,255,255,.45)}
+  .tbtn.on{color:#0a84ff}
   .tbtn svg{width:24px;height:24px}
   .tbtn span{font-size:11px;font-weight:500;letter-spacing:.01em}
 
@@ -303,7 +312,18 @@
     var s=document.getElementById('splash');if(!s)return;
     s.classList.add('hide');setTimeout(function(){if(s.parentNode)s.remove();},450);
   };
-  if(hasCfg)setTimeout(window._hideSplash,4000);
+  if(hasCfg){
+    // Greeting in splash
+    try{
+      var cfg2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+      if(cfg2.displayName){
+        var lang2=cfg2.lang||'en';
+        var sn=document.getElementById('splash-name');
+        if(sn)sn.textContent=lang2==='fr'?'Bonjour '+cfg2.displayName+' !':'Hi, '+cfg2.displayName+'!';
+      }
+    }catch(se){}
+    setTimeout(window._hideSplash,3500);
+  }
   // Expose lang helper early
   window._getLang=function(){try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';}};
 })();
@@ -439,8 +459,8 @@
       </div>
 
       <!-- Calendrier 2 -->
-      <p class="acc-section-title" id="acc-s-cal2">Calendar 2</p>
-      <div class="acc-rows">
+      <p class="acc-section-title" id="acc-s-cal2" style="display:none">Calendar 2</p>
+      <div class="acc-rows" id="acc-rows-cal2" style="display:none">
         <button class="acc-row" onclick="accEditCal2()">
           <span class="acc-row-ico">&#127881;</span>
           <span class="acc-row-lbl" id="acc-cal2-lbl">Source &amp; colour</span>
@@ -516,11 +536,13 @@ function _ds(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'
 
 function wkInit(byDay,today){
   _wkByDay=byDay;_wkToday=today;
-  if(!_wkCur||!_wkDates.includes(_wkCur))_wkCur=today;
+  _wkCur=today; // always reset to today on init
   _wkDates=[];
   var td=new Date(today+'T00:00:00'),dow=td.getDay();
   var ws=new Date(td);ws.setDate(td.getDate()-(dow===0?6:dow-1));
-  for(var i=0;i<56;i++){var d=new Date(ws);d.setDate(ws.getDate()+i);_wkDates.push(_ds(d));}
+  // 4 semaines passées + 12 semaines futures = 112 jours
+  var wkStart=new Date(ws);wkStart.setDate(ws.getDate()-28);
+  for(var i=0;i<112;i++){var d=new Date(wkStart);d.setDate(wkStart.getDate()+i);_wkDates.push(_ds(d));}
   var strip=document.getElementById('wk-strip');if(!strip)return;
   strip.innerHTML='';
   _wkDates.forEach(function(ds){
@@ -528,7 +550,7 @@ function wkInit(byDay,today){
     var g=document.createElement('div');g.className='wk-grid-host';g.dataset.date=ds;
     p.appendChild(g);strip.appendChild(p);
   });
-  wkSnap(_wkCur,false,true);wkUpdateHdr();
+  wkSnap(_wkCur,false,true);wkUpdateHdr();_initWkDaysSwipe();
   var t;
   strip.addEventListener('scroll',function(){
     if(typeof awPopClose==='function')awPopClose();
@@ -566,7 +588,10 @@ function wkUpdateHdr(){
   var dow=d.getDay(),mon=new Date(d);mon.setDate(d.getDate()-(dow===0?6:dow-1));
   var days=document.getElementById('wk-days');if(!days)return;
   days.innerHTML='';
-  ['M','T','W','T','F','S','S'].forEach(function(l,i){
+  var _DOW_EN=['M','T','W','T','F','S','S'];
+  var _DOW_FR=['L','M','M','J','V','S','D'];
+  var _dow=typeof window._getLang==='function'&&window._getLang()==='fr'?_DOW_FR:_DOW_EN;
+  _dow.forEach(function(l,i){
     var day=new Date(mon);day.setDate(mon.getDate()+i);var ds=_ds(day);
     var isT=(ds===_wkToday),isSel=(ds===_wkCur),hasEv=((byDay[ds]||[]).length>0);
     var cls='wk-mini'+(isT?' is-today':'')+(isSel?' is-sel':'')+(hasEv?' has-ev':'');
@@ -577,6 +602,22 @@ function wkUpdateHdr(){
   });
 }
 function wkGoToday(){_wkCur=_wkToday;wkSnap(_wkCur,true,true);wkUpdateHdr();}
+function _initWkDaysSwipe(){
+  var days=document.getElementById('wk-days');if(!days)return;
+  var sx=0,active=false;
+  days.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;active=true;},{passive:true});
+  days.addEventListener('touchend',function(e){
+    if(!active)return;active=false;
+    var dx=e.changedTouches[0].clientX-sx;
+    if(Math.abs(dx)<40)return;
+    if(!_wkCur)return;
+    // Changer de semaine : même jour +/- 7 jours
+    var d=new Date(_wkCur+'T00:00:00');
+    d.setDate(d.getDate()+(dx<0?7:-7));
+    var ds=_ds(d);
+    if(_wkDates.includes(ds)){_wkCur=ds;wkSnap(_wkCur,true,true);wkUpdateHdr();}
+  },{passive:true});
+}
 
 /* ── Tabs ── */
 var VIDS=['v-agenda','v-week','v-account'],TIDS=['tb-0','tb-1','tb-2'],_tab=0;
@@ -613,48 +654,42 @@ function _updateSlider(){
 }
 function _initPillSwipe(){
   var pill=document.getElementById('tb-pill');if(!pill)return;
-  var startX=0,startTab=0,swipeActive=false,swipeDist=0;
-  var SWIPE_THRESH=40; // px to trigger tab change
+  var startX=0,startTab=0,active=false,dist=0;
+  var THRESH=36;
 
   pill.addEventListener('touchstart',function(e){
-    startX=e.touches[0].clientX;
-    startTab=_tab;
-    swipeActive=false;
-    swipeDist=0;
-    var sl=document.getElementById('tb-slider');
-    if(sl)sl.style.transition='none';
+    startX=e.touches[0].clientX;startTab=_tab;active=false;dist=0;
+    var sl=document.getElementById('tb-slider');if(sl)sl.style.transition='none';
   },{passive:true});
 
   pill.addEventListener('touchmove',function(e){
-    swipeDist=e.touches[0].clientX-startX;
-    if(Math.abs(swipeDist)>8){
-      swipeActive=true;
-      // Drag slider visually
-      var sl=document.getElementById('tb-slider');if(!sl)return;
-      var btns=pill.querySelectorAll('.tbtn');if(!btns[startTab])return;
-      var w=btns[startTab].offsetWidth;
-      var base=btns[startTab].offsetLeft;
-      var clamped=Math.max(-w,Math.min(w,swipeDist));
-      sl.style.left=(base+clamped)+'px';
-      sl.style.width=w+'px';
-    }
+    dist=e.touches[0].clientX-startX;
+    if(Math.abs(dist)<8)return;
+    active=true;
+    // Interpoler le slider vers l'onglet cible
+    var sl=document.getElementById('tb-slider');if(!sl)return;
+    var btns=pill.querySelectorAll('.tbtn');
+    if(!btns[startTab])return;
+    // Swipe droite (dist>0) → onglet suivant (index+1); gauche → précédent
+    var targetTab=dist>0?Math.min(startTab+1,2):Math.max(startTab-1,0);
+    if(targetTab===startTab){_updateSlider();return;}
+    var progress=Math.min(Math.abs(dist)/THRESH,1);
+    var fromL=btns[startTab].offsetLeft,fromW=btns[startTab].offsetWidth;
+    var toL=btns[targetTab].offsetLeft,toW=btns[targetTab].offsetWidth;
+    sl.style.left=(fromL+(toL-fromL)*progress)+'px';
+    sl.style.width=(fromW+(toW-fromW)*progress)+'px';
   },{passive:true});
 
   pill.addEventListener('touchend',function(e){
     var sl=document.getElementById('tb-slider');
-    if(sl)sl.style.transition='left .25s cubic-bezier(.4,0,.2,1),width .25s';
-    if(!swipeActive){
-      // It was a tap — let onclick handle it, just re-sync slider
-      setTimeout(_updateSlider,50);
-      return;
-    }
-    // It was a swipe — change tab based on direction
+    if(sl)sl.style.transition='left .22s cubic-bezier(.4,0,.2,1),width .22s';
+    if(!active){setTimeout(_updateSlider,50);return;}
     var newTab=startTab;
-    if(swipeDist>SWIPE_THRESH&&startTab>0)newTab=startTab-1;
-    else if(swipeDist<-SWIPE_THRESH&&startTab<2)newTab=startTab+1;
+    if(dist>THRESH&&startTab<2)newTab=startTab+1;
+    else if(dist<-THRESH&&startTab>0)newTab=startTab-1;
     if(newTab!==startTab)goTab(newTab);
     else _updateSlider();
-    swipeActive=false;
+    active=false;
   },{passive:true});
 }
 
@@ -662,10 +697,15 @@ function _initPillSwipe(){
 function _applyProfile(){
   try{
     var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+    var nw=document.getElementById('nb-avatar-wrap'),ai=document.getElementById('acc-avatar-wrap');
     if(cfg.photo){
-      var ni=document.getElementById('nb-avatar-img'),nw=document.getElementById('nb-avatar-wrap'),ai=document.getElementById('acc-avatar-img');
-      if(ni)ni.src=cfg.photo;if(ai)ai.src=cfg.photo;
-      if(nw){nw.classList.add('has-photo');nw.style.borderRadius='50%';}
+      var ni=document.getElementById('nb-avatar-img'),aim=document.getElementById('acc-avatar-img');
+      if(ni)ni.src=cfg.photo;if(aim)aim.src=cfg.photo;
+      if(nw){nw.classList.add('has-photo');nw.classList.remove('no-photo');nw.style.borderRadius='50%';}
+      if(ai)ai.classList.remove('no-photo');
+    } else {
+      if(nw)nw.classList.add('no-photo');
+      if(ai)ai.classList.add('no-photo');
     }
     if(cfg.displayName){
       var ne=document.getElementById('acc-display-name');if(ne)ne.textContent=cfg.displayName;
@@ -679,6 +719,11 @@ function _applyProfile(){
     if(cfg.theme)_applyTheme(cfg.theme); else _applyTheme('auto');
     var pb=document.getElementById('acc-cal1-preset-badge');
     if(pb){var pm={'ecam':'ECAM','custom':'Custom','none':'Single'};pb.textContent=pm[cfg.cal1Preset||'ecam']||'';}
+    // Show/hide cal2 section
+    var hasCal2=(cfg.calendars&&cfg.calendars[1])||cfg.cal2Ical;
+    var sec2=document.getElementById('acc-s-cal2'),row2=document.getElementById('acc-rows-cal2');
+    if(sec2)sec2.style.display=hasCal2?'':'none';
+    if(row2)row2.style.display=hasCal2?'':'none';
   }catch(e){}
 }
 
@@ -724,16 +769,14 @@ function accSetTheme(v){
   _applyTheme(v);
   location.reload();
 }
-function _themeIcon(v){return v==='dark'?'&#127769;':v==='light'?'&#9728;&#65039;':'&#10024;';}
-function _themeIcon(v){return v==='dark'?'&#127769;':v==='light'?'&#9728;&#65039;':'&#10024;';}
+function _themeIcon(v){return v==='dark'?'🌙':v==='light'?'☀️':'✨';}
 function _applyTheme(v){
   var r=document.documentElement;
-  // Remove previous
-  r.removeAttribute('data-theme');
-  r.style.colorScheme='';
+  r.removeAttribute('data-theme'); r.style.colorScheme='';
   if(v==='dark'){r.setAttribute('data-theme','dark');r.style.colorScheme='dark';}
   else if(v==='light'){r.setAttribute('data-theme','light');r.style.colorScheme='light';}
   var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
+  var ico=document.getElementById('acc-theme-ico');if(ico)ico.textContent=_themeIcon(v||'auto');
 }
 function showCalSettings(){ accEditCal1Source(); }
 function accEditCal1Source(){

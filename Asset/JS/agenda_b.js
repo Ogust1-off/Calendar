@@ -18,7 +18,7 @@ function _loadCfg() {
 let AW_API_KEY = '', AW_CALENDAR_ID = '', AW_CALENDAR_ID_2 = '', AW_ICAL_URL = '';
 let AW_CAL1_PRESET = 'ecam', AW_CAL1_COLOR_CFG = 'blue', AW_CAL1_SUBJECTS = [], AW_CAL2_COLOR_CFG = 'lime';
 const AW_CAL2_COLOR = 'lime';
-const AW_FETCH_DAYS = 49;
+const AW_FETCH_DAYS = 84; // 12 semaines
 
 // Grid config: show hours from AW_HOUR_START to AW_HOUR_END
 const AW_HOUR_START=0, AW_HOUR_END=24; let AW_PX_PER_HOUR=60;
@@ -882,7 +882,7 @@ function awRenderCalendar(byDay, today) {
 // Nombre de semaines complètes disponibles au-delà de la semaine courante
 // AW_FETCH_DAYS couvre les jours chargés ; on soustrait 7 (semaine courante déjà incluse)
 // puis on divise par 7 pour obtenir le nombre de semaines suivantes accessibles.
-const AW_MAX_OFFSET = Math.floor(AW_FETCH_DAYS / 7); // ex: 49j → 7 semaines après la courante (offset 0 à 6)
+const AW_MAX_OFFSET = Math.floor(AW_FETCH_DAYS / 7);
 
 function awCalPrev()    { if (awCalOffset > 0) { awCalOffset--; if (window._awByDay) awRenderCalendar(window._awByDay, awToday()); } }
 function awCalNext()    { if (awCalOffset < AW_MAX_OFFSET) { awCalOffset++; if (window._awByDay) awRenderCalendar(window._awByDay, awToday()); } }
