@@ -1,899 +1,771 @@
 /*
   Calendar by Shortcut™ — Onboarding & Settings
-  © 2026 Ogust'1. Clean rewrite.
+  © 2026 Ogust'1
 */
-
 'use strict';
 
-// ── Storage helpers ───────────────────────────────────────────────────────────
-function _obSave(d)  { localStorage.setItem('shortcut_config', JSON.stringify(d)); }
-function _obLoad()   { try { return JSON.parse(localStorage.getItem('shortcut_config')||'null')||{}; } catch(e){ return {}; } }
-function _obEsc(s)   { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function _obSave(d){ localStorage.setItem('shortcut_config', JSON.stringify(d)); }
+function _obLoad(){ try{ return JSON.parse(localStorage.getItem('shortcut_config')||'null')||{}; }catch(e){ return {}; } }
+function _obEsc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
-// ── State ─────────────────────────────────────────────────────────────────────
-var _obStep = 0;
-var _obIsSettings = false;
-var _obCalSub = 0; // sub-step within calendar step
+var _obStep=0, _obIsSettings=false, _obCalSub=0;
 
-// ── Open / Close ──────────────────────────────────────────────────────────────
-function showOnboarding() {
-  if (document.getElementById('ob-overlay')) return;
-  _obStep = 0; _obCalSub = 0; _obIsSettings = false;
-  _obOpen();
+function showOnboarding(){
+  if(document.getElementById('ob-overlay'))return;
+  _obStep=0;_obCalSub=0;_obIsSettings=false;_obOpen();
 }
-function showSettings() {
-  if (document.getElementById('ob-overlay')) return;
-  _obStep = 1; _obCalSub = 0; _obIsSettings = true;
-  _obOpen();
+function showSettings(){
+  if(document.getElementById('ob-overlay'))return;
+  _obStep=1;_obCalSub=0;_obIsSettings=true;_obOpen();
 }
-
-function _obOpen() {
-  var el = document.createElement('div');
-  el.id = 'ob-overlay';
-  el.innerHTML =
-    '<div id="ob-sheet">' +
-    '<div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>' +
-    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>' +
-    (_obIsSettings ? '<button class="ob-x" onclick="_obClose()" aria-label="Close">\u00d7</button>' : '') +
-    '<div id="ob-content"></div>' +
-    '<div id="ob-bottom"></div>' +
-    '</div>';
+function _obOpen(){
+  var el=document.createElement('div');el.id='ob-overlay';
+  el.innerHTML='<div id="ob-sheet"><div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>'+
+    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>'+
+    (_obIsSettings?'<button class="ob-x" onclick="_obClose()">\u00d7</button>':'')+
+    '<div id="ob-content"></div><div id="ob-bottom"></div></div>';
   document.body.appendChild(el);
-  requestAnimationFrame(function() {
-    el.classList.add('ob-in');
-    _obRender();
-    _obInitDrag(el);
-  });
+  requestAnimationFrame(function(){el.classList.add('ob-in');_obRender();_obInitDrag(el);});
 }
-
-function _obClose() {
-  var o = document.getElementById('ob-overlay');
-  if (!o) return;
-  o.classList.add('ob-out');
-  setTimeout(function() { o.remove(); }, 380);
+function _obClose(){
+  var o=document.getElementById('ob-overlay');if(!o)return;
+  o.classList.add('ob-out');setTimeout(function(){o.remove();},380);
 }
-
-function _obShowUnconfigured() {
-  var c = document.getElementById('aw-compact');
-  if (!c) return;
-  var d = _obLoad(), lang = d.lang||'en';
-  var msg = lang==='fr' ? "L\u2019agenda n\u2019est pas configur\u00e9." : 'Calendar not configured.';
-  var btn = lang==='fr' ? 'Configurer' : 'Set up';
-  c.innerHTML = '<div class="aw-state" style="display:flex;flex-direction:column;align-items:center;gap:18px;padding:52px 24px">' +
-    '<div style="font-size:48px">&#128197;</div>' +
-    '<div style="font-size:16px;font-weight:600;color:var(--text);text-align:center">' + msg + '</div>' +
-    '<button onclick="showOnboarding()" style="padding:13px 32px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:15px;font-weight:600;font-family:inherit;">' + btn + '</button>' +
-    '</div>';
+function _obShowUnconfigured(){
+  var c=document.getElementById('aw-compact');if(!c)return;
+  var d=_obLoad(),lang=d.lang||'en';
+  var msg=lang==='fr'?"L\u2019agenda n\u2019est pas configur\u00e9.":'Calendar not configured.';
+  var btn=lang==='fr'?'Configurer':'Set up';
+  c.innerHTML='<div class="aw-state" style="display:flex;flex-direction:column;align-items:center;gap:18px;padding:52px 24px">'+
+    '<div style="font-size:48px">&#128197;</div>'+
+    '<div style="font-size:16px;font-weight:600;color:var(--text);text-align:center">'+msg+'</div>'+
+    '<button onclick="showOnboarding()" style="padding:13px 32px;border-radius:14px;border:none;cursor:pointer;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;font-size:15px;font-weight:600;font-family:inherit;">'+btn+'</button></div>';
 }
-
-// ── Drag to dismiss ───────────────────────────────────────────────────────────
-function _obInitDrag(overlay) {
-  var sheet = overlay.querySelector('#ob-sheet');
-  var zone  = overlay.querySelector('#ob-handle-zone');
-  if (!sheet || !zone) return;
-  var startY=0, curY=0, active=false;
-  var THRESH = 120;
-  function start(e) { active=true; startY=e.touches?e.touches[0].clientY:e.clientY; curY=0; sheet.style.transition='none'; }
-  function move(e)  {
-    if (!active) return;
-    var dy = (e.touches?e.touches[0].clientY:e.clientY) - startY;
-    if (dy<0) dy=0; curY=dy;
+function _obInitDrag(overlay){
+  var sheet=overlay.querySelector('#ob-sheet'),zone=overlay.querySelector('#ob-handle-zone');
+  if(!sheet||!zone)return;
+  var sy=0,cy=0,on=false,T=120;
+  function start(e){on=true;sy=e.touches?e.touches[0].clientY:e.clientY;cy=0;sheet.style.transition='none';}
+  function move(e){
+    if(!on)return;
+    var dy=(e.touches?e.touches[0].clientY:e.clientY)-sy;
+    if(dy<0)dy=0;cy=dy;
     sheet.style.transform='translateY('+dy+'px)';
-    overlay.style.background='rgba(0,0,0,'+(0.52*(1-Math.min(dy/THRESH,1)*0.7))+')';
-    if (e.cancelable) e.preventDefault();
+    overlay.style.background='rgba(0,0,0,'+(0.52*(1-Math.min(dy/T,1)*0.7))+')';
+    if(e.cancelable)e.preventDefault();
   }
-  function end() {
-    if (!active) return; active=false; sheet.style.transition='';
-    if (curY >= THRESH) {
-      sheet.style.transform='translateY(110%)';
-      overlay.style.opacity='0'; overlay.style.transition='opacity .25s';
-      setTimeout(function() {
-        overlay.remove();
-        if (!_obIsSettings) {
-          var cfg=_obLoad();
-          if (!(cfg.apiKey||cfg.cal1Ical) || !((cfg.calendars&&cfg.calendars[0])||cfg.cal1Ical)) _obShowUnconfigured();
-        }
-      }, 280);
-    } else {
-      sheet.style.transform=''; overlay.style.background='';
-    }
+  function end(){
+    if(!on)return;on=false;sheet.style.transition='';
+    if(cy>=T){
+      sheet.style.transform='translateY(110%)';overlay.style.opacity='0';overlay.style.transition='opacity .25s';
+      setTimeout(function(){overlay.remove();if(!_obIsSettings){var cfg=_obLoad();if(!(cfg.apiKey||cfg.cal1Ical)||!((cfg.calendars&&cfg.calendars[0])||cfg.cal1Ical))_obShowUnconfigured();}},280);
+    }else{sheet.style.transform='';overlay.style.background='';}
   }
-  zone.addEventListener('touchstart', start, {passive:true});
-  document.addEventListener('touchmove', move, {passive:false});
-  document.addEventListener('touchend', end, {passive:true});
-  zone.addEventListener('mousedown', start);
-  document.addEventListener('mousemove', function(e){if(active)move(e);});
-  document.addEventListener('mouseup', end);
+  zone.addEventListener('touchstart',start,{passive:true});
+  document.addEventListener('touchmove',move,{passive:false});
+  document.addEventListener('touchend',end,{passive:true});
+  zone.addEventListener('mousedown',start);
+  document.addEventListener('mousemove',function(e){if(on)move(e);});
+  document.addEventListener('mouseup',end);
 }
 
-// ── Steps: 0=welcome, 1=calendars(sub), 2=profile, 3=prefs, 4=done
-var _OB_STEPS = 5;
-
-function _obRender() {
-  var con = document.getElementById('ob-content');
-  var bot = document.getElementById('ob-bottom');
-  if (!con || !bot) return;
+var _OB_STEPS=5;
+function _obRender(){
+  var con=document.getElementById('ob-content'),bot=document.getElementById('ob-bottom');
+  if(!con||!bot)return;
   con.classList.remove('ob-slide');
-  var fns = [_s0, _s1_cal, _s2, _s3, _s4];
-  var r = fns[_obStep] ? fns[_obStep]() : {c:'',b:''};
-  con.innerHTML = r.c; bot.innerHTML = r.b;
-  void con.offsetWidth; con.classList.add('ob-slide');
-  setTimeout(function(){ var i=con.querySelector('input[type="text"],input[type="password"],input[type="url"]'); if(i) i.focus(); }, 320);
+  var r=[_s0,_s1cal,_s2,_s3,_s4][_obStep]();
+  con.innerHTML=r.c;bot.innerHTML=r.b;
+  void con.offsetWidth;con.classList.add('ob-slide');
+  setTimeout(function(){var i=con.querySelector('input[type="text"],input[type="password"],input[type="url"]');if(i)i.focus();},320);
 }
-
-function _obNext() {
-  if (!_obValidate()) return;
-  // Handle calendar sub-steps
-  if (_obStep === 1) {
-    var d = _obLoad(), src2 = d.calSource||'google';
-    var subMax = src2==='ical' ? 2 : 3;
-    if (_obCalSub < subMax) { _obCalSub++; _obRender(); return; }
-    _obCalSub=0; _obStep++; _obRender(); return;
+function _obNext(){
+  if(!_obValidate())return;
+  if(_obStep===1){
+    var src=(_obLoad().calSource||'google');
+    var max=src==='ical'?2:3;
+    if(_obCalSub<max){_obCalSub++;_obRender();return;}
+    _obCalSub=0;_obStep++;_obRender();return;
   }
-  if (_obStep < _OB_STEPS-1) { _obStep++; _obRender(); }
+  if(_obStep<_OB_STEPS-1){_obStep++;_obRender();}
 }
-
-function _obBack() {
-  if (_obStep === 1 && _obCalSub > 0) { _obCalSub--; _obRender(); return; }
-  if (_obStep > (_obIsSettings?1:0)) { _obStep--; _obRender(); }
+function _obBack(){
+  if(_obStep===1&&_obCalSub>0){_obCalSub--;_obRender();return;}
+  if(_obStep>(_obIsSettings?1:0)){_obStep--;_obRender();}
 }
+function _obSkip(){if(_obStep<_OB_STEPS-1){_obStep++;_obRender();}}
 
-function _obSkip() {
-  if (_obStep < _OB_STEPS-1) { _obStep++; _obRender(); }
-}
-
-// ── Step 0: Welcome ───────────────────────────────────────────────────────────
-function _s0() {
+// Step 0: Welcome
+function _s0(){
   return {
-    c: '<div class="ob-hero">' +
-       '<div class="ob-logo-wrap"><svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="13" fill="url(#og)"/><path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/><defs><linearGradient id="og" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs></svg></div>' +
-       '<h1 class="ob-h1">Calendar<br><em>by Shortcut&#8482;</em></h1>' +
-       '<p class="ob-p">Your ECAM schedule, always with you.</p>' +
-       '<div class="ob-feats">' +
-         '<div class="ob-feat"><span>&#128197;</span>Agenda &amp; time grid</div>' +
-         '<div class="ob-feat"><span>&#128276;</span>Live class tracking</div>' +
-         '<div class="ob-feat"><span>&#128274;</span>Keys stored on device</div>' +
-         '<div class="ob-feat"><span>&#128244;</span>Works offline</div>' +
-       '</div></div>',
-    b: '<button class="ob-btn-p ob-btn-full" onclick="_obNext()">Get started <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>' +
-       '<p class="ob-legal">Your data never leaves this device.</p>'
+    c:'<div class="ob-hero"><div class="ob-logo-wrap"><svg viewBox="0 0 48 48" fill="none"><rect width="48" height="48" rx="13" fill="url(#og)"/><path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/><defs><linearGradient id="og" x1="0" y1="0" x2="48" y2="48"><stop stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/></linearGradient></defs></svg></div>'+
+      '<h1 class="ob-h1">Calendar<br><em>by Shortcut&#8482;</em></h1>'+
+      '<p class="ob-p">Votre agenda ECAM, toujours avec vous.</p>'+
+      '<div class="ob-feats">'+
+        '<div class="ob-feat"><span>&#128197;</span>Agenda &amp; grille horaire</div>'+
+        '<div class="ob-feat"><span>&#128276;</span>Suivi en temps r\u00e9el</div>'+
+        '<div class="ob-feat"><span>&#128274;</span>Cl\u00e9s sur l\u2019appareil</div>'+
+        '<div class="ob-feat"><span>&#128244;</span>Hors ligne</div>'+
+      '</div></div>',
+    b:'<button class="ob-btn-p ob-btn-full" onclick="_obNext()">Commencer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button><p class="ob-legal">Vos donn\u00e9es ne quittent pas cet appareil.</p>'
   };
 }
 
-// ── Step 1: API Key (only if API source) ──────────────────────────────────────
-function _s1() {
-  var saved = _obLoad().apiKey || '';
-  return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">' + _obDots(1,4) + '</div></div>' +
-       '<h2 class="ob-h2">API Key</h2>' +
-       '<p class="ob-p2">A Google API key to read your calendar.</p>' +
-       '<div class="ob-field"><label class="ob-lbl">GOOGLE API KEY</label>' +
-       '<div class="ob-inp-wrap"><input type="password" id="ob-apikey" class="ob-inp" placeholder="AIzaSy\u2026" value="' + _obEsc(saved) + '" autocomplete="off" spellcheck="false"/>' +
-       '<button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-apikey\',this)">' + _eyeIcon(false) + '</button></div>' +
-       '<div class="ob-err" id="ob-apikey-err"></div></div>' +
-       '<details class="ob-details"><summary class="ob-hint-t">&#128161; How to get an API key</summary>' +
-       '<ol class="ob-hint-l"><li>Go to <strong>console.cloud.google.com</strong></li>' +
-       '<li>New project &#8594; APIs &amp; Services &#8594; Credentials</li>' +
-       '<li>Create API Key &#8594; restrict to <em>Google Calendar API</em></li></ol></details>' +
-       '</div>',
-    b: _obNavRow(true, 'Next', true)
-  };
-}
-
-// ── Step 2: Calendars (sub-stepped) ──────────────────────────────────────────
-function _s1_cal() {
-  var d = _obLoad(), src = d.calSource||'google';
-  if (_obCalSub === 0) return _s2a(d, src);
-  // sub 1+: dépend de la source
-  if (src === 'google') {
-    if (_obCalSub === 1) return _s2_google_api(d);
-    if (_obCalSub === 2) return _s2_google_ids(d);
-    if (_obCalSub === 3) return _s2c(d);
-  } else if (src === 'ical') {
-    if (_obCalSub === 1) return _s2_ical_urls(d);
-    if (_obCalSub === 2) return _s2c(d);
-  } else { // both
-    if (_obCalSub === 1) return _s2_google_api(d);
-    if (_obCalSub === 2) return _s2_both_ids(d);
-    if (_obCalSub === 3) return _s2c(d);
+// Step 1: Calendriers (sous-\u00e9tapes selon source)
+function _s1cal(){
+  var d=_obLoad(),src=d.calSource||'google';
+  if(_obCalSub===0) return _sCS(d,src);
+  if(src==='google'){
+    if(_obCalSub===1) return _sCAPI(d);
+    if(_obCalSub===2) return _sCGIDs(d);
+    if(_obCalSub===3) return _sCColors(d);
+  } else if(src==='ical'){
+    if(_obCalSub===1) return _sCIcal(d);
+    if(_obCalSub===2) return _sCColors(d);
+  } else {
+    if(_obCalSub===1) return _sCAPI(d);
+    if(_obCalSub===2) return _sCBoth(d);
+    if(_obCalSub===3) return _sCColors(d);
   }
-  return _s2a(d, src);
+  return _sCS(d,src);
 }
 
-function _obSubjRow(s, i) {
-  var hex = (OB_COLORS.find(function(c){return c.k===(s.color||'blue');})||OB_COLORS[0]).hex;
-  return '<div class="ob-subj-row" data-idx="'+i+'">' +
-    '<input class="ob-inp ob-subj-inp" data-match="'+_obEsc(s.match||s.label||'')+
-    '" value="'+_obEsc(s.label||s.match||'')+'" placeholder="Subject name…" '+
-    'oninput="_obSubjChange()" style="flex:1;min-width:0;"/>' +
-    '<button class="ob-color-dot-btn" data-color="'+(s.color||'blue')+'" '+
-    'style="background:'+hex+';" '+
-    'onclick="_obOpenColorPop(this,'+i+')" title="Pick colour"></button>' +
-    '<button onclick="_obRemoveSubj(this)" class="ob-subj-del">×</button>' +
-  '</div>';
-}
-
-function _obOpenColorPop(btn, idx) {
-  // Close any existing pop
-  var existing = document.getElementById('ob-color-pop');
-  if (existing) { existing.remove(); if(existing.dataset.idx==idx) return; }
-  var pop = document.createElement('div');
-  pop.id = 'ob-color-pop'; pop.dataset.idx = idx;
-  pop.style.cssText = 'position:absolute;z-index:9999;background:#1c1c1e;border:.5px solid rgba(255,255,255,.15);'+
-    'border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;width:220px;'+
-    'box-shadow:0 8px 32px rgba(0,0,0,.5);';
-  OB_COLORS.forEach(function(c) {
-    var cur = btn.dataset.color === c.k;
-    var b = document.createElement('button');
-    b.style.cssText = 'width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:'+(cur?'2.5px solid #fff':'2px solid transparent')+
-      ';cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .1s;';
-    if(cur) b.innerHTML='<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>';
-    b.onclick = function(e) {
-      e.stopPropagation();
-      // Update the dot button
-      btn.style.background = c.hex;
-      btn.dataset.color = c.k;
-      pop.remove();
-      _obSaveSubjs();
-    };
-    pop.appendChild(b);
-  });
-  // Position below the dot button
-  var rect = btn.getBoundingClientRect();
-  var sheet = document.getElementById('ob-sheet');
-  var sheetRect = sheet ? sheet.getBoundingClientRect() : {left:0,top:0};
-  pop.style.top = (rect.bottom - sheetRect.top + 6) + 'px';
-  var left = rect.left - sheetRect.left - 90;
-  pop.style.left = Math.max(8, Math.min(left, 200)) + 'px';
-  document.getElementById('ob-content').appendChild(pop);
-  // Close on outside click
-  setTimeout(function(){
-    document.addEventListener('click', function close(ev) {
-      if(!pop.contains(ev.target)&&ev.target!==btn){pop.remove();document.removeEventListener('click',close);}
-    });
-  }, 10);
-}
-
-function _s2c(d) {
-  var preset = d.cal1Preset||'ecam', color = d.cal1Color||'blue', subs = d.cal1Subjects||[];
-  var defaultSubs = [
-    {match:'math',color:'blue',label:'Maths'},{match:'physique',color:'cyan',label:'Physique'},
-    {match:'informatique',color:'violet',label:'Informatique'},{match:'sciences ind',color:'amber',label:'Sciences Ind.'},
-    {match:'anglais',color:'emerald',label:'Anglais'},{match:'sport',color:'rose',label:'Sport'},
-    {match:'culture',color:'orange',label:'Culture'},{match:'proj',color:'grey',label:'Projets'},
-  ];
-  var subjList = subs.length ? subs : defaultSubs;
-  var subjRows = subjList.map(function(s,i){return _obSubjRow(s,i);}).join('');
+// Sous-\u00e9tape 0: Choix source
+function _sCS(d,src){
+  if(!d.calSource){d.calSource='google';_obSave(d);src='google';}
   return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
-       '<h2 class="ob-h2">Calendar 1 Style</h2>' +
-       '<p class="ob-p2">How should event colours be assigned?</p>' +
-       '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">' +
-         _srcBtn2('ecam',   preset==='ecam',   '&#127979;', 'ECAM Preset',       'Auto-detects subjects by name and assigns colours.') +
-         _srcBtn2('custom', preset==='custom', '&#127912;', 'Custom',            'Set your own subject names and colours.') +
-         _srcBtn2('none',   preset==='none',   '&#11036;',  'Single colour',     'All events use one colour.') +
-       '</div>' +
-       '<div id="ob-c1-color" style="' + (preset==='none'?'':'display:none') + '">' +
-         '<label class="ob-lbl" style="display:block;margin-bottom:8px">COLOUR</label>' +
-         _obColorGrid('ob-c1g', color, '_obPickCal1Color') +
-       '</div>' +
-       '<div id="ob-c1-subjs" style="' + (preset==='custom'?'':'display:none') + ';position:relative">' +
-         '<label class="ob-lbl" style="display:block;margin-bottom:10px">SUBJECTS &amp; COLOURS</label>' +
-         '<div id="ob-subj-list">' + subjRows + '</div>' +
-         '<button class="ob-btn-g" style="width:100%;margin-top:10px;font-size:13px" onclick="_obAddSubj()">+ Add subject</button>' +
-       '</div></div>',
-    b: _obNavRow(false, 'Next', true)
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(1,4)+'</div></div>'+
+      '<h2 class="ob-h2">Source</h2><p class="ob-p2">Comment acc\u00e9der \u00e0 votre calendrier\u00a0?</p>'+
+      '<div class="ob-src-group">'+
+        _srcBtn('google',src==='google','&#128273;','Google Calendar','Cl\u00e9 API + ID. Recommand\u00e9.')+
+        _srcBtn('ical',src==='ical','&#128241;','Lien iCal','Depuis iPhone ou Google. Sans cl\u00e9 API.')+
+        _srcBtn('both',src==='both','&#128279;','Les deux','Cal\u00a01 Google + Cal\u00a02 iCal.')+
+      '</div></div>',
+    b:'<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
   };
 }
 
-function _s2d(d) {
-  var color = d.cal2Color||'lime';
-  var hasCal2 = (d.calendars&&d.calendars[1]) || d.cal2Ical;
-  if (!hasCal2) { setTimeout(function(){_obNext();},10); return {c:'<div class="ob-form"></div>',b:''}; }
+// Sous-\u00e9tape: Cl\u00e9 API
+function _sCAPI(d){
   return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">' + _obDots(2,4) + '</div></div>' +
-       '<h2 class="ob-h2">Calendar 2 Colour</h2>' +
-       '<p class="ob-p2">Choose a colour for all events from Calendar 2.</p>' +
-       _obColorGrid('ob-c2g', color, '_obPickCal2Color') +
-       '</div>',
-    b: _obNavRow(false, 'Save', true)
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(1,4)+'</div></div>'+
+      '<h2 class="ob-h2">Cl\u00e9 API Google</h2><p class="ob-p2">Pour acc\u00e9der \u00e0 vos calendriers.</p>'+
+      '<div class="ob-field"><label class="ob-lbl">CL\u00c9 API</label>'+
+      '<div class="ob-inp-wrap"><input type="password" id="ob-apikey" class="ob-inp" placeholder="AIzaSy\u2026" value="'+_obEsc(d.apiKey||'')+'" autocomplete="off" spellcheck="false"/>'+
+      '<button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-apikey\',this)">'+_eyeIcon(false)+'</button></div>'+
+      '<div class="ob-err" id="ob-apikey-err"></div></div>'+
+      '<details class="ob-details"><summary class="ob-hint-t">&#128161; Obtenir une cl\u00e9</summary>'+
+      '<ol class="ob-hint-l"><li>console.cloud.google.com</li><li>APIs &amp; Services \u2192 Identifiants \u2192 Cr\u00e9er une cl\u00e9</li><li>Restreindre \u00e0 Google Calendar API</li></ol></details></div>',
+    b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
   };
 }
 
-// Source buttons helpers
-function _srcBtn(val, active, ico, title, sub) {
-  return '<button class="ob-src-btn'+(active?' ob-src-on':'')+'" onclick="_obPickSrc(\''+val+'\',this)">' +
-    '<div class="ob-src-ico">'+ico+'</div><div class="ob-src-body"><div class="ob-src-title">'+title+'</div><div class="ob-src-sub">'+sub+'</div></div>' +
-    '<div class="ob-src-chk">'+(active?'&#10003;':'')+'</div></button>';
-}
-function _srcBtn2(val, active, ico, title, sub) {
-  return '<button class="ob-preset-btn'+(active?' ob-preset-on':'')+'" onclick="_obPickPreset(\''+val+'\',this)">' +
-    '<div class="ob-src-ico">'+ico+'</div><div class="ob-src-body"><div class="ob-src-title">'+title+'</div><div class="ob-src-sub">'+sub+'</div></div>' +
-    '<div class="ob-src-chk">'+(active?'&#10003;':'')+'</div></button>';
-
-// ── Source: Google / iCal / Les deux ─────────────────────────────────────────
-function _s2a(d, src) {
-  if (!d.calSource) { d.calSource='google'; _obSave(d); src='google'; }
+// Sous-\u00e9tape: IDs Google
+function _sCGIDs(d){
   return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">'+_obDots(1,4)+'</div></div>' +
-       '<h2 class="ob-h2">Source</h2>' +
-       '<p class="ob-p2">Comment accéder à votre calendrier ?</p>' +
-       '<div class="ob-src-group">' +
-         _srcBtn('google', src==='google', '🔑', 'Google Calendar', 'API key + Calendar ID. Recommandé.') +
-         _srcBtn('ical',   src==='ical',   '📱', 'Lien iCal',        'Lien depuis iPhone ou Google. Pas de clé API.') +
-         _srcBtn('both',   src==='both',   '🔗', 'Les deux',          'Cal 1 via Google API, Cal 2 via iCal.') +
-       '</div></div>',
-    b: _obNavRow(true, 'Suivant', false)
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(2,4)+'</div></div>'+
+      '<h2 class="ob-h2">Calendriers Google</h2><p class="ob-p2">IDs de vos calendriers.</p>'+
+      '<div class="ob-field"><label class="ob-lbl">CAL 1 \u2014 ID <span style="color:var(--red)">*</span></label>'+
+      '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off" spellcheck="false"/>'+
+      '<div class="ob-err" id="ob-cal0-err"></div></div>'+
+      '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 \u2014 ID <span class="ob-opt">optionnel</span></label>'+
+      '<input type="text" id="ob-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[1])||'')+'" autocomplete="off" spellcheck="false"/></div>'+
+      '<details class="ob-details"><summary class="ob-hint-t">&#128161; Trouver l\u2019ID</summary>'+
+      '<ol class="ob-hint-l"><li>Google Calendar \u2192 Param\u00e8tres \u2192 votre agenda</li><li>Int\u00e9grer l\u2019agenda \u2192 copier l\u2019<strong>ID de l\u2019agenda</strong></li></ol></details></div>',
+    b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
   };
 }
 
-// ── Google : clé API ────────────────────────────────────────────────────────
-function _s2_google_api(d) {
+// Sous-\u00e9tape: Liens iCal
+function _sCIcal(d){
   return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">'+_obDots(1,4)+'</div></div>' +
-       '<h2 class="ob-h2">Clé API Google</h2>' +
-       '<p class="ob-p2">Clé pour accéder aux calendriers Google.</p>' +
-       '<div class="ob-field"><label class="ob-lbl">API KEY</label>' +
-       '<div class="ob-inp-wrap"><input type="password" id="ob-apikey" class="ob-inp" placeholder="AIzaSy…" value="'+_obEsc(d.apiKey||'')+'" autocomplete="off" spellcheck="false"/>' +
-       '<button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-apikey\',this)">'+_eyeIcon(false)+'</button></div>' +
-       '<div class="ob-err" id="ob-apikey-err"></div></div>' +
-       '<details class="ob-details"><summary class="ob-hint-t">💡 Obtenir une clé API</summary>' +
-       '<ol class="ob-hint-l"><li>Aller sur <strong>console.cloud.google.com</strong></li>' +
-       '<li>APIs &amp; Services → Identifiants → Créer une clé API</li>' +
-       '<li>Restreindre à <em>Google Calendar API</em></li></ol></details>' +
-       '</div>',
-    b: _obNavRow(false, 'Suivant', true)
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(1,3)+'</div></div>'+
+      '<h2 class="ob-h2">Liens iCal</h2><p class="ob-p2">Copiez depuis iPhone ou Google Calendar.</p>'+
+      '<div class="ob-field"><label class="ob-lbl">CAL 1 <span style="color:var(--red)">*</span></label>'+
+      '<input type="url" id="ob-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal1Ical||'')+'" autocomplete="off" spellcheck="false"/>'+
+      '<div class="ob-err" id="ob-ical0-err"></div></div>'+
+      '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 <span class="ob-opt">optionnel</span></label>'+
+      '<input type="url" id="ob-ical1" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off" spellcheck="false"/></div>'+
+      '<details class="ob-details"><summary class="ob-hint-t">&#128161; Lien iCal depuis iPhone</summary>'+
+      '<ol class="ob-hint-l"><li>App Calendrier \u2192 Calendriers \u2192 &#9432; \u2192 Partager le calendrier</li><li>Activer Calendrier public \u2192 copier le lien</li><li>Ou Google Calendar : Param\u00e8tres \u2192 Int\u00e9grer \u2192 iCal</li></ol></details></div>',
+    b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
   };
 }
 
-// ── Google : IDs calendriers ──────────────────────────────────────────────────
-function _s2_google_ids(d) {
+// Sous-\u00e9tape: Les deux (Cal1=Google, Cal2=iCal)
+function _sCBoth(d){
   return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">'+_obDots(2,4)+'</div></div>' +
-       '<h2 class="ob-h2">Calendriers Google</h2>' +
-       '<p class="ob-p2">IDs de vos calendriers Google.</p>' +
-       '<div class="ob-field"><label class="ob-lbl">CALENDRIER 1 <span style="color:var(--red)">*</span></label>' +
-       '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off" spellcheck="false"/>' +
-       '<div class="ob-err" id="ob-cal0-err"></div></div>' +
-       '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDRIER 2 <span class="ob-opt">optionnel</span></label>' +
-       '<input type="text" id="ob-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[1])||'')+'" autocomplete="off" spellcheck="false"/></div>' +
-       '<details class="ob-details"><summary class="ob-hint-t">💡 Trouver l\'ID</summary>' +
-       '<ol class="ob-hint-l"><li>Google Calendar → Paramètres → votre agenda → Intégrer l\'agenda</li>' +
-       '<li>Copier l\'<strong>ID de l\'agenda</strong></li></ol></details>' +
-       '</div>',
-    b: _obNavRow(false, 'Suivant', true)
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(2,4)+'</div></div>'+
+      '<h2 class="ob-h2">Vos calendriers</h2><p class="ob-p2">Cal\u00a01 via Google, Cal\u00a02 via lien iCal.</p>'+
+      '<div class="ob-field"><label class="ob-lbl">CAL 1 \u2014 ID GOOGLE <span style="color:var(--red)">*</span></label>'+
+      '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off" spellcheck="false"/>'+
+      '<div class="ob-err" id="ob-cal0-err"></div></div>'+
+      '<div class="ob-field" style="margin-top:12px"><label class="ob-lbl">CAL 2 \u2014 LIEN ICAL <span class="ob-opt">optionnel</span></label>'+
+      '<input type="url" id="ob-ical2" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off" spellcheck="false"/>'+
+      '<div class="ob-err" id="ob-ical2-err"></div></div></div>',
+    b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
   };
 }
 
-// ── iCal : URLs ───────────────────────────────────────────────────────────────
-function _s2_ical_urls(d) {
-  return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">'+_obDots(1,3)+'</div></div>' +
-       '<h2 class="ob-h2">Liens iCal</h2>' +
-       '<p class="ob-p2">Collez les liens iCal de votre iPhone ou Google.</p>' +
-       '<div class="ob-field"><label class="ob-lbl">CALENDRIER 1 <span style="color:var(--red)">*</span></label>' +
-       '<input type="url" id="ob-ical0" class="ob-inp ob-mono" placeholder="webcal://…" value="'+_obEsc(d.cal1Ical||'')+'" autocomplete="off" spellcheck="false"/>' +
-       '<div class="ob-err" id="ob-ical0-err"></div></div>' +
-       '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDRIER 2 <span class="ob-opt">optionnel</span></label>' +
-       '<input type="url" id="ob-ical1" class="ob-inp ob-mono" placeholder="webcal://…" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off" spellcheck="false"/></div>' +
-       '<details class="ob-details"><summary class="ob-hint-t">💡 Obtenir le lien iCal depuis iPhone</summary>' +
-       '<ol class="ob-hint-l"><li>App Calendrier → <strong>Calendriers</strong> (en bas)</li>' +
-       '<li>Appuyer sur ⓘ → <strong>Partager le calendrier</strong></li>' +
-       '<li>Activer <strong>Calendrier public</strong> → copier le lien</li>' +
-       '<li>Ou Google Calendar : Paramètres → votre agenda → Intégrer → iCal</li></ol></details>' +
-       '</div>',
-    b: _obNavRow(false, 'Suivant', true)
-  };
-}
-
-// ── Les deux : Cal1 Google ID + Cal2 iCal URL ─────────────────────────────────
-function _s2_both_ids(d) {
-  return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">'+_obDots(2,4)+'</div></div>' +
-       '<h2 class="ob-h2">Calendriers</h2>' +
-       '<p class="ob-p2">Cal 1 via Google, Cal 2 via lien iCal.</p>' +
-       '<div class="ob-field"><label class="ob-lbl">CAL 1 — ID GOOGLE <span style="color:var(--red)">*</span></label>' +
-       '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off" spellcheck="false"/>' +
-       '<div class="ob-err" id="ob-cal0-err"></div></div>' +
-       '<div class="ob-field" style="margin-top:12px"><label class="ob-lbl">CAL 2 — LIEN ICAL <span class="ob-opt">optionnel</span></label>' +
-       '<input type="url" id="ob-ical0" class="ob-inp ob-mono" placeholder="webcal://…" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off" spellcheck="false"/>' +
-       '<div class="ob-err" id="ob-ical0-err"></div></div>' +
-       '</div>',
-    b: _obNavRow(false, 'Suivant', true)
-  };
-}
-}
-
-function _obPickSrc(val, btn) {
-  document.querySelectorAll('#ob-content .ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
-  btn.classList.add('ob-src-on'); var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
-  var d=_obLoad(); d.calSource=val; _obSave(d);
-  // Hide/show the iphone hint based on selection
-  var hint=document.getElementById('ob-iphone-hint'); if(hint)hint.style.display=(val==='ical'?'':'');
-  var f=document.getElementById('ob-ical-fields'); if(f)f.style.display=(val==='ical'?'':'none');
-  if(val==='ical')f.style.marginTop='14px';
-}
-function _obPickPreset(val, btn) {
-  // Décocher uniquement le groupe parent
-  var parent=btn.parentElement;
-  if(parent)parent.querySelectorAll('.ob-preset-btn').forEach(function(b){
-    b.classList.remove('ob-preset-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';
-  });
-  btn.classList.add('ob-preset-on');
-  var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='✓';
-  var d=_obLoad(); d.cal1Preset=val; _obSave(d);
-  // Afficher/masquer les sections associées
-  ['ob-c1-color','ob-cs-col1'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=(val==='none'?'':'none');});
-  ['ob-c1-subjs','ob-cs-subjs'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display=(val==='custom'?'':'none');});
-}
-
-// ── Colour grid ───────────────────────────────────────────────────────────────
-var OB_COLORS = [
-  {k:'blue',hex:'#3b82f6'},{k:'violet',hex:'#8b5cf6'},{k:'emerald',hex:'#10b981'},
-  {k:'amber',hex:'#f59e0b'},{k:'rose',hex:'#f43f5e'},{k:'cyan',hex:'#06b6d4'},
-  {k:'orange',hex:'#f97316'},{k:'grey',hex:'#94a3b8'},{k:'lime',hex:'#84cc16'},
-];
-
-function _obColorGrid(id, current, onchange) {
-  var h = '<div class="ob-cg" id="'+id+'">';
-  OB_COLORS.forEach(function(c) {
-    var on = c.k===current;
-    h += '<button class="ob-cb'+(on?' ob-cb-on':'')+'" data-color="'+c.k+'" style="background:'+c.hex+'" onclick="'+onchange+'(\''+c.k+'\',\''+id+'\')">' +
-         (on?'<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':'') + '</button>';
-  });
-  return h + '</div>';
-}
-function _obSelectColor(key, gridId) {
-  var g=document.getElementById(gridId); if(!g)return;
-  g.querySelectorAll('.ob-cb').forEach(function(b){
-    var on=b.dataset.color===key; b.classList.toggle('ob-cb-on',on);
-    b.innerHTML=on?'<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':'';
-  });
-}
-function _obPickCal1Color(k,g){ _obSelectColor(k,g); var d=_obLoad();d.cal1Color=k;_obSave(d); }
-function _obPickCal2Color(k,g){ _obSelectColor(k,g); var d=_obLoad();d.cal2Color=k;_obSave(d); }
-function _obPickSubjColor(k,g){ _obSelectColor(k,g); _obSaveSubjs(); }
-
-// Subject management
-function _obSaveSubjs() {
-  var rows=document.querySelectorAll('#ob-subj-list .ob-subj-row');
-  var subs=[];
-  rows.forEach(function(row){
-    var inp=row.querySelector('.ob-subj-inp');
-    var dotBtn=row.querySelector('.ob-color-dot-btn');
-    var label=(inp&&inp.value.trim())||'';
-    var match=(inp&&inp.dataset.match)||label.toLowerCase();
-    var color=(dotBtn&&dotBtn.dataset.color)||'blue';
-    if(label) subs.push({match:match,color:color,label:label});
-  });
-  var d=_obLoad(); d.cal1Subjects=subs; _obSave(d);
-}
-function _obSubjChange(){ _obSaveSubjs(); if(typeof _obSaveSubjsCs==='function')_obSaveSubjsCs(); }
-function _obRemoveSubj(btn){ var r=btn.closest('.ob-subj-row');if(r)r.remove();_obSaveSubjs(); }
-function _obAddSubj(){
-  var list=document.getElementById('ob-subj-list'); if(!list)return;
-  var i=list.querySelectorAll('.ob-subj-row').length;
-  var div=document.createElement('div');
-  div.outerHTML; // force parse
-  list.insertAdjacentHTML('beforeend', _obSubjRow({match:'',color:'blue',label:''},i));
-  _obSaveSubjs();
-}
-
-// ── Step 3: Profile (optional) ────────────────────────────────────────────────
-function _s2() {
-  var d=_obLoad(), photo=d.photo||'', name=d.displayName||'';
-  return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">'+_obDots(3,4)+'</div><span class="ob-opt-badge">Optional</span></div>' +
-       '<h2 class="ob-h2">Your Profile</h2><p class="ob-p2">Add a photo and display name.</p>' +
-       '<div class="ob-avatar-row">' +
-         '<div class="ob-avatar-preview" id="ob-av-preview">' +
-           (photo?'<img id="ob-av-img" src="'+_obEsc(photo)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':
-             '<div id="ob-av-img" class="ob-av-placeholder"><svg viewBox="0 0 24 24" fill="none" width="28" height="28"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>') +
-         '</div>' +
-         '<div class="ob-avatar-btns">' +
-           '<label class="ob-btn-av" for="ob-av-input">Choose photo</label>' +
-           '<input type="file" id="ob-av-input" accept="image/*" style="display:none" onchange="_obPickPhoto(this)"/>' +
-           (photo?'<button class="ob-btn-av ob-btn-av-del" onclick="_obRemovePhoto()">Remove</button>':'') +
-         '</div></div>' +
-       '<div class="ob-field" style="margin-top:16px"><label class="ob-lbl">DISPLAY NAME</label>' +
-       '<input type="text" id="ob-displayname" class="ob-inp" placeholder="e.g. Augustin" value="'+_obEsc(name)+'" autocomplete="given-name" spellcheck="false"/></div></div>',
-    b: _obNavRow(false, 'Next', false)
-  };
-}
-
-// ── Step 4: Preferences ───────────────────────────────────────────────────────
-function _s3() {
-  var d=_obLoad(), lang=d.lang||'en', theme=d.theme||'auto';
-  function lb(v,lbl){ return '<button class="ob-pref-btn'+(lang===v?' ob-pref-on':'')+'" onclick="_obPickLang(\''+v+'\',this)">'+lbl+'</button>'; }
-  function tb(v,lbl){ return '<button class="ob-pref-btn'+(theme===v?' ob-pref-on':'')+'" onclick="_obPickTheme(\''+v+'\',this)">'+lbl+'</button>'; }
-  return {
-    c: '<div class="ob-form">' +
-       '<div class="ob-step-row"><div class="ob-dots">'+_obDots(4,4)+'</div></div>' +
-       '<h2 class="ob-h2">Preferences</h2><p class="ob-p2">Language and display theme.</p>' +
-       '<div class="ob-pref-row"><div class="ob-pref-ico">&#127760;</div><div class="ob-pref-label">Language</div>' +
-         '<div class="ob-pref-btns" id="ob-lang-btns">'+lb('en','English')+lb('fr','Fran\u00e7ais')+'</div></div>' +
-       '<div class="ob-pref-row" style="margin-top:12px"><div class="ob-pref-ico">&#127763;</div><div class="ob-pref-label">Theme</div>' +
-         '<div class="ob-pref-btns" id="ob-theme-btns">'+tb('auto','Auto')+tb('dark','Dark')+tb('light','Light')+'</div></div>' +
-       '</div>',
-    b: _obNavRow(false, 'Next', false)
-  };
-}
-function _obPickLang(v,btn){ document.querySelectorAll('#ob-lang-btns .ob-pref-btn').forEach(function(b){b.classList.remove('ob-pref-on');}); btn.classList.add('ob-pref-on'); var d=_obLoad();d.lang=v;_obSave(d); }
-function _obPickTheme(v,btn){ document.querySelectorAll('#ob-theme-btns .ob-pref-btn').forEach(function(b){b.classList.remove('ob-pref-on');}); btn.classList.add('ob-pref-on'); var d=_obLoad();d.theme=v;_obSave(d); if(typeof _applyTheme==='function')_applyTheme(v); }
-
-// ── Step 5: Done ──────────────────────────────────────────────────────────────
-function _s4() {
-  return {
-    c: '<div class="ob-done">' +
-       '<div class="ob-check-wrap"><div class="ob-ring r1"></div><div class="ob-ring r2"></div>' +
-       '<div class="ob-check-circle"><svg viewBox="0 0 48 48" fill="none" width="40" height="40"><path class="ob-check-path" d="M12 24l9 9 15-15" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>' +
-       "<h2 class=\"ob-done-h\">You're all set!</h2><p class=\"ob-p2\">Loading your schedule now.</p></div>",
-    b: '<button class="ob-btn-p ob-btn-full" onclick="_obFinish()">Open Calendar <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>'
-  };
-}
-
-// ── Validation ────────────────────────────────────────────────────────────────
-function _obValidate() {
-  if (_obStep===1) {
-    var d2=_obLoad(), src=d2.calSource||'google';
-    if (_obCalSub===0) return true; // choix source toujours valide
-    // Google sub1: API key
-    if (_obCalSub===1 && (src==='google'||src==='both')) {
-      var vk=((document.getElementById('ob-apikey')||{}).value||'').trim();
-      var ek=document.getElementById('ob-apikey-err');
-      if(!vk){_obErr(ek,'API key required.');return false;}
-      if(!vk.startsWith('AIza')){_obErr(ek,'Should start with "AIza".');return false;}
-      _obClear(ek); d2.apiKey=vk; _obSave(d2);
-    }
-    // Google sub2: Calendar IDs
-    if (_obCalSub===2 && src==='google') {
-      var v0=((document.getElementById('ob-cal0')||{}).value||'').trim();
-      var e0=document.getElementById('ob-cal0-err');
-      if(!v0){_obErr(e0,'Calendar ID required.');return false;}
-      if(!v0.includes('@')){_obErr(e0,'Must contain @.');return false;}
-      _obClear(e0);
-      var v1=((document.getElementById('ob-cal1')||{}).value||'').trim();
-      d2.calendars=[v0]; if(v1&&v1.includes('@'))d2.calendars.push(v1); _obSave(d2);
-    }
-    // Both sub2: Cal1 Google + Cal2 iCal
-    if (_obCalSub===2 && src==='both') {
-      var vg=((document.getElementById('ob-cal0')||{}).value||'').trim();
-      var eg=document.getElementById('ob-cal0-err');
-      if(!vg){_obErr(eg,'Calendar 1 ID required.');return false;}
-      if(!vg.includes('@')){_obErr(eg,'Must contain @.');return false;}
-      _obClear(eg);
-      var vi=((document.getElementById('ob-ical0')||{}).value||'').trim();
-      var ei=document.getElementById('ob-ical0-err');
-      if(!vi){_obErr(ei,'iCal URL required.');return false;}
-      _obClear(ei);
-      d2.calendars=[vg]; d2.cal2Ical=vi; _obSave(d2);
-    }
-    // iCal sub1: URLs
-    if (_obCalSub===1 && src==='ical') {
-      var u=((document.getElementById('ob-ical0')||{}).value||'').trim();
-      var eu=document.getElementById('ob-ical0-err');
-      if(!u){_obErr(eu,'iCal URL required.');return false;}
-      _obClear(eu);
-      var u2=((document.getElementById('ob-ical1')||{}).value||'').trim();
-      d2.cal1Ical=u; if(u2)d2.cal2Ical=u2; _obSave(d2);
-    }
-    // Dernier sub: style — sauvegarder sujets
-    var src2=d2.calSource||'google';
-    var isLastStyle=(src2==='ical'&&_obCalSub===2)||(src2!=='ical'&&_obCalSub===3);
-    if(isLastStyle) _obSaveSubjs();
-    return true;
-  }
-  if (_obStep===2) { _obSaveProfile(); return true; }
-  return true;
-}
-
-// ── Profile helpers ───────────────────────────────────────────────────────────
-function _obSaveProfile() {
-  var name=((document.getElementById('ob-displayname')||{}).value||'').trim();
-  var d=_obLoad(); if(name)d.displayName=name; _obSave(d);
-}
-function _obPickPhoto(input) {
-  var file=input.files[0]; if(!file)return;
-  var reader=new FileReader();
-  reader.onload=function(e){
-    var url=e.target.result;
-    var wrap=document.getElementById('ob-av-preview');
-    if(wrap)wrap.innerHTML='<img id="ob-av-img" src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>';
-    var btns=document.querySelector('.ob-avatar-btns');
-    if(btns&&!btns.querySelector('.ob-btn-av-del')){var del=document.createElement('button');del.className='ob-btn-av ob-btn-av-del';del.textContent='Remove';del.onclick=_obRemovePhoto;btns.appendChild(del);}
-    var d=_obLoad();d.photo=url;_obSave(d);
-    if(typeof _applyProfile==='function')_applyProfile();
-  };
-  reader.readAsDataURL(file);
-}
-function _obRemovePhoto() {
-  var d=_obLoad();delete d.photo;_obSave(d);
-  var wrap=document.getElementById('ob-av-preview');
-  if(wrap)wrap.innerHTML='<div id="ob-av-img" class="ob-av-placeholder"><svg viewBox="0 0 24 24" fill="none" width="28" height="28"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>';
-  var del=document.querySelector('.ob-btn-av-del');if(del)del.remove();
-  if(typeof _applyProfile==='function')_applyProfile();
-}
-
-// ── Finish ────────────────────────────────────────────────────────────────────
-function _obFinish() {
-  _obClose();
-  setTimeout(function(){if(typeof awInit==='function')awInit();},300);
-  setTimeout(function(){if(typeof _applyProfile==='function')_applyProfile();},350);
-}
-
-// ── Nav helpers ───────────────────────────────────────────────────────────────
-function _obDots(current, total) {
-  var h=''; for(var i=1;i<=total;i++) h+='<div class="ob-dot'+(i===current?' ob-dot-on':'')+'"></div>'; return h;
-}
-function _obNavRow(required, nextLabel, hasBack) {
-  var back = hasBack ? '<button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>Back</button>' : '';
-  var next = '<button class="ob-btn-p" onclick="_obNext()">'+(nextLabel||'Next')+'<svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
-  var skip = !required ? '<button class="ob-btn-skip" onclick="_obSkip()">Skip</button>' : '';
-  return '<div class="ob-row">'+back+'<div class="ob-row-right">'+skip+next+'</div></div>';
-}
-
-// ── Form helpers ──────────────────────────────────────────────────────────────
-function _obErr(el,msg){ if(!el)return; el.textContent=msg; el.classList.add('ob-err-show'); }
-function _obClear(el) { if(!el)return; el.classList.remove('ob-err-show'); }
-function _eyeIcon(open) {
-  return open
-    ? '<svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M17.94 17.94A10 10 0 0112 20c-7 0-11-8-11-8a18 18 0 015.06-5.94M9.9 4.24A9 9 0 0112 4c7 0 11 8 11 8a18 18 0 01-2.16 3.19M1 1l22 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
-    : '<svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M1 12C1 12 5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>';
-}
-function _obToggleEye(id,btn){
-  var i=document.getElementById(id); if(!i)return;
-  var open=i.type==='password'; i.type=open?'text':'password'; btn.innerHTML=_eyeIcon(open);
-}
-
-// ── Calendar Settings sheet (from Account) ────────────────────────────────────
-function _obOpenCalSettings() {
-  if (document.getElementById('ob-overlay')) return;
-  var el = document.createElement('div'); el.id='ob-overlay';
-  el.innerHTML = '<div id="ob-sheet"><div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>' +
-    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>' +
-    '<button class="ob-x" onclick="_obCalClose()">\u00d7</button>' +
-    '<div id="ob-cal-content"></div><div id="ob-cal-bottom"></div></div>';
-  document.body.appendChild(el);
-  requestAnimationFrame(function(){ el.classList.add('ob-in'); _obCalRender(0); _obInitDrag(el); });
-}
-var _obCalSubStep=0;
-function _obCalRender(s){ _obCalSubStep=s; var fns=[_sCalSrc,_sCalIds,_sCalStyle,_sCalDone]; var r=fns[s]&&fns[s](); if(!r)return; var con=document.getElementById('ob-cal-content'),bot=document.getElementById('ob-cal-bottom'); if(!con||!bot)return; con.classList.remove('ob-slide'); con.innerHTML=r.c;bot.innerHTML=r.b; void con.offsetWidth;con.classList.add('ob-slide'); }
-function _sCalSrc(){ var d=_obLoad(),src=d.calSource||'api'; return {c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots"><div class="ob-dot ob-dot-on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div></div><h2 class="ob-h2">Source</h2>'+_srcBtn('api',src==='api','&#128273;','Google API','API key + Calendar ID.')+_srcBtn('ical',src==='ical','&#128241;','iCal Link','No API key needed.')+'</div>', b:'<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Next <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'}; }
-function _sCalIds(){ var d=_obLoad(),src=d.calSource||'api'; if(src==='ical'){return{c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div><div class="ob-dot"></div></div></div><h2 class="ob-h2">iCal URLs</h2><div class="ob-field"><label class="ob-lbl">CALENDAR 1 *</label><input type="url" id="ob-cs-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal1Ical||'')+'"/><div class="ob-err" id="ob-cs-ical0-err"></div></div><div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label><input type="url" id="ob-cs-ical1" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'"/></div></div>',b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obCalRender(0)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Next <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'};} var d2=_obLoad(); return{c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div><div class="ob-dot"></div></div></div><h2 class="ob-h2">Calendars</h2><div class="ob-field"><label class="ob-lbl">API KEY *</label><div class="ob-inp-wrap"><input type="password" id="ob-cs-api" class="ob-inp" placeholder="AIzaSy\u2026" value="'+_obEsc(d2.apiKey||'')+'"/><button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-cs-api\',this)">'+_eyeIcon(false)+'</button></div><div class="ob-err" id="ob-cs-api-err"></div></div><div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 1 *</label><input type="text" id="ob-cs-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d2.calendars&&d2.calendars[0])||'')+'"/><div class="ob-err" id="ob-cs-cal0-err"></div></div><div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CALENDAR 2 <span class="ob-opt">optional</span></label><input type="text" id="ob-cs-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d2.calendars&&d2.calendars[1])||'')+'"/></div></div>',b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obCalRender(0)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back</button><div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Next <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'}; }
-function _sCalStyle(){
-  var d=_obLoad(), p=d.cal1Preset||'ecam', c=d.cal1Color||'blue', c2=d.cal2Color||'lime';
+// Sous-\u00e9tape: Couleurs
+function _sCColors(d){
+  var preset=d.cal1Preset||'ecam',c1=d.cal1Color||'blue',c2=d.cal2Color||'lime';
   var hasCal2=(d.calendars&&d.calendars[1])||d.cal2Ical;
-  var c1subjRows='';
+  var subs=d.cal1Subjects||[];
   var defaultSubs=[
     {match:'math',color:'blue',label:'Maths'},{match:'physique',color:'cyan',label:'Physique'},
     {match:'informatique',color:'violet',label:'Informatique'},{match:'sciences ind',color:'amber',label:'Sciences Ind.'},
     {match:'anglais',color:'emerald',label:'Anglais'},{match:'sport',color:'rose',label:'Sport'},
     {match:'culture',color:'orange',label:'Culture'},{match:'proj',color:'grey',label:'Projets'},
   ];
-  var subjList=(d.cal1Subjects&&d.cal1Subjects.length)?d.cal1Subjects:defaultSubs;
-  subjList.forEach(function(s,i){c1subjRows+=_obSubjRow(s,i);});
+  var subjList=subs.length?subs:defaultSubs;
+  var subjRows=subjList.map(function(s,i){return _obSubjRow(s,i);}).join('');
   return {
-    c: '<div class="ob-form" style="padding-bottom:8px">'+
-       '<div class="ob-step-row"><div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot ob-dot-on"></div></div></div>'+
-       '<h2 class="ob-h2">Colours</h2>'+
-       '<p style="font-size:11px;font-weight:600;letter-spacing:.05em;color:rgba(255,255,255,.35);margin-bottom:8px;text-transform:uppercase">CALENDAR 1 STYLE</p>'+
-       _srcBtn2('ecam',  p==='ecam',  '&#127979;','ECAM Preset','Auto colour by subject.')+
-       _srcBtn2('custom',p==='custom','&#127912;','Custom','Name subjects and pick colours.')+
-       _srcBtn2('none',  p==='none',  '&#11036;', 'Single colour','All events same colour.')+
-       '<div id="ob-cs-col1" style="'+(p==='none'?'margin-top:10px':'display:none;margin-top:10px')+'">'+
-         '<label class="ob-lbl" style="display:block;margin-bottom:8px">CAL 1 COLOUR</label>'+
-         _obColorGrid('ob-csg1',c,'_obPickCal1Color')+
-       '</div>'+
-       '<div id="ob-cs-subjs" style="'+(p==='custom'?'margin-top:10px':'display:none;margin-top:10px')+';position:relative">'+
-         '<label class="ob-lbl" style="display:block;margin-bottom:8px">SUBJECTS &amp; COLOURS</label>'+
-         '<div id="ob-cs-subj-list">'+c1subjRows+'</div>'+
-         '<button class="ob-btn-g" style="width:100%;margin-top:8px;font-size:13px" onclick="_obAddSubjCs()">+ Add</button>'+
-       '</div>'+
-       (hasCal2
-         ? '<p style="font-size:11px;font-weight:600;letter-spacing:.05em;color:rgba(255,255,255,.35);margin:16px 0 8px;text-transform:uppercase">CALENDAR 2 COLOUR</p>'+
-           _obColorGrid('ob-csg2',c2,'_obPickCal2Color')
-         : '')+
-       '</div>',
-    b: '<div class="ob-row">'+
-       '<button class="ob-btn-g" onclick="_obCalRender(1)"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Back</button>'+
-       '<div class="ob-row-right"><button class="ob-btn-p" onclick="_obCalNext()">Save <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(3,4)+'</div></div>'+
+      '<h2 class="ob-h2">Couleurs</h2>'+
+      '<label class="ob-lbl" style="display:block;margin-bottom:10px">STYLE CALENDRIER 1</label>'+
+      '<div class="ob-src-group" id="ob-preset-grp">'+
+        _srcBtn2('ecam',preset==='ecam','&#127979;','Pr\u00e9d\u00e9fini ECAM','D\u00e9tecte auto les mati\u00e8res.')+
+        _srcBtn2('custom',preset==='custom','&#127912;','Personnalis\u00e9','Vos mati\u00e8res et couleurs.')+
+        _srcBtn2('none',preset==='none','&#11036;','Couleur unique','Tous les \u00e9v\u00e9nements pareil.')+
+      '</div>'+
+      '<div id="ob-c1-color" style="'+(preset==='none'?'margin-top:12px':'display:none;margin-top:12px')+'">'+
+        '<label class="ob-lbl" style="display:block;margin-bottom:8px">COULEUR</label>'+
+        _obColorGrid('ob-c1g',c1,'_obPickCal1Color')+
+      '</div>'+
+      '<div id="ob-c1-subjs" style="'+(preset==='custom'?'margin-top:12px':'display:none;margin-top:12px')+';position:relative">'+
+        '<label class="ob-lbl" style="display:block;margin-bottom:10px">MATI\u00c8RES &amp; COULEURS</label>'+
+        '<div id="ob-subj-list">'+subjRows+'</div>'+
+        '<button class="ob-btn-g" style="width:100%;margin-top:10px;font-size:13px" onclick="_obAddSubj()">+ Ajouter</button>'+
+      '</div>'+
+      (hasCal2?'<div style="margin-top:16px"><label class="ob-lbl" style="display:block;margin-bottom:8px">COULEUR CALENDRIER 2</label>'+_obColorGrid('ob-c2g',c2,'_obPickCal2Color')+'</div>':'')+
+      '</div>',
+    b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button><div class="ob-row-right"><button class="ob-btn-skip" onclick="_obSkip()">Passer</button><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
   };
+}
+
+// Step 2: Profil
+function _s2(){
+  var d=_obLoad(),photo=d.photo||'',name=d.displayName||'';
+  return {
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(3,4)+'</div><span class="ob-opt-badge">Optionnel</span></div>'+
+      '<h2 class="ob-h2">Votre profil</h2><p class="ob-p2">Photo et pr\u00e9nom.</p>'+
+      '<div class="ob-avatar-row"><div class="ob-avatar-preview" id="ob-av-preview">'+
+        (photo?'<img src="'+_obEsc(photo)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':
+          '<div class="ob-av-placeholder"><svg viewBox="0 0 24 24" fill="none" width="28" height="28"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>')+
+      '</div><div class="ob-avatar-btns">'+
+        '<label class="ob-btn-av" for="ob-av-input">Choisir une photo</label>'+
+        '<input type="file" id="ob-av-input" accept="image/*" style="display:none" onchange="_obPickPhoto(this)"/>'+
+        (photo?'<button class="ob-btn-av ob-btn-av-del" onclick="_obRemovePhoto()">Supprimer</button>':'')+
+      '</div></div>'+
+      '<div class="ob-field" style="margin-top:16px"><label class="ob-lbl">PR\u00c9NOM</label>'+
+      '<input type="text" id="ob-displayname" class="ob-inp" placeholder="ex. Augustin" value="'+_obEsc(name)+'" autocomplete="given-name" spellcheck="false"/></div></div>',
+    b:'<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-skip" onclick="_obSkip()">Passer</button><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
+  };
+}
+
+// Step 3: Pr\u00e9f\u00e9rences
+function _s3(){
+  var d=_obLoad(),lang=d.lang||'en',theme=d.theme||'auto';
+  function lb(v,lbl){return '<button class="ob-pref-btn'+(lang===v?' ob-pref-on':'')+'" onclick="_obPickLang(\''+v+'\',this)">'+lbl+'</button>';}
+  function tb(v,lbl){return '<button class="ob-pref-btn'+(theme===v?' ob-pref-on':'')+'" onclick="_obPickTheme(\''+v+'\',this)">'+lbl+'</button>';}
+  var thIco=theme==='dark'?'\u{1F319}':theme==='light'?'\u2600\uFE0F':'\u2728';
+  return {
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(4,4)+'</div></div>'+
+      '<h2 class="ob-h2">Pr\u00e9f\u00e9rences</h2><p class="ob-p2">Langue et th\u00e8me.</p>'+
+      '<div class="ob-pref-row"><div class="ob-pref-ico">&#127760;</div><div class="ob-pref-label">Langue</div>'+
+        '<div class="ob-pref-btns" id="ob-lang-btns">'+lb('fr','Fran\u00e7ais')+lb('en','English')+'</div></div>'+
+      '<div class="ob-pref-row" style="margin-top:12px"><div class="ob-pref-ico" id="ob-t-ico">'+thIco+'</div><div class="ob-pref-label">Th\u00e8me</div>'+
+        '<div class="ob-pref-btns" id="ob-theme-btns">'+tb('auto','Auto')+tb('dark','\u{1F319}')+tb('light','\u2600\uFE0F')+'</div></div>'+
+      '</div>',
+    b:'<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-skip" onclick="_obSkip()">Passer</button><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
+  };
+}
+function _obPickLang(v,btn){
+  document.querySelectorAll('#ob-lang-btns .ob-pref-btn').forEach(function(b){b.classList.remove('ob-pref-on');});
+  btn.classList.add('ob-pref-on');
+  var d=_obLoad();d.lang=v;_obSave(d);
+}
+function _obPickTheme(v,btn){
+  document.querySelectorAll('#ob-theme-btns .ob-pref-btn').forEach(function(b){b.classList.remove('ob-pref-on');});
+  btn.classList.add('ob-pref-on');
+  var d=_obLoad();d.theme=v;_obSave(d);
+  var ico=document.getElementById('ob-t-ico');
+  if(ico)ico.textContent=v==='dark'?'\u{1F319}':v==='light'?'\u2600\uFE0F':'\u2728';
+  if(typeof _applyTheme==='function')_applyTheme(v);
+}
+
+// Step 4: Done
+function _s4(){
+  return {
+    c:'<div class="ob-done"><div class="ob-check-wrap"><div class="ob-ring r1"></div><div class="ob-ring r2"></div><div class="ob-check-circle"><svg viewBox="0 0 48 48" fill="none" width="40" height="40"><path class="ob-check-path" d="M12 24l9 9 15-15" stroke="white" stroke-width="3.5" stroke-linecap="round"/></svg></div></div><h2 class="ob-done-h">C\u2019est pr\u00eat\u00a0!</h2><p class="ob-p2">Chargement de votre agenda.</p></div>',
+    b:'<button class="ob-btn-p ob-btn-full" onclick="_obFinish()">Ouvrir le calendrier <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>'
+  };
+}
+
+// Validation
+function _obValidate(){
+  if(_obStep!==1)return true;
+  var d=_obLoad(),src=d.calSource||'google';
+  if(_obCalSub===0)return true;
+  if(_obCalSub===1&&(src==='google'||src==='both')){
+    var vk=((document.getElementById('ob-apikey')||{}).value||'').trim();
+    var ek=document.getElementById('ob-apikey-err');
+    if(!vk){_obErr(ek,'Cl\u00e9 API requise.');return false;}
+    if(!vk.startsWith('AIza')){_obErr(ek,'Doit commencer par "AIza".');return false;}
+    _obClear(ek);d.apiKey=vk;_obSave(d);
+  }
+  if(_obCalSub===1&&src==='ical'){
+    var u=((document.getElementById('ob-ical0')||{}).value||'').trim();
+    var eu=document.getElementById('ob-ical0-err');
+    if(!u){_obErr(eu,'Lien iCal requis.');return false;}
+    _obClear(eu);
+    var u2=((document.getElementById('ob-ical1')||{}).value||'').trim();
+    d.cal1Ical=u;if(u2)d.cal2Ical=u2;_obSave(d);
+  }
+  if(_obCalSub===2&&src==='google'){
+    var v0=((document.getElementById('ob-cal0')||{}).value||'').trim();
+    var e0=document.getElementById('ob-cal0-err');
+    if(!v0){_obErr(e0,'ID requis.');return false;}
+    if(!v0.includes('@')){_obErr(e0,'Doit contenir @.');return false;}
+    _obClear(e0);
+    var v1=((document.getElementById('ob-cal1')||{}).value||'').trim();
+    d.calendars=[v0];if(v1&&v1.includes('@'))d.calendars.push(v1);_obSave(d);
+  }
+  if(_obCalSub===2&&src==='both'){
+    var vg=((document.getElementById('ob-cal0')||{}).value||'').trim();
+    var eg=document.getElementById('ob-cal0-err');
+    if(!vg){_obErr(eg,'ID Cal 1 requis.');return false;}
+    if(!vg.includes('@')){_obErr(eg,'Doit contenir @.');return false;}
+    _obClear(eg);d.calendars=[vg];
+    var vi=((document.getElementById('ob-ical2')||{}).value||'').trim();
+    if(vi)d.cal2Ical=vi;_obSave(d);
+  }
+  if((src==='ical'&&_obCalSub===2)||(src!=='ical'&&_obCalSub===3))_obSaveSubjs();
+  return true;
+}
+
+// Profile
+function _obSaveProfile(){
+  var name=((document.getElementById('ob-displayname')||{}).value||'').trim();
+  var d=_obLoad();if(name)d.displayName=name;_obSave(d);
+}
+function _obPickPhoto(input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var url=e.target.result;
+    var wrap=document.getElementById('ob-av-preview');
+    if(wrap)wrap.innerHTML='<img src="'+url+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>';
+    var btns=document.querySelector('.ob-avatar-btns');
+    if(btns&&!btns.querySelector('.ob-btn-av-del')){var del=document.createElement('button');del.className='ob-btn-av ob-btn-av-del';del.textContent='Supprimer';del.onclick=_obRemovePhoto;btns.appendChild(del);}
+    var d=_obLoad();d.photo=url;_obSave(d);
+    if(typeof _applyProfile==='function')_applyProfile();
+  };
+  reader.readAsDataURL(file);
+}
+function _obRemovePhoto(){
+  var d=_obLoad();delete d.photo;_obSave(d);
+  var wrap=document.getElementById('ob-av-preview');
+  if(wrap)wrap.innerHTML='<div class="ob-av-placeholder"><svg viewBox="0 0 24 24" fill="none" width="28" height="28"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>';
+  var del=document.querySelector('.ob-btn-av-del');if(del)del.remove();
+  if(typeof _applyProfile==='function')_applyProfile();
+}
+function _obFinish(){
+  _obClose();
+  var name=((document.getElementById('ob-displayname')||{}).value||'').trim();
+  if(name){var d=_obLoad();d.displayName=name;_obSave(d);}
+  setTimeout(function(){if(typeof awInit==='function')awInit();},300);
+  setTimeout(function(){if(typeof _applyProfile==='function')_applyProfile();},350);
+}
+
+// Boutons radio source/preset
+function _srcBtn(val,active,ico,title,sub){
+  return '<button class="ob-src-btn'+(active?' ob-src-on':'')+'" onclick="_obPickSrc(\''+val+'\',this)">'+
+    '<div class="ob-src-ico">'+ico+'</div><div class="ob-src-body"><div class="ob-src-title">'+title+'</div><div class="ob-src-sub">'+sub+'</div></div>'+
+    '<div class="ob-src-chk">'+(active?'&#10003;':'')+'</div></button>';
+}
+function _srcBtn2(val,active,ico,title,sub){
+  return '<button class="ob-preset-btn'+(active?' ob-preset-on':'')+'" onclick="_obPickPreset(\''+val+'\',this)">'+
+    '<div class="ob-src-ico">'+ico+'</div><div class="ob-src-body"><div class="ob-src-title">'+title+'</div><div class="ob-src-sub">'+sub+'</div></div>'+
+    '<div class="ob-src-chk">'+(active?'&#10003;':'')+'</div></button>';
+}
+function _obPickSrc(val,btn){
+  var parent=btn.parentElement;
+  if(parent)parent.querySelectorAll('.ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
+  btn.classList.add('ob-src-on');
+  var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
+  var d=_obLoad();d.calSource=val;_obSave(d);
+}
+function _obPickPreset(val,btn){
+  var parent=btn.parentElement;
+  if(parent)parent.querySelectorAll('.ob-preset-btn').forEach(function(b){b.classList.remove('ob-preset-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
+  btn.classList.add('ob-preset-on');
+  var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
+  var d=_obLoad();d.cal1Preset=val;_obSave(d);
+  var c1=document.getElementById('ob-c1-color'),s1=document.getElementById('ob-c1-subjs');
+  var c2=document.getElementById('ob-cs-col1'),s2=document.getElementById('ob-cs-subjs');
+  if(c1)c1.style.display=val==='none'?'':'none';
+  if(s1)s1.style.display=val==='custom'?'':'none';
+  if(c2)c2.style.display=val==='none'?'':'none';
+  if(s2)s2.style.display=val==='custom'?'':'none';
+}
+
+// Grille couleurs
+var OB_COLORS=[
+  {k:'blue',hex:'#3b82f6'},{k:'violet',hex:'#8b5cf6'},{k:'emerald',hex:'#10b981'},
+  {k:'amber',hex:'#f59e0b'},{k:'rose',hex:'#f43f5e'},{k:'cyan',hex:'#06b6d4'},
+  {k:'orange',hex:'#f97316'},{k:'grey',hex:'#94a3b8'},{k:'lime',hex:'#84cc16'},
+];
+function _obColorGrid(id,cur,fn){
+  var h='<div class="ob-cg" id="'+id+'">';
+  OB_COLORS.forEach(function(c){
+    var on=c.k===cur;
+    h+='<button class="ob-cb'+(on?' ob-cb-on':'')+'" data-color="'+c.k+'" style="background:'+c.hex+'" onclick="'+fn+'(\''+c.k+'\',\''+id+'\')">'+
+      (on?'<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':'')+'</button>';
+  });
+  return h+'</div>';
+}
+function _obSelColor(key,gid){
+  var g=document.getElementById(gid);if(!g)return;
+  g.querySelectorAll('.ob-cb').forEach(function(b){
+    var on=b.dataset.color===key;b.classList.toggle('ob-cb-on',on);
+    b.innerHTML=on?'<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':'';
+  });
+}
+function _obPickCal1Color(k,g){_obSelColor(k,g);var d=_obLoad();d.cal1Color=k;_obSave(d);}
+function _obPickCal2Color(k,g){_obSelColor(k,g);var d=_obLoad();d.cal2Color=k;_obSave(d);}
+function _obPickSubjColor(k,g){_obSelColor(k,g);_obSaveSubjs();}
+
+// Mati\u00e8res
+function _obSubjRow(s,i){
+  var hex=(OB_COLORS.find(function(c){return c.k===(s.color||'blue');})||OB_COLORS[0]).hex;
+  return '<div class="ob-subj-row" data-idx="'+i+'">'+
+    '<input class="ob-inp ob-subj-inp" data-match="'+_obEsc(s.match||s.label||'')+'" value="'+_obEsc(s.label||s.match||'')+'" placeholder="Mati\u00e8re\u2026" oninput="_obSubjChange()" style="flex:1;min-width:0;"/>'+
+    '<button class="ob-color-dot-btn" data-color="'+(s.color||'blue')+'" style="background:'+hex+';" onclick="_obOpenColorPop(this,'+i+')" title="Couleur"></button>'+
+    '<button onclick="_obRemoveSubj(this)" class="ob-subj-del">\u00d7</button>'+
+  '</div>';
+}
+function _obOpenColorPop(btn,idx){
+  var existing=document.getElementById('ob-color-pop');
+  if(existing){existing.remove();if(existing.dataset.idx==idx)return;}
+  var pop=document.createElement('div');pop.id='ob-color-pop';pop.dataset.idx=idx;
+  pop.style.cssText='position:absolute;z-index:9999;background:var(--bg2,#1c1c1e);border:.5px solid var(--sep);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;width:224px;box-shadow:0 8px 32px rgba(0,0,0,.5);';
+  OB_COLORS.forEach(function(c){
+    var cur=btn.dataset.color===c.k;
+    var b=document.createElement('button');
+    b.style.cssText='width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:'+(cur?'2.5px solid #fff':'2px solid transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;';
+    if(cur)b.innerHTML='<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>';
+    b.onclick=function(e){e.stopPropagation();btn.style.background=c.hex;btn.dataset.color=c.k;pop.remove();_obSaveSubjs();};
+    pop.appendChild(b);
+  });
+  var rect=btn.getBoundingClientRect();
+  var sheet=document.getElementById('ob-sheet');
+  var sr=sheet?sheet.getBoundingClientRect():{left:0,top:0,width:400};
+  pop.style.top=(rect.bottom-sr.top+6)+'px';
+  pop.style.left=Math.max(8,Math.min(rect.left-sr.left-90,sr.width-232))+'px';
+  var content=document.querySelector('#ob-content,#ob-cal-content');if(content)content.appendChild(pop);
+  setTimeout(function(){document.addEventListener('click',function cl(e){if(!pop.contains(e.target)&&e.target!==btn){pop.remove();document.removeEventListener('click',cl);}});},10);
+}
+function _obSaveSubjs(){
+  var rows=document.querySelectorAll('#ob-subj-list .ob-subj-row,#ob-cs-subj-list .ob-subj-row');
+  var subs=[];
+  rows.forEach(function(row){
+    var inp=row.querySelector('.ob-subj-inp'),dot=row.querySelector('.ob-color-dot-btn');
+    var label=(inp&&inp.value.trim())||'',match=(inp&&inp.dataset.match)||label.toLowerCase(),color=(dot&&dot.dataset.color)||'blue';
+    if(label)subs.push({match:match,color:color,label:label});
+  });
+  var d=_obLoad();d.cal1Subjects=subs;_obSave(d);
+}
+function _obSubjChange(){_obSaveSubjs();}
+function _obRemoveSubj(btn){var r=btn.closest('.ob-subj-row');if(r)r.remove();_obSaveSubjs();}
+function _obAddSubj(){
+  var list=document.getElementById('ob-subj-list');if(!list)return;
+  var i=list.querySelectorAll('.ob-subj-row').length;
+  list.insertAdjacentHTML('beforeend',_obSubjRow({match:'',color:'blue',label:''},i));
 }
 function _obAddSubjCs(){
   var list=document.getElementById('ob-cs-subj-list');if(!list)return;
   var i=list.querySelectorAll('.ob-subj-row').length;
   list.insertAdjacentHTML('beforeend',_obSubjRow({match:'',color:'blue',label:''},i));
-  _obSaveSubjsCs();
 }
-function _obSaveSubjsCs(){
-  var rows=document.querySelectorAll('#ob-cs-subj-list .ob-subj-row');
-  var subs=[];
-  rows.forEach(function(row){
-    var inp=row.querySelector('.ob-subj-inp'), dot=row.querySelector('.ob-color-dot-btn');
-    var label=(inp&&inp.value.trim())||'';
-    var match=(inp&&inp.dataset.match)||label.toLowerCase();
-    var color=(dot&&dot.dataset.color)||'blue';
-    if(label)subs.push({match:match,color:color,label:label});
+
+// Nav helpers
+function _obDots(cur,tot){var h='';for(var i=1;i<=tot;i++)h+='<div class="ob-dot'+(i===cur?' ob-dot-on':'')+'"></div>';return h;}
+function _obErr(el,msg){if(!el)return;el.textContent=msg;el.classList.add('ob-err-show');}
+function _obClear(el){if(!el)return;el.classList.remove('ob-err-show');}
+function _eyeIcon(open){
+  return open?'<svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M17.94 17.94A10 10 0 0112 20c-7 0-11-8-11-8a18 18 0 015.06-5.94M9.9 4.24A9 9 0 0112 4c7 0 11 8 11 8a18 18 0 01-2.16 3.19M1 1l22 22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>':
+    '<svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M1 12C1 12 5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/></svg>';
+}
+function _obToggleEye(id,btn){
+  var i=document.getElementById(id);if(!i)return;
+  var open=i.type==='password';i.type=open?'text':'password';btn.innerHTML=_eyeIcon(open);
+}
+
+// ── SHEETS DEPUIS L'ONGLET COMPTE ─────────────────────────────────────────────
+function _obAccSheet(fillFn){
+  var el=document.createElement('div');el.id='ob-overlay';
+  el.innerHTML='<div id="ob-sheet"><div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>'+
+    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>'+
+    '<button class="ob-x" onclick="_obClose()">\u00d7</button>'+
+    '<div id="ob-cal-content"></div><div id="ob-cal-bottom"></div></div>';
+  document.body.appendChild(el);
+  requestAnimationFrame(function(){
+    el.classList.add('ob-in');
+    var con=el.querySelector('#ob-cal-content'),bot=el.querySelector('#ob-cal-bottom');
+    fillFn(con,bot);_obInitDrag(el);
   });
-  var d=_obLoad();d.cal1Subjects=subs;_obSave(d);
 }
-function _sCalDone(){ return{c:'<div class="ob-done"><div class="ob-check-wrap"><div class="ob-ring r1"></div><div class="ob-ring r2"></div><div class="ob-check-circle"><svg viewBox="0 0 48 48" fill="none" width="40" height="40"><path class="ob-check-path" d="M12 24l9 9 15-15" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div><h2 class="ob-done-h">Saved!</h2><p class="ob-p2">Refreshing your calendar.</p></div>',b:'<button class="ob-btn-p ob-btn-full" onclick="_obCalFinish()">Done</button>'}; }
-function _obCalNext(){
-  var d=_obLoad(),src=d.calSource||'api';
-  if(_obCalSubStep===0){_obCalRender(1);return;}
-  if(_obCalSubStep===1){
-    if(src==='ical'){var u=((document.getElementById('ob-cs-ical0')||{}).value||'').trim();var eu=document.getElementById('ob-cs-ical0-err');if(!u){_obErr(eu,'iCal URL required.');return;}_obClear(eu);d.cal1Ical=u;var u2=((document.getElementById('ob-cs-ical1')||{}).value||'').trim();if(u2)d.cal2Ical=u2;_obSave(d);}
-    else{var vk=((document.getElementById('ob-cs-api')||{}).value||'').trim();var ek=document.getElementById('ob-cs-api-err');if(!vk){_obErr(ek,'API key required.');return;}if(!vk.startsWith('AIza')){_obErr(ek,'Should start with "AIza".');return;}_obClear(ek);var v0=((document.getElementById('ob-cs-cal0')||{}).value||'').trim();var e0=document.getElementById('ob-cs-cal0-err');if(!v0){_obErr(e0,'Calendar ID required.');return;}if(!v0.includes('@')){_obErr(e0,'Must contain @.');return;}_obClear(e0);d.apiKey=vk;d.calendars=[v0];var v1=((document.getElementById('ob-cs-cal1')||{}).value||'').trim();if(v1&&v1.includes('@'))d.calendars.push(v1);_obSave(d);}
-    _obCalRender(2);return;
+function _obAccDone(msg,cb){
+  var con=document.getElementById('ob-cal-content'),bot=document.getElementById('ob-cal-bottom');
+  if(!con||!bot)return;
+  con.innerHTML='<div class="ob-done"><div class="ob-check-wrap"><div class="ob-ring r1"></div><div class="ob-ring r2"></div><div class="ob-check-circle"><svg viewBox="0 0 48 48" fill="none" width="40" height="40"><path class="ob-check-path" d="M12 24l9 9 15-15" stroke="white" stroke-width="3.5" stroke-linecap="round"/></svg></div></div><h2 class="ob-done-h">'+msg+'</h2></div>';
+  bot.innerHTML='<button class="ob-btn-p ob-btn-full" onclick="_obClose()">Fermer</button>';
+  if(cb)setTimeout(cb,400);
+}
+
+// Bouton 1: Source & API
+function _obOpenCalSettings(){
+  if(document.getElementById('ob-overlay'))return;
+  _obAccSheet(function(con,bot){
+    var d=_obLoad(),src=d.calSource||'google';
+    con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Source &amp; API</h2><p class="ob-p2">Connexion \u00e0 votre calendrier.</p>'+
+      '<div class="ob-src-group" id="ob-acc-src">'+
+        _srcBtn('google',src==='google','&#128273;','Google Calendar','Cl\u00e9 API + ID.')+
+        _srcBtn('ical',src==='ical','&#128241;','Lien iCal','Depuis iPhone ou Google.')+
+        _srcBtn('both',src==='both','&#128279;','Les deux','Cal 1 Google + Cal 2 iCal.')+
+      '</div>'+
+      '<div id="ob-acc-gf" style="'+(src==='google'||src==='both'?'margin-top:14px':'display:none;margin-top:14px')+'">'+
+        '<div class="ob-field"><label class="ob-lbl">CL\u00c9 API</label><div class="ob-inp-wrap"><input type="password" id="ob-cs-api" class="ob-inp" placeholder="AIzaSy\u2026" value="'+_obEsc(d.apiKey||'')+'" autocomplete="off"/><button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-cs-api\',this)">'+_eyeIcon(false)+'</button></div><div class="ob-err" id="ob-cs-api-err"></div></div>'+
+        '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 1 \u2014 ID GOOGLE</label><input type="text" id="ob-cs-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off"/><div class="ob-err" id="ob-cs-cal0-err"></div></div>'+
+      '</div>'+
+      '<div id="ob-acc-gf2" style="'+(src==='google'?'margin-top:10px':'display:none;margin-top:10px')+'">'+
+        '<div class="ob-field"><label class="ob-lbl">CAL 2 \u2014 ID GOOGLE <span class="ob-opt">optionnel</span></label><input type="text" id="ob-cs-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[1])||'')+'" autocomplete="off"/></div>'+
+      '</div>'+
+      '<div id="ob-acc-if" style="'+(src==='ical'?'margin-top:14px':'display:none;margin-top:14px')+'">'+
+        '<div class="ob-field"><label class="ob-lbl">CAL 1 \u2014 LIEN ICAL</label><input type="url" id="ob-cs-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal1Ical||'')+'" autocomplete="off"/><div class="ob-err" id="ob-cs-ical0-err"></div></div>'+
+        '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 \u2014 LIEN ICAL <span class="ob-opt">optionnel</span></label><input type="url" id="ob-cs-ical1" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>'+
+      '</div>'+
+      '<div id="ob-acc-bf" style="'+(src==='both'?'margin-top:10px':'display:none;margin-top:10px')+'">'+
+        '<div class="ob-field"><label class="ob-lbl">CAL 2 \u2014 LIEN ICAL <span class="ob-opt">optionnel</span></label><input type="url" id="ob-cs-both-ical" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>'+
+      '</div></div>';
+    bot.innerHTML='<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obAccSaveSrc()">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
+    // Hook source buttons to show/hide fields
+    setTimeout(function(){
+      var grp=document.getElementById('ob-acc-src');if(!grp)return;
+      grp.querySelectorAll('.ob-src-btn').forEach(function(b){
+        b.addEventListener('click',function(){
+          var s=_obLoad().calSource||'google';
+          var gf=document.getElementById('ob-acc-gf'),gf2=document.getElementById('ob-acc-gf2'),iff=document.getElementById('ob-acc-if'),bf=document.getElementById('ob-acc-bf');
+          if(gf)gf.style.display=(s==='google'||s==='both'?'':'none');
+          if(gf2)gf2.style.display=(s==='google'?'':'none');
+          if(iff)iff.style.display=(s==='ical'?'':'none');
+          if(bf)bf.style.display=(s==='both'?'':'none');
+        });
+      });
+    },50);
+  });
+}
+function _obAccSaveSrc(){
+  var d=_obLoad(),src=d.calSource||'google';
+  if(src==='google'||src==='both'){
+    var vk=((document.getElementById('ob-cs-api')||{}).value||'').trim();
+    var ek=document.getElementById('ob-cs-api-err');
+    if(vk){if(!vk.startsWith('AIza')){_obErr(ek,'Doit commencer par "AIza".');return;}_obClear(ek);d.apiKey=vk;}
+    var v0=((document.getElementById('ob-cs-cal0')||{}).value||'').trim();
+    var e0=document.getElementById('ob-cs-cal0-err');
+    if(v0){if(!v0.includes('@')){_obErr(e0,'Doit contenir @.');return;}_obClear(e0);d.calendars=[v0];var v1=((document.getElementById('ob-cs-cal1')||{}).value||'').trim();if(v1&&v1.includes('@'))d.calendars.push(v1);}
   }
-  _obCalRender(3);
+  if(src==='ical'){var u0=((document.getElementById('ob-cs-ical0')||{}).value||'').trim();if(u0)d.cal1Ical=u0;var u1=((document.getElementById('ob-cs-ical1')||{}).value||'').trim();if(u1)d.cal2Ical=u1;else delete d.cal2Ical;}
+  if(src==='both'){var u2=((document.getElementById('ob-cs-both-ical')||{}).value||'').trim();if(u2)d.cal2Ical=u2;else delete d.cal2Ical;}
+  _obSave(d);
+  _obAccDone('Enregistr\u00e9\u00a0!',function(){if(typeof awInit==='function')awInit();if(typeof _applyProfile==='function')_applyProfile();});
 }
-function _obCalClose(){var o=document.getElementById('ob-overlay');if(o){o.classList.add('ob-out');setTimeout(function(){o.remove();},380);}}
-function _obCalFinish(){_obCalClose();setTimeout(function(){if(typeof awInit==='function')awInit();},300);}
 
-// Also handle preset change in cal settings
-var _origPickPreset = _obPickPreset;
-(function(){
-  var orig = _obPickPreset;
-  _obPickPreset = function(val,btn){
-    orig(val,btn);
-    // Also update the cal settings sheet colour row if present
-    var cs=document.getElementById('ob-cs-col1');if(cs)cs.style.display=(val==='none'?'':'none');
-  };
-})();
+// Bouton 2: Style Cal 1
+function _obOpenCal1Style(){
+  if(document.getElementById('ob-overlay'))return;
+  _obAccSheet(function(con,bot){
+    var d=_obLoad(),preset=d.cal1Preset||'ecam',c1=d.cal1Color||'blue';
+    var subs=d.cal1Subjects||[];
+    var defaultSubs=[{match:'math',color:'blue',label:'Maths'},{match:'physique',color:'cyan',label:'Physique'},{match:'informatique',color:'violet',label:'Informatique'},{match:'sciences ind',color:'amber',label:'Sciences Ind.'},{match:'anglais',color:'emerald',label:'Anglais'},{match:'sport',color:'rose',label:'Sport'},{match:'culture',color:'orange',label:'Culture'},{match:'proj',color:'grey',label:'Projets'}];
+    var sl=subs.length?subs:defaultSubs;
+    var sr=sl.map(function(s,i){return _obSubjRow(s,i);}).join('');
+    con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Style Cal 1</h2><p class="ob-p2">Attribuer des couleurs aux \u00e9v\u00e9nements.</p>'+
+      '<div class="ob-src-group" id="ob-cs-preset-grp">'+
+        _srcBtn2('ecam',preset==='ecam','&#127979;','Pr\u00e9d\u00e9fini ECAM','Auto par mati\u00e8re.')+
+        _srcBtn2('custom',preset==='custom','&#127912;','Personnalis\u00e9','Vos propres mati\u00e8res.')+
+        _srcBtn2('none',preset==='none','&#11036;','Couleur unique','Tout pareil.')+
+      '</div>'+
+      '<div id="ob-cs-col1" style="'+(preset==='none'?'margin-top:12px':'display:none;margin-top:12px')+'"><label class="ob-lbl" style="display:block;margin-bottom:8px">COULEUR</label>'+_obColorGrid('ob-csg1',c1,'_obPickCal1Color')+'</div>'+
+      '<div id="ob-cs-subjs" style="'+(preset==='custom'?'margin-top:12px':'display:none;margin-top:12px')+';position:relative"><label class="ob-lbl" style="display:block;margin-bottom:8px">MATI\u00c8RES &amp; COULEURS</label>'+
+        '<div id="ob-cs-subj-list">'+sr+'</div>'+
+        '<button class="ob-btn-g" style="width:100%;margin-top:8px;font-size:13px" onclick="_obAddSubjCs()">+ Ajouter</button>'+
+      '</div></div>';
+    bot.innerHTML='<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obSaveSubjs();_obAccDone(\'Enregistr\u00e9\u00a0!\',null)">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
+  });
+}
 
-// ── Inject CSS ────────────────────────────────────────────────────────────────
+// Bouton 3: Couleur Cal 2
+function _obOpenCal2Color(){
+  if(document.getElementById('ob-overlay'))return;
+  _obAccSheet(function(con,bot){
+    var d=_obLoad(),c2=d.cal2Color||'lime';
+    var hasCal2=(d.calendars&&d.calendars[1])||d.cal2Ical;
+    if(!hasCal2){con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Couleur Cal 2</h2><p class="ob-p2">Aucun deuxi\u00e8me calendrier configur\u00e9.</p></div>';bot.innerHTML='<button class="ob-btn-p ob-btn-full" onclick="_obClose()">Fermer</button>';return;}
+    con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Couleur Cal 2</h2><p class="ob-p2">Couleur de tous les \u00e9v\u00e9nements du Cal 2.</p>'+_obColorGrid('ob-c2g-acc',c2,'_obPickCal2Color')+'</div>';
+    bot.innerHTML='<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obAccDone(\'Enregistr\u00e9\u00a0!\',null)">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
+  });
+}
+
+// Option avanc\u00e9e: multi-calendriers
+function _obOpenAdvanced(){
+  if(document.getElementById('ob-overlay'))return;
+  _obAccSheet(function(con,bot){_obFillAdvanced(con,bot);});
+}
+function _obFillAdvanced(con,bot){
+  var d=_obLoad(),extras=d.extraCals||[];
+  function rowHtml(cal,i){
+    var hex=(OB_COLORS.find(function(c){return c.k===(cal.color||'blue');})||OB_COLORS[0]).hex;
+    return '<div class="ob-extra-row" data-idx="'+i+'" style="border:.5px solid var(--sep);border-radius:12px;padding:12px;margin-bottom:10px">'+
+      '<div style="display:flex;gap:6px;margin-bottom:8px">'+
+        '<button class="ob-src-btn'+(cal.type==='google'?' ob-src-on':'')+'" onclick="_obExtraType('+i+',\'google\',this)" style="flex:1;padding:8px;font-size:12px;border-radius:10px">&#128273; Google</button>'+
+        '<button class="ob-src-btn'+(cal.type!=='google'?' ob-src-on':'')+'" onclick="_obExtraType('+i+',\'ical\',this)" style="flex:1;padding:8px;font-size:12px;border-radius:10px">&#128241; iCal</button>'+
+      '</div>'+
+      '<input class="ob-inp ob-mono" placeholder="ID ou webcal://\u2026" value="'+_obEsc(cal.url||'')+'" oninput="_obExtraUrl('+i+',this)" style="font-size:12.5px;padding:9px 12px"/>'+
+      '<div style="display:flex;align-items:center;gap:8px;margin-top:8px">'+
+        '<label class="ob-lbl" style="margin:0;text-transform:none;letter-spacing:0;font-size:12px">Couleur :</label>'+
+        '<button class="ob-color-dot-btn" data-color="'+(cal.color||'blue')+'" style="background:'+hex+';" onclick="_obExtraColorPop(this,'+i+')" title="Couleur"></button>'+
+        '<button onclick="_obRemoveExtra('+i+')" style="background:none;border:none;color:#ff453a;font-size:18px;cursor:pointer;margin-left:auto;padding:0 4px">\u00d7</button>'+
+      '</div></div>';
+  }
+  con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Calendriers suppl.</h2><p class="ob-p2">Ajoutez autant de calendriers que souhait\u00e9.</p>'+
+    '<div id="ob-extra-list">'+extras.map(function(c,i){return rowHtml(c,i);}).join('')+'</div>'+
+    '<button class="ob-btn-g" style="width:100%;margin-top:6px;font-size:13px" onclick="_obAddExtra()">+ Ajouter un calendrier</button></div>';
+  bot.innerHTML='<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obAccDone(\'Enregistr\u00e9\u00a0!\',function(){if(typeof awInit===\'function\')awInit();})">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
+}
+function _obAddExtra(){var d=_obLoad();var e=d.extraCals||[];e.push({type:'google',url:'',color:'blue'});d.extraCals=e;_obSave(d);var el=document.getElementById('ob-overlay');if(!el)return;var con=el.querySelector('#ob-cal-content'),bot=el.querySelector('#ob-cal-bottom');if(con&&bot)_obFillAdvanced(con,bot);}
+function _obRemoveExtra(i){var d=_obLoad();var e=d.extraCals||[];e.splice(i,1);d.extraCals=e;_obSave(d);var el=document.getElementById('ob-overlay');if(!el)return;var con=el.querySelector('#ob-cal-content'),bot=el.querySelector('#ob-cal-bottom');if(con&&bot)_obFillAdvanced(con,bot);}
+function _obExtraType(i,type,btn){var p=btn.parentElement;if(p)p.querySelectorAll('.ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');});btn.classList.add('ob-src-on');var d=_obLoad();var e=d.extraCals||[];if(e[i])e[i].type=type;d.extraCals=e;_obSave(d);}
+function _obExtraUrl(i,inp){var d=_obLoad();var e=d.extraCals||[];if(e[i])e[i].url=inp.value.trim();d.extraCals=e;_obSave(d);}
+function _obExtraColorPop(btn,i){
+  var existing=document.getElementById('ob-color-pop');if(existing)existing.remove();
+  var pop=document.createElement('div');pop.id='ob-color-pop';
+  pop.style.cssText='position:absolute;z-index:9999;background:var(--bg2,#1c1c1e);border:.5px solid var(--sep);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;width:224px;box-shadow:0 8px 32px rgba(0,0,0,.5);';
+  OB_COLORS.forEach(function(c){
+    var b=document.createElement('button');
+    b.style.cssText='width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:2px solid transparent;cursor:pointer;';
+    b.onclick=function(e){e.stopPropagation();btn.style.background=c.hex;btn.dataset.color=c.k;pop.remove();var d=_obLoad();var ex=d.extraCals||[];if(ex[i])ex[i].color=c.k;d.extraCals=ex;_obSave(d);};
+    pop.appendChild(b);
+  });
+  var rect=btn.getBoundingClientRect();var sheet=document.getElementById('ob-sheet');var sr=sheet?sheet.getBoundingClientRect():{left:0,top:0,width:400};
+  pop.style.top=(rect.bottom-sr.top+6)+'px';pop.style.left=Math.max(8,Math.min(rect.left-sr.left-90,sr.width-232))+'px';
+  var content=document.querySelector('#ob-cal-content');if(content)content.appendChild(pop);
+  setTimeout(function(){document.addEventListener('click',function cl(e){if(!pop.contains(e.target)){pop.remove();document.removeEventListener('click',cl);}});},10);
+}
+
+// CSS inject\u00e9
 (function(){
-  if (document.getElementById('ob-css')) return;
-  var s = document.createElement('style'); s.id = 'ob-css';
-  s.textContent = `
+  if(document.getElementById('ob-css'))return;
+  var s=document.createElement('style');s.id='ob-css';
+  s.textContent=`
 #ob-overlay{position:fixed;inset:0;z-index:9000;display:flex;align-items:flex-end;
   background:rgba(0,0,0,.52);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
   opacity:0;transition:opacity .25s}
 #ob-overlay.ob-in{opacity:1}
 #ob-overlay.ob-out{opacity:0;pointer-events:none}
-#ob-sheet{position:relative;width:100%;background:var(--bg2,#0d1017);border-radius:26px 26px 0 0;
-  border-top:1px solid rgba(255,255,255,.11);min-height:65vh;max-height:95dvh;
+#ob-sheet{position:relative;width:100%;background:var(--bg2,#1c1c1e);border-radius:26px 26px 0 0;
+  border-top:1px solid var(--sep,rgba(255,255,255,.11));min-height:65vh;max-height:95dvh;
   display:flex;flex-direction:column;overflow:hidden;
   box-shadow:0 -20px 60px rgba(0,0,0,.7);
   transform:translateY(60px);transition:transform .38s cubic-bezier(.32,1.2,.45,1);will-change:transform}
 #ob-overlay.ob-in #ob-sheet{transform:translateY(0)}
-@media(prefers-color-scheme:light){#ob-sheet{background:#f2f2f7;border-top-color:rgba(0,0,0,.06)}}
 #ob-handle-zone{width:100%;padding:10px 0 4px;cursor:grab;flex-shrink:0;display:flex;align-items:center;justify-content:center;touch-action:none}
-#ob-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.22)}
-@media(prefers-color-scheme:light){#ob-handle{background:rgba(0,0,0,.16)}}
+#ob-handle{width:36px;height:4px;border-radius:2px;background:var(--sep)}
 .ob-orbs{position:absolute;inset:0;pointer-events:none;overflow:hidden;border-radius:inherit}
 .ob-orb1,.ob-orb2{position:absolute;border-radius:50%;filter:blur(80px);opacity:.18}
 .ob-orb1{width:300px;height:300px;background:#3b82f6;top:-80px;right:-60px;animation:orb 9s ease-in-out infinite}
 .ob-orb2{width:220px;height:220px;background:#6366f1;bottom:60px;left:-40px;animation:orb 13s ease-in-out infinite reverse}
 @keyframes orb{0%,100%{transform:translate(0,0)}50%{transform:translate(12px,10px)}}
-@media(prefers-color-scheme:light){.ob-orb1,.ob-orb2{opacity:.06}}
 .ob-x{position:absolute;top:18px;right:16px;z-index:10;width:28px;height:28px;border-radius:50%;
-  background:rgba(255,255,255,.08);border:none;cursor:pointer;color:rgba(255,255,255,.45);
-  display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;transition:background .15s}
-.ob-x:hover{background:rgba(255,255,255,.14)}
-@media(prefers-color-scheme:light){.ob-x{background:rgba(0,0,0,.06);color:rgba(0,0,0,.4)}}
+  background:var(--fill);border:none;cursor:pointer;color:var(--lbl2);
+  display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
 #ob-content,#ob-cal-content{flex:1;overflow-y:auto;padding:20px 22px 4px;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
-#ob-bottom,#ob-cal-bottom{padding:10px 22px calc(env(safe-area-inset-bottom,0px) + 12px);position:relative;z-index:1;flex-shrink:0}
+#ob-bottom,#ob-cal-bottom{padding:10px 22px calc(env(safe-area-inset-bottom,0px)+12px);position:relative;z-index:1;flex-shrink:0}
 .ob-slide{animation:obslide .22s cubic-bezier(.25,.8,.25,1) both}
 @keyframes obslide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
 .ob-step-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .ob-dots{display:flex;gap:5px;align-items:center}
-.ob-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);transition:all .2s}
-.ob-dot.ob-dot-on{width:18px;border-radius:3px;background:#3b82f6}
-@media(prefers-color-scheme:light){.ob-dot{background:rgba(0,0,0,.14)}.ob-dot.ob-dot-on{background:#007aff}}
-.ob-opt-badge{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-  color:rgba(255,255,255,.4);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);padding:2px 8px;border-radius:99px}
-@media(prefers-color-scheme:light){.ob-opt-badge{color:rgba(0,0,0,.4);background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.08)}}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--sep);transition:all .2s}
+.ob-dot.ob-dot-on{width:18px;border-radius:3px;background:var(--tint,#0a84ff)}
+.ob-opt-badge{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--lbl3);background:var(--fill);border:1px solid var(--sep);padding:2px 8px;border-radius:99px}
 .ob-hero{display:flex;flex-direction:column;align-items:flex-start;padding-top:4px}
 .ob-logo-wrap{width:52px;height:52px;border-radius:14px;overflow:hidden;margin-bottom:18px;box-shadow:0 4px 18px rgba(59,130,246,.4)}
 .ob-logo-wrap svg{width:100%;height:100%;display:block}
 .ob-h1{font-size:34px;font-weight:800;line-height:1.1;letter-spacing:-.04em;color:var(--lbl);margin:0 0 10px;font-family:-apple-system,"SF Pro Display",sans-serif}
 .ob-h1 em{font-style:normal;background:linear-gradient(135deg,#60a5fa,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-@media(prefers-color-scheme:light){.ob-h1{color:rgba(0,0,0,.88)}}
 .ob-p{font-size:15px;color:var(--lbl2);margin:0 0 22px;line-height:1.55}
-@media(prefers-color-scheme:light){.ob-p{color:rgba(0,0,0,.48)}}
 .ob-feats{display:flex;flex-direction:column;gap:10px;width:100%}
 .ob-feat{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--lbl2)}
 .ob-feat span{font-size:18px;width:26px;text-align:center;flex-shrink:0}
-@media(prefers-color-scheme:light){.ob-feat{color:rgba(0,0,0,.62)}}
 .ob-h2{font-size:26px;font-weight:800;line-height:1.12;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
-@media(prefers-color-scheme:light){.ob-h2{color:rgba(0,0,0,.88)}}
 .ob-p2{font-size:14px;color:var(--lbl2);margin:0 0 16px;line-height:1.5}
-@media(prefers-color-scheme:light){.ob-p2{color:rgba(0,0,0,.48)}}
 .ob-field{display:flex;flex-direction:column;gap:5px}
-.ob-lbl{font-size:11px;font-weight:600;letter-spacing:.05em;color:var(--lbl3)}
-@media(prefers-color-scheme:light){.ob-lbl{color:rgba(0,0,0,.38)}}
-.ob-opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;color:rgba(255,255,255,.28)}
+.ob-lbl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--lbl3)}
+.ob-opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--lbl3)}
 .ob-inp-wrap{position:relative;display:flex;align-items:center}
 .ob-inp{width:100%;padding:13px 44px 13px 14px;background:var(--fill);
   border:1.5px solid var(--sep);border-radius:12px;color:var(--lbl);
   font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;box-sizing:border-box;
-  transition:border-color .18s,background .18s,box-shadow .18s}
-.ob-inp:focus{border-color:#60a5fa;background:rgba(96,165,250,.08);box-shadow:0 0 0 3px rgba(96,165,250,.14)}
+  transition:border-color .18s,box-shadow .18s}
+.ob-inp:focus{border-color:var(--tint);box-shadow:0 0 0 3px rgba(10,132,255,.15)}
 .ob-field>.ob-inp{padding:13px 14px}
 .ob-mono{font-family:"SF Mono",ui-monospace,monospace;font-size:12.5px}
 .ob-inp::placeholder{color:var(--lbl3)}
-@media(prefers-color-scheme:light){.ob-inp{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.1);color:rgba(0,0,0,.88)}.ob-inp::placeholder{color:rgba(0,0,0,.22)}.ob-inp:focus{background:rgba(0,122,255,.06);border-color:#007aff;box-shadow:0 0 0 3px rgba(0,122,255,.1)}}
-.ob-eye{position:absolute;right:12px;background:none;border:none;cursor:pointer;color:rgba(255,255,255,.32);padding:4px;display:flex;align-items:center;transition:color .15s}
-.ob-eye:hover{color:rgba(255,255,255,.62)}
+.ob-eye{position:absolute;right:12px;background:none;border:none;cursor:pointer;color:var(--lbl3);padding:4px;display:flex;align-items:center}
 .ob-err{font-size:12px;color:#ff453a;max-height:0;overflow:hidden;transition:max-height .2s}
 .ob-err.ob-err-show{max-height:36px;margin-top:3px}
-.ob-details{margin-top:14px;border-radius:11px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);overflow:hidden}
-@media(prefers-color-scheme:light){.ob-details{background:rgba(0,0,0,.03);border-color:rgba(0,0,0,.06)}}
-.ob-details summary.ob-hint-t{font-size:13px;font-weight:500;color:rgba(255,255,255,.55);padding:11px 14px;cursor:pointer;list-style:none;user-select:none}
+.ob-details{margin-top:14px;border-radius:11px;background:var(--fill);border:1px solid var(--sep);overflow:hidden}
+.ob-details summary.ob-hint-t{font-size:13px;font-weight:500;color:var(--lbl2);padding:11px 14px;cursor:pointer;list-style:none;user-select:none}
 .ob-details summary.ob-hint-t::-webkit-details-marker{display:none}
-@media(prefers-color-scheme:light){.ob-details summary.ob-hint-t{color:rgba(0,0,0,.52)}}
-.ob-hint-l{margin:0;padding:0 14px 12px 28px;color:rgba(255,255,255,.4);font-size:12.5px;line-height:1.9}
-.ob-hint-l strong{color:rgba(255,255,255,.65)} .ob-hint-l em{color:rgba(96,165,250,.9);font-style:normal}
-@media(prefers-color-scheme:light){.ob-hint-l{color:rgba(0,0,0,.44)}.ob-hint-l strong{color:rgba(0,0,0,.72)}}
-/* Source / preset buttons */
+.ob-hint-l{margin:0;padding:0 14px 12px 28px;color:var(--lbl2);font-size:12.5px;line-height:1.9}
+.ob-hint-l strong{color:var(--lbl)}
+.ob-src-group{display:flex;flex-direction:column;gap:8px}
 .ob-src-btn,.ob-preset-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
-  border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);
-  color:rgba(255,255,255,.85);font-family:inherit;cursor:pointer;text-align:left;width:100%;
-  -webkit-tap-highlight-color:transparent;transition:all .15s;margin-bottom:8px}
-.ob-src-btn:last-child{margin-bottom:0}
-.ob-src-btn:active{transform:scale(.98)}
-.ob-src-btn.ob-src-on,.ob-preset-btn.ob-preset-on{border-color:#3b82f6;background:rgba(59,130,246,.12)}
-@media(prefers-color-scheme:light){.ob-src-btn{border-color:rgba(0,0,0,.1);background:rgba(0,0,0,.04);color:rgba(0,0,0,.8)}.ob-src-btn.ob-src-on,.ob-preset-btn.ob-preset-on{border-color:#007aff;background:rgba(0,122,255,.08)}}
+  border:1.5px solid var(--sep);background:var(--fill);
+  color:var(--lbl);font-family:inherit;cursor:pointer;text-align:left;width:100%;
+  -webkit-tap-highlight-color:transparent;transition:border-color .15s,background .15s}
+.ob-src-btn:active,.ob-preset-btn:active{transform:scale(.98)}
+.ob-src-btn.ob-src-on,.ob-preset-btn.ob-preset-on{border-color:var(--tint);background:rgba(10,132,255,.1)}
 .ob-src-ico{font-size:22px;flex-shrink:0;width:30px;text-align:center}
 .ob-src-body{flex:1;min-width:0}
 .ob-src-title{font-size:14px;font-weight:600;color:var(--lbl);margin-bottom:2px}
 .ob-src-sub{font-size:12px;color:var(--lbl2);line-height:1.4}
-@media(prefers-color-scheme:light){.ob-src-sub{color:rgba(0,0,0,.45)}}
-.ob-src-chk{font-size:15px;color:#3b82f6;font-weight:700;flex-shrink:0;width:20px;text-align:center}
-/* Colour grid */
+.ob-src-chk{font-size:15px;color:var(--tint);font-weight:700;flex-shrink:0;width:20px;text-align:center}
 .ob-cg{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .ob-cb{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;
   display:flex;align-items:center;justify-content:center;
   -webkit-tap-highlight-color:transparent;transition:transform .12s,border-color .12s}
 .ob-cb:active{transform:scale(.88)}
-.ob-cb.ob-cb-on{border-color:#fff;transform:scale(1.15)}
-@media(prefers-color-scheme:light){.ob-cb.ob-cb-on{border-color:rgba(0,0,0,.5)}}
-/* Subject rows — compact: input + color dot + delete */
+.ob-cb.ob-cb-on{border-color:var(--lbl);transform:scale(1.15)}
 .ob-subj-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.ob-color-dot-btn{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.25);
-  flex-shrink:0;cursor:pointer;transition:transform .12s,border-color .15s}
+.ob-color-dot-btn{width:32px;height:32px;border-radius:50%;border:2px solid var(--sep);flex-shrink:0;cursor:pointer;transition:transform .12s}
 .ob-color-dot-btn:active{transform:scale(.88)}
-.ob-color-dot-btn:hover{border-color:rgba(255,255,255,.6)}
-.ob-subj-del{background:none;border:none;color:#ff453a;font-size:20px;cursor:pointer;
-  padding:0 4px;flex-shrink:0;line-height:1;-webkit-tap-highlight-color:transparent}
-/* Avatar */
+.ob-subj-del{background:none;border:none;color:#ff453a;font-size:20px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1}
 .ob-avatar-row{display:flex;align-items:center;gap:16px;margin-bottom:4px}
-.ob-avatar-preview{width:72px;height:72px;border-radius:50%;flex-shrink:0;overflow:hidden;
-  background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.1);
-  display:flex;align-items:center;justify-content:center}
-@media(prefers-color-scheme:light){.ob-avatar-preview{background:rgba(0,0,0,.05);border-color:rgba(0,0,0,.1)}}
-.ob-av-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:rgba(255,255,255,.3)}
-@media(prefers-color-scheme:light){.ob-av-placeholder{color:rgba(0,0,0,.28)}}
+.ob-avatar-preview{width:72px;height:72px;border-radius:50%;flex-shrink:0;overflow:hidden;background:var(--fill);border:1.5px solid var(--sep);display:flex;align-items:center;justify-content:center}
+.ob-av-placeholder{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--lbl3)}
 .ob-avatar-btns{display:flex;flex-direction:column;gap:8px}
-.ob-btn-av{display:inline-flex;align-items:center;justify-content:center;padding:9px 16px;
-  border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;
-  background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);-webkit-tap-highlight-color:transparent;transition:background .15s}
-.ob-btn-av:active{background:rgba(255,255,255,.14)}
-.ob-btn-av-del{background:rgba(255,69,58,.12);color:#ff453a}
-@media(prefers-color-scheme:light){.ob-btn-av{background:rgba(0,0,0,.06);color:rgba(0,0,0,.6)}.ob-btn-av-del{background:rgba(255,59,48,.1);color:#ff3b30}}
-/* Prefs */
-.ob-pref-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid rgba(255,255,255,.08)}
+.ob-btn-av{display:inline-flex;align-items:center;justify-content:center;padding:9px 16px;border-radius:10px;border:none;cursor:pointer;font-size:13px;font-weight:500;font-family:inherit;background:var(--fill);color:var(--lbl2)}
+.ob-btn-av-del{color:#ff453a}
+.ob-pref-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:.5px solid var(--sep)}
 .ob-pref-row:last-child{border-bottom:none}
 .ob-pref-ico{font-size:22px;flex-shrink:0;width:30px;text-align:center}
 .ob-pref-label{flex:1;font-size:15px;font-weight:500;color:var(--lbl)}
-@media(prefers-color-scheme:light){.ob-pref-label{color:rgba(0,0,0,.8)}}
 .ob-pref-btns{display:flex;gap:6px;flex-shrink:0}
-.ob-pref-btn{padding:6px 14px;border-radius:99px;border:.5px solid rgba(255,255,255,.18);
-  background:rgba(255,255,255,.07);color:rgba(255,255,255,.55);font-size:13px;font-weight:500;
-  font-family:inherit;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
-.ob-pref-btn.ob-pref-on{background:var(--tint,#0a84ff);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(10,132,255,.4)}
-/* Done */
+.ob-pref-btn{padding:6px 14px;border-radius:99px;border:.5px solid var(--sep);background:var(--fill);color:var(--lbl2);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;transition:all .15s}
+.ob-pref-btn.ob-pref-on{background:var(--tint);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(10,132,255,.4)}
 .ob-done{display:flex;flex-direction:column;align-items:center;padding:28px 0 16px}
 .ob-check-wrap{position:relative;width:88px;height:88px;margin-bottom:24px}
 .ob-ring{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(99,102,241,.4);animation:ob-ring 2.5s ease-out infinite}
@@ -903,28 +775,15 @@ var _origPickPreset = _obPickPreset;
 .ob-check-path{stroke-dasharray:60;stroke-dashoffset:60;animation:ob-draw .5s .2s ease forwards}
 @keyframes ob-draw{to{stroke-dashoffset:0}}
 .ob-done-h{font-size:28px;font-weight:800;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
-@media(prefers-color-scheme:light){.ob-done-h{color:rgba(0,0,0,.88)}}
-/* Buttons */
-.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;
-  border-radius:13px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;
-  background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);
-  flex:1;-webkit-tap-highlight-color:transparent;transition:transform .1s,opacity .15s}
+.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-radius:13px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);flex:1;-webkit-tap-highlight-color:transparent;transition:transform .1s}
 .ob-btn-p:active{transform:scale(.97)}
 .ob-btn-p.ob-btn-full{width:100%}
-.ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;
-  border-radius:13px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;
-  background:rgba(255,255,255,.08);color:rgba(255,255,255,.6);flex-shrink:0;
-  -webkit-tap-highlight-color:transparent;transition:transform .1s}
+.ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:13px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:var(--fill);color:var(--lbl2);flex-shrink:0;-webkit-tap-highlight-color:transparent}
 .ob-btn-g:active{transform:scale(.97)}
-@media(prefers-color-scheme:light){.ob-btn-g{background:rgba(0,0,0,.07);color:rgba(0,0,0,.58)}}
-.ob-btn-skip{background:none;border:none;cursor:pointer;font-size:14px;font-weight:500;
-  color:rgba(255,255,255,.32);font-family:inherit;padding:14px 10px;-webkit-tap-highlight-color:transparent;transition:color .15s}
-.ob-btn-skip:hover{color:rgba(255,255,255,.55)}
-@media(prefers-color-scheme:light){.ob-btn-skip{color:rgba(0,0,0,.32)}}
+.ob-btn-skip{background:none;border:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--lbl3);font-family:inherit;padding:14px 10px}
 .ob-row{display:flex;align-items:center;gap:8px}
 .ob-row-right{display:flex;align-items:center;gap:6px;margin-left:auto}
-.ob-legal{font-size:11.5px;color:rgba(255,255,255,.22);text-align:center;margin:10px 0 0}
-@media(prefers-color-scheme:light){.ob-legal{color:rgba(0,0,0,.26)}}
+.ob-legal{font-size:11.5px;color:var(--lbl3);text-align:center;margin:10px 0 0}
 `;
   document.head.appendChild(s);
 })();

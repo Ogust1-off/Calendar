@@ -455,14 +455,14 @@
       <!-- Calendrier 1 -->
       <p class="acc-section-title" id="acc-s-cal1">Calendar 1</p>
       <div class="acc-rows">
-        <button class="acc-row" onclick="accEditCal1Source()">
+        <button class="acc-row" onclick="_obOpenCalSettings()">
           <span class="acc-row-ico">&#128273;</span>
-          <span class="acc-row-lbl" id="acc-cal1-src-lbl">Source &amp; API</span>
+          <span class="acc-row-lbl">Source &amp; clé API</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button class="acc-row" onclick="accEditCal1Style()">
+        <button class="acc-row" onclick="_obOpenCal1Style()">
           <span class="acc-row-ico">&#127912;</span>
-          <span class="acc-row-lbl" id="acc-cal1-style-lbl">Colour style</span>
+          <span class="acc-row-lbl">Style de couleurs Cal 1</span>
           <span class="acc-row-status" id="acc-cal1-preset-badge"></span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
@@ -471,9 +471,19 @@
       <!-- Calendrier 2 -->
       <p class="acc-section-title" id="acc-s-cal2" style="display:none">Calendar 2</p>
       <div class="acc-rows" id="acc-rows-cal2" style="display:none">
-        <button class="acc-row" onclick="accEditCal2()">
+        <button class="acc-row" onclick="_obOpenCal2Color()">
           <span class="acc-row-ico">&#127881;</span>
-          <span class="acc-row-lbl" id="acc-cal2-lbl">Source &amp; colour</span>
+          <span class="acc-row-lbl">Couleur Cal 2</span>
+          <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <!-- Avancé -->
+      <p class="acc-section-title">Avanced</p>
+      <div class="acc-rows">
+        <button class="acc-row" onclick="_obOpenAdvanced()">
+          <span class="acc-row-ico">&#128295;</span>
+          <span class="acc-row-lbl">Calendriers supplémentaires</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
@@ -812,7 +822,6 @@ function accSetLang(lang){
 function accSetTheme(v){
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.theme=v;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
   _applyTheme(v);
-  location.reload();
 }
 function _themeIcon(v){return v==='dark'?'🌙':v==='light'?'☀️':'✨';}
 function _applyTheme(v){
@@ -823,49 +832,8 @@ function _applyTheme(v){
   var sel=document.getElementById('acc-theme');if(sel)sel.value=v||'auto';
   var ico=document.getElementById('acc-theme-ico');if(ico)ico.textContent=_themeIcon(v||'auto');
 }
-function showCalSettings(){ accEditCal1Source(); }
-function accEditCal1Source(){
-  if(typeof _obOpenCalSettings==='function')_obOpenCalSettings();
-}
-function accEditCal1Style(){
-  if(document.getElementById('ob-overlay'))return;
-  _obCalSubStep=0;
-  var el=document.createElement('div');el.id='ob-overlay';
-  el.innerHTML='<div id="ob-sheet"><div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>'+
-    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>'+
-    '<button class="ob-x" onclick="_obClose()">×</button>'+
-    '<div id="ob-cal-content"></div><div id="ob-cal-bottom"></div></div>';
-  document.body.appendChild(el);
-  requestAnimationFrame(function(){el.classList.add('ob-in');_obCalStyleOnly();if(typeof _obInitDrag==='function')_obInitDrag(el);});
-}
-function accEditCal2(){
-  if(document.getElementById('ob-overlay'))return;
-  var el=document.createElement('div');el.id='ob-overlay';
-  el.innerHTML='<div id="ob-sheet"><div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>'+
-    '<div id="ob-handle-zone"><div id="ob-handle"></div></div>'+
-    '<button class="ob-x" onclick="_obClose()">×</button>'+
-    '<div id="ob-cal-content"></div><div id="ob-cal-bottom"></div></div>';
-  document.body.appendChild(el);
-  requestAnimationFrame(function(){el.classList.add('ob-in');_obCal2Only();if(typeof _obInitDrag==='function')_obInitDrag(el);});
-}
-function _obClose(){var o=document.getElementById('ob-overlay');if(o){o.classList.add('ob-out');setTimeout(function(){o.remove();},380);}}
-function _obCalStyleOnly(){
-  if(typeof _obCalRender==='function'){_obCalSubStep=2;_obCalRender(2);}
-}
-function _obCal2Only(){
-  var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-  var c2=d.cal2Color||'lime';
-  var hasCal2=(d.calendars&&d.calendars[1])||d.cal2Ical;
-  var con=document.getElementById('ob-cal-content'),bot=document.getElementById('ob-cal-bottom');
-  if(!con||!bot)return;
-  con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Calendar 2</h2>'+
-    (hasCal2
-      ? '<p class="ob-p2">Colour for all events from Calendar 2.</p>'+
-        (typeof _obColorGrid==='function'?_obColorGrid('ob-c2g-acc',c2,'_obPickCal2Color'):'')
-      : '<p class="ob-p2">No Calendar 2 configured.</p>')+
-    '</div>';
-  bot.innerHTML='<button class="ob-btn-p ob-btn-full" onclick="_obClose()">Done</button>';
-}
+function showCalSettings(){ _obOpenCalSettings(); }
+
 function accRefresh(){
   var ico=document.getElementById('acc-refresh-ico'),st=document.getElementById('acc-refresh-status');
   if(ico)ico.textContent='&#9203;';if(st)st.textContent='Updating\u2026';
