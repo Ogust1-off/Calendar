@@ -710,7 +710,7 @@ function _obExtraColorPop(btn,i){
 .ob-x{position:absolute;top:18px;right:16px;z-index:10;width:28px;height:28px;border-radius:50%;
   background:var(--fill);border:none;cursor:pointer;color:var(--lbl2);
   display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
-#ob-content,#ob-cal-content{flex:1;overflow-y:auto;padding:20px 22px 4px;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
+#ob-content,#ob-cal-content{flex:1;overflow-y:auto;padding:16px 20px 4px;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
 #ob-bottom,#ob-cal-bottom{padding:10px 22px calc(env(safe-area-inset-bottom,0px)+12px);position:relative;z-index:1;flex-shrink:0}
 .ob-slide{animation:obslide .22s cubic-bezier(.25,.8,.25,1) both}
 @keyframes obslide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
@@ -728,8 +728,8 @@ function _obExtraColorPop(btn,i){
 .ob-feats{display:flex;flex-direction:column;gap:10px;width:100%}
 .ob-feat{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--lbl2)}
 .ob-feat span{font-size:18px;width:26px;text-align:center;flex-shrink:0}
-.ob-h2{font-size:26px;font-weight:800;line-height:1.12;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
-.ob-p2{font-size:14px;color:var(--lbl2);margin:0 0 16px;line-height:1.5}
+.ob-h2{font-size:24px;font-weight:800;line-height:1.12;letter-spacing:-.03em;color:var(--lbl);margin:0 0 8px;font-family:-apple-system,"SF Pro Display",sans-serif}
+.ob-p2{font-size:13.5px;color:var(--lbl2);margin:0 0 12px;line-height:1.5}
 .ob-field{display:flex;flex-direction:column;gap:5px}
 .ob-lbl{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--lbl3)}
 .ob-opt{font-size:10px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--lbl3)}
@@ -750,8 +750,8 @@ function _obExtraColorPop(btn,i){
 .ob-details summary.ob-hint-t::-webkit-details-marker{display:none}
 .ob-hint-l{margin:0;padding:0 14px 12px 28px;color:var(--lbl2);font-size:12.5px;line-height:1.9}
 .ob-hint-l strong{color:var(--lbl)}
-.ob-src-group{display:flex;flex-direction:column;gap:8px}
-.ob-src-btn,.ob-preset-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
+.ob-src-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
+.ob-src-btn,.ob-preset-btn{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:13px;
   border:1.5px solid var(--sep);background:var(--fill);
   color:var(--lbl);font-family:inherit;cursor:pointer;text-align:left;width:100%;
   -webkit-tap-highlight-color:transparent;transition:border-color .15s,background .15s}

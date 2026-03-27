@@ -168,6 +168,16 @@ function awParseICal(text) {
 
 // ── API ────────────────────────────────────────────────────────────────────────
 
+async function _fetchWithTimeout(url, ms) {
+  ms = ms || 10000;
+  const ctrl = new AbortController();
+  const timer = setTimeout(function(){ ctrl.abort(); }, ms);
+  try {
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return r;
+  } catch(e) { clearTimeout(timer); throw e; }
+}
 async function awFetch() {
   const monday = awMondayOf(new Date());
   monday.setHours(0, 0, 0, 0);
@@ -191,23 +201,30 @@ async function awFetch() {
     cal2,
   }));
 
-  const urls = [buildUrl(AW_CALENDAR_ID)];
-  if (AW_CALENDAR_ID_2) urls.push(buildUrl(AW_CALENDAR_ID_2));
-
-  const responses = await Promise.all(urls.map(u => fetch(u)));
-  for (const res of responses) {
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e.error && e.error.message) || 'API ' + res.status); }
+  const events = [];
+  // Google Calendar API fetch (only if API key and calendar ID are set)
+  if (AW_API_KEY && AW_CALENDAR_ID) {
+    const urls = [buildUrl(AW_CALENDAR_ID)];
+    if (AW_CALENDAR_ID_2) urls.push(buildUrl(AW_CALENDAR_ID_2));
+    try {
+      const responses = await Promise.all(urls.map(u => fetch(u)));
+      for (const res of responses) {
+        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e.error && e.error.message) || 'API ' + res.status); }
+      }
+      const datas = await Promise.all(responses.filter(r=>r.status==='fulfilled').map(r=>r.value.json()));
+      datas.forEach((data, idx) => events.push(...parseEvents(data, idx === 1)));
+    } catch(e) {
+      if (!AW_ICAL_URL) throw e; // Re-throw only if no iCal fallback
+      console.warn('Google API failed, using iCal only:', e);
+    }
   }
-  const datas = await Promise.all(responses.map(r => r.json()));
-  const events = datas.flatMap((data, idx) => parseEvents(data, idx === 1));
-  events.sort((a, b) => new Date(a.start) - new Date(b.start));
   // Fetch iCal sources
   const icalSources = [];
   if (AW_ICAL_URL) icalSources.push({ url: AW_ICAL_URL, cal2: false, color: null });
   if (AW_CAL2_ICAL) icalSources.push({ url: AW_CAL2_ICAL, cal2: true, color: AW_CAL2_COLOR_CFG });
   if (AW_EXTRA_CALS && AW_EXTRA_CALS.length) {
     AW_EXTRA_CALS.forEach(function(ec) {
-      if (ec.type === 'ical' && ec.url) icalSources.push({ url: ec.url, cal2: true, color: ec.color || 'lime' });
+      if (ec.type === 'ical' && ec.url) icalSources.push({ url: ec.url, cal2: true, color: ec.color || 'lime', extraColor: ec.color || 'lime' });
     });
   }
   for (const src of icalSources) {
@@ -215,7 +232,7 @@ async function awFetch() {
       const proxyUrl = src.url.replace(/^webcal:\/\//i,'https://');
       const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(proxyUrl)}`);
       const text = await res.text();
-      const parsed = awParseICal(text).map(ev => ({ ...ev, cal2: src.cal2 }));
+      const parsed = awParseICal(text).map(ev => ({ ...ev, cal2: src.cal2, _extraColor: src.extraColor || null }));
       events.push(...parsed);
     } catch(e) { console.warn('iCal fetch failed:', src.url, e); }
   }
@@ -318,7 +335,7 @@ function awRowHtml(ev, idx = -1) {
   const dur       = !allDay ? awFmtDuration(ev.start, ev.end) : '';
   const fullName  = ev.summary || '(Sans titre)';
   const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
-  const color     = awColorFor(shortName, ev.cal2);
+  const color     = ev._extraColor || awColorFor(shortName, ev.cal2);
 
   const typeMatch  = fullName.match(/\b(CM|TD|TP|DS|Exam|Cours)\b/i);
   const typeBadge  = typeMatch ? typeMatch[0].toUpperCase() : '';
@@ -707,42 +724,41 @@ function awRenderCompact(byDay, today) {
   const compact = document.getElementById('aw-compact');
   if (!compact) return;
   const nowTs = Date.now();
-
-  const base = new Date(today + 'T00:00:00');
-  let targetDay = null;
-  const skipped = [];
-
-  // Start from today, look forward for the next day with events
-  for (let i = 0; i < AW_FETCH_DAYS; i++) {
-    const d  = new Date(base); d.setDate(base.getDate() + i);
-    const ds = awDateStr(d);
-    // Pour aujourd'hui: afficher tous les events (y compris passés)
-    // Pour les jours futurs: seulement les events non terminés
-    const isToday2 = ds === today;
-    const future = (byDay[ds] || []).filter(({ev}) =>
-      isToday2 ? true : (ev.start.length === 10 ? ds >= today : new Date(ev.end) > nowTs)
-    );
-    if (future.length > 0) { targetDay = { ds, items: future.map(({ev}) => ev) }; break; }
-    else skipped.push(ds);
-  }
-
   let html = '';
-  const shown = skipped.slice(0, 6);
-  if (shown.length > 0) {
-    html += `<div class="aw-skipped-list">`;
-    html += shown.map(ds => {
-      const isToday = ds === today;
-      const label   = awFmtDayLabel(ds, true);
-      const msg = window._t?window._t('noMoreToday'):'No more events today';
-      return `<div class="aw-skipped-row">
-        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ' <span class="aw-skipped-today-pill">'+(window._t?window._t('today2'):'Today')+'</span>' : ''}</span>
-        <span class="aw-skipped-msg">${msg}</span>
-      </div>`;
-    }).join('');
-    html += `</div>`;
+
+  // ── Section 1: Today (always show all events, past greyed) ──
+  const todayItems = (byDay[today] || []).map(({ev}) => ev);
+  if (todayItems.length > 0) {
+    const dayLabel = awFmtDayLabel(today, true);
+    html += `<div class="aw-compact-day-hd">
+      <span class="aw-compact-day-label today">${dayLabel}</span>
+      <span class="aw-today-pill">${window._t?window._t('today2'):'Today'}</span>
+    </div>`;
+    html += todayItems.map(ev => awRowHtml(ev, awEvCache.indexOf(ev))).join('');
   }
 
-  if (!targetDay) {
+  // ── Section 2: Next days with future events ──
+  const base = new Date(today + 'T00:00:00');
+  let found = 0;
+  for (let i = 1; i < AW_FETCH_DAYS && found < 3; i++) {
+    const d = new Date(base); d.setDate(base.getDate() + i);
+    const ds = awDateStr(d);
+    const items = (byDay[ds] || []).filter(({ev}) =>
+      ev.start.length === 10 ? true : new Date(ev.end) > nowTs
+    ).map(({ev}) => ev);
+    if (items.length === 0) continue;
+    found++;
+    const isWE = awIsWeekend(ds);
+    const label = awFmtDayLabel(ds, true);
+    html += `<div class="aw-compact-day-hd">
+      <span class="aw-compact-day-label">${label}</span>
+    </div>`;
+    html += items.map(ev => awRowHtml(ev, awEvCache.indexOf(ev))).join('');
+    if (found >= 3) break;
+  }
+
+  // ── Empty state: no events today AND no upcoming ──
+  if (!todayItems.length && found === 0) {
     const isWE = awIsWeekend(today);
     const nextMonday = (() => {
       const d = new Date(today + 'T00:00:00');
@@ -763,23 +779,16 @@ function awRenderCompact(byDay, today) {
         <div class="aw-empty-sub">${window._t?window._t('enjoyBreak'):'Enjoy the break!'}</div>
       </div>`;
     }
-    compact.innerHTML = html;
-    return;
   }
 
-  const isToday  = targetDay.ds === today;
-  const dayLabel = awFmtDayLabel(targetDay.ds, true);
-
-  html += `<div class="aw-compact-day-hd">
-    <span class="aw-compact-day-label${isToday ? ' today' : ''}">${dayLabel}</span>
-    ${isToday ? '<span class="aw-today-pill">'+(window._t?window._t('today2'):'Today')+'</span>' : ''}
-  </div>`;
-
-  html += targetDay.items.map((ev) => {
-    const idx = awEvCache.indexOf(ev);
-    return awRowHtml(ev, idx);
-  }).join('');
   compact.innerHTML = html;
+  // Scroll to today's section or first in-progress event
+  setTimeout(function() {
+    const inProg = compact.querySelector('.aw-event-now');
+    const todayHd = compact.querySelector('.aw-compact-day-hd');
+    const target = inProg || todayHd;
+    if (target) target.scrollIntoView({block:'start'});
+  }, 50);
 }
 
 // ── Time-grid calendar view ───────────────────────────────────────────────────
