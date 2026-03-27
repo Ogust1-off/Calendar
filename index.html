@@ -209,34 +209,36 @@
     .aw-gev-loc{color:rgba(10,20,40,.38)!important}}
 
   /* ── Account ── */
-  .acc-page{padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center;gap:24px}
-  .acc-hero{display:flex;flex-direction:column;align-items:center;gap:12px}
-  .acc-icon{width:78px;height:78px;border-radius:50%;overflow:hidden;position:relative;
-    box-shadow:0 0 0 3px rgba(255,255,255,.1),0 4px 20px rgba(0,0,0,.25);cursor:pointer;transition:opacity .15s}
-  .acc-icon:active{opacity:.75}
+  .acc-page{padding:0 0 32px;display:flex;flex-direction:column;align-items:stretch;gap:0}
+  .acc-hero{display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:32px 20px 20px;background:var(--bg2);
+    border-bottom:.5px solid var(--sep);margin-bottom:8px}
+  .acc-icon{width:80px;height:80px;border-radius:50%;overflow:hidden;position:relative;
+    box-shadow:0 0 0 3px var(--tint),0 4px 20px rgba(0,0,0,.2);
+    cursor:pointer;transition:opacity .15s;flex-shrink:0}
+  .acc-icon:active{opacity:.7}
   .acc-icon img{width:100%;height:100%;object-fit:cover;display:block}
-  .acc-name{font-size:24px;font-weight:700;letter-spacing:-.04em;color:var(--lbl);cursor:pointer}
-  .acc-sub{font-size:13px;color:var(--lbl3)}
-  .acc-section-title{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--lbl3);padding:0 4px;margin:16px 0 6px;align-self:flex-start;width:100%}
-  .acc-rows{width:100%;background:var(--bg2);border-radius:14px;overflow:hidden;
-    border:.5px solid var(--sep);box-shadow:0 2px 16px rgba(0,0,0,.18)}
-  @media(prefers-color-scheme:light){.acc-rows{box-shadow:0 2px 16px rgba(0,0,0,.07)}}
-  .acc-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border:none;
-    background:none;color:var(--lbl);font-size:16px;font-family:inherit;cursor:pointer;
-    text-align:left;width:100%;border-bottom:.5px solid var(--sep2);
-    -webkit-tap-highlight-color:transparent;transition:background .1s}
-  .acc-row:last-child{border-bottom:none}
+  .acc-name{font-size:22px;font-weight:700;letter-spacing:-.035em;color:var(--lbl);cursor:pointer;line-height:1.2}
+  .acc-sub{font-size:12px;color:var(--lbl3)}
+  .acc-st{font-size:12px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--lbl3);padding:0 20px;margin:20px 0 8px}
+  .acc-card{background:var(--bg2);border-radius:16px;overflow:hidden;
+    margin:0 16px;border:.5px solid var(--sep)}
+  @media(prefers-color-scheme:light){.acc-card{box-shadow:0 1px 8px rgba(0,0,0,.06)}}
+  [data-theme="dark"] .acc-card,[data-theme="light"] .acc-card{box-shadow:none}
+  .acc-sep{height:.5px;background:var(--sep);margin-left:52px}
+  .acc-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;
+    background:none;color:var(--lbl);font-size:15px;font-family:inherit;cursor:pointer;
+    text-align:left;width:100%;-webkit-tap-highlight-color:transparent;transition:background .1s}
   .acc-row:active{background:var(--bg3)}
   .acc-row-static{cursor:default!important}.acc-row-static:active{background:none!important}
-  .acc-row-ico{font-size:18px;flex-shrink:0}
-  .acc-row-lbl{flex:1}
-  .acc-row-chv{width:12px;height:12px;color:var(--lbl3);flex-shrink:0}
-  .acc-row-status{font-size:12px;color:var(--lbl3);flex-shrink:0}
+  .acc-row-ico{font-size:20px;flex-shrink:0;width:30px;text-align:center}
+  .acc-row-lbl{flex:1;font-weight:400}
+  .acc-chv{width:12px;height:12px;color:var(--lbl3);flex-shrink:0;opacity:.6}
+  .acc-badge{font-size:12px;color:var(--lbl3);flex-shrink:0;background:var(--fill);padding:2px 8px;border-radius:6px}
   .acc-select{background:none;border:none;color:var(--tint);font-size:14px;font-family:inherit;
-    outline:none;cursor:pointer;flex-shrink:0}
-  .acc-row-danger .acc-row-lbl{color:#ff453a}
-  @media(prefers-color-scheme:light){.acc-row-danger .acc-row-lbl{color:#ff3b30}}
-  #acc-upd{font-size:12px;color:var(--lbl3)}
+    outline:none;cursor:pointer;flex-shrink:0;font-weight:500}
+  .acc-row-danger .acc-row-lbl{color:var(--red)}
 
   /* ── Tab bar ── */
   #tb{position:fixed;bottom:0;left:0;right:0;
@@ -556,7 +558,8 @@ function _ds(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'
 
 function wkInit(byDay,today){
   _wkByDay=byDay;_wkToday=today;
-  _wkCur=today; // always reset to today on init
+  // Preserve current day if already viewing — only reset if invalid
+  if(!_wkCur||!_wkDates.includes(_wkCur))_wkCur=today;
   _wkDates=[];
   var td=new Date(today+'T00:00:00'),dow=td.getDay();
   var ws=new Date(td);ws.setDate(td.getDate()-(dow===0?6:dow-1));
@@ -578,9 +581,12 @@ function wkInit(byDay,today){
       var s=document.getElementById('wk-strip');if(!s)return;
       var idx=Math.round(s.scrollLeft/s.offsetWidth);
       if(_wkDates[idx]&&_wkDates[idx]!==_wkCur){_wkCur=_wkDates[idx];wkUpdateHdr();wkPrefetch(_wkCur);}
-    },60);
+    },80);
   },{passive:true});
   _wkDirty=false;
+  // Snap physique amélioré — décelération douce
+  strip.style.scrollBehavior='auto';
+  strip.style.webkitOverflowScrolling='touch';
 }
 function wkPrefetch(ds){var idx=_wkDates.indexOf(ds);[-1,0,1].forEach(function(d){var i=idx+d;if(i>=0&&i<_wkDates.length)wkRenderPage(_wkDates[i]);});}
 function wkRenderPage(ds){
@@ -624,19 +630,58 @@ function wkUpdateHdr(){
 function wkGoToday(){_wkCur=_wkToday;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 function _initWkDaysSwipe(){
   var days=document.getElementById('wk-days');if(!days)return;
-  var sx=0,active=false;
-  days.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;active=true;},{passive:true});
-  days.addEventListener('touchend',function(e){
-    if(!active)return;active=false;
-    var dx=e.changedTouches[0].clientX-sx;
-    if(Math.abs(dx)<40)return;
-    if(!_wkCur)return;
-    // Changer de semaine : même jour +/- 7 jours
+  var hdr=document.getElementById('wk-hdr');
+  var sx=0,sy=0,swiping=false,startCur=null,lastDx=0;
+  var THRESH=50;
+
+  function onStart(e){
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
+    swiping=false;startCur=_wkCur;lastDx=0;
+    // Remove transition for immediate response
+    var strip=document.getElementById('wk-strip');
+    if(strip)strip.style.transition='none';
+  }
+  function onMove(e){
+    var dx=e.touches[0].clientX-sx;
+    var dy=e.touches[0].clientY-sy;
+    if(!swiping&&Math.abs(dx)<8&&Math.abs(dy)<8)return;
+    if(!swiping&&Math.abs(dy)>Math.abs(dx)*0.8)return; // vertical scroll
+    swiping=true;lastDx=dx;
+    // Visual feedback: slightly translate the header
+    if(hdr)hdr.style.transform='translateX('+(dx*0.05)+'px)';
+    if(e.cancelable)e.preventDefault();
+  }
+  function onEnd(e){
+    if(hdr)hdr.style.transform='';
+    if(!swiping||!_wkCur)return;
+    var dx=lastDx;
+    if(Math.abs(dx)<THRESH){
+      // Snap back — not enough
+      swiping=false;return;
+    }
+    // Changer de semaine : +7 ou -7 jours
     var d=new Date(_wkCur+'T00:00:00');
-    d.setDate(d.getDate()+(dx<0?7:-7));
+    // dx>0 = glisser vers droite = semaine précédente
+    // dx<0 = glisser vers gauche = semaine suivante
+    d.setDate(d.getDate()+(dx>0?-7:7));
     var ds=_ds(d);
-    if(_wkDates.includes(ds)){_wkCur=ds;wkSnap(_wkCur,true,true);wkUpdateHdr();}
-  },{passive:true});
+    var strip=document.getElementById('wk-strip');
+    if(strip){strip.style.transition='';}
+    if(_wkDates.includes(ds)){
+      _wkCur=ds;
+      wkSnap(_wkCur,true,true);
+      wkUpdateHdr();
+    }
+    swiping=false;
+  }
+
+  // Attach to both days bar and the whole week header
+  var targets=[days,hdr].filter(Boolean);
+  targets.forEach(function(el){
+    el.addEventListener('touchstart',onStart,{passive:true});
+    el.addEventListener('touchmove',onMove,{passive:false});
+    el.addEventListener('touchend',onEnd,{passive:true});
+  });
 }
 
 /* ── Tabs ── */
@@ -718,34 +763,13 @@ function _initPillSwipe(){
     var btns=_btns();
     var newTab=tab0;
     var THRESH=40;
-    if(dx<-THRESH&&tab0<btns.length-1)newTab=tab0+1;
-    else if(dx>THRESH&&tab0>0)newTab=tab0-1;
+    if(dx>THRESH&&tab0<btns.length-1)newTab=tab0+1;
+    else if(dx<-THRESH&&tab0>0)newTab=tab0-1;
     if(newTab!==tab0)goTab(newTab);
     else _updateSlider();
     live=false;
   },{passive:true});
 
-  // Swipe depuis n'importe où sur l'écran (plus naturel)
-  var bodyStart={x:0,y:0,tab:0,ok:false,dx2:0};
-  document.addEventListener('touchstart',function(e){
-    if(pill.contains(e.target))return; // géré ci-dessus
-    var t=e.touches[0];
-    bodyStart={x:t.clientX,y:t.clientY,tab:_tab,ok:true,dx2:0};
-  },{passive:true});
-  document.addEventListener('touchmove',function(e){
-    if(!bodyStart.ok)return;
-    bodyStart.dx2=e.touches[0].clientX-bodyStart.x;
-    var dy=e.touches[0].clientY-bodyStart.y;
-    if(Math.abs(dy)>Math.abs(bodyStart.dx2)*1.5){bodyStart.ok=false;return;}
-  },{passive:true});
-  document.addEventListener('touchend',function(e){
-    if(!bodyStart.ok)return;bodyStart.ok=false;
-    var dx2=bodyStart.dx2,THRESH2=60;
-    var newTab=bodyStart.tab;
-    if(dx2<-THRESH2&&bodyStart.tab<2)newTab=bodyStart.tab+1;
-    else if(dx2>THRESH2&&bodyStart.tab>0)newTab=bodyStart.tab-1;
-    if(newTab!==bodyStart.tab)goTab(newTab);
-  },{passive:true});
 }
 
 /* ── Profile ── */
@@ -899,7 +923,10 @@ setInterval(function(){
     _lastTs=awLastUpdated;
     var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
     _wkToday=today;_wkByDay=window._awByDay;_wkDirty=true;
-    if(_tab===1)wkInit(_wkByDay,_wkToday);
+    if(_tab===1){
+      // Refresh header and re-render current page without resetting position
+      wkInit(_wkByDay,_wkToday);
+    }
     wkUpdateHdr();
   }
   var lm=window.matchMedia('(prefers-color-scheme:light)').matches;

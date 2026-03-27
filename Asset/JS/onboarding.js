@@ -207,10 +207,28 @@ function _sCBoth(d){
   };
 }
 
-// Sous-\u00e9tape: Couleurs
+// Sous-étape: Couleurs
 function _sCColors(d){
-  var preset=d.cal1Preset||'ecam',c1=d.cal1Color||'blue',c2=d.cal2Color||'lime';
+  var src=d.calSource||'google';
+  var c1=d.cal1Color||'blue',c2=d.cal2Color||'lime';
   var hasCal2=(d.calendars&&d.calendars[1])||d.cal2Ical;
+  var nav='<div class="ob-row"><button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button><div class="ob-row-right"><button class="ob-btn-skip" onclick="_obSkip()">Passer</button><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
+  // iCal only: couleur simple uniquement (pas de preset par matière)
+  if(src==='ical'){
+    d.cal1Preset='none';_obSave(d);
+    return {
+      c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(2,3)+'</div></div>'+
+        '<h2 class="ob-h2">Couleur du calendrier</h2>'+
+        '<p class="ob-p2">Choisissez la couleur des événements.</p>'+
+        '<label class="ob-lbl" style="display:block;margin-bottom:8px">CALENDRIER 1</label>'+
+        _obColorGrid('ob-c1g',c1,'_obPickCal1Color')+
+        (hasCal2?'<label class="ob-lbl" style="display:block;margin:16px 0 8px">CALENDRIER 2</label>'+_obColorGrid('ob-c2g',c2,'_obPickCal2Color'):'')+
+        '</div>',
+      b:nav
+    };
+  }
+  // Google/both: preset complet
+  var preset=d.cal1Preset||'ecam';
   var subs=d.cal1Subjects||[];
   var defaultSubs=[
     {match:'math',color:'blue',label:'Maths'},{match:'physique',color:'cyan',label:'Physique'},
@@ -227,7 +245,7 @@ function _sCColors(d){
       '<div class="ob-src-group" id="ob-preset-grp">'+
         _srcBtn2('ecam',preset==='ecam','&#127979;','Pr\u00e9d\u00e9fini ECAM','D\u00e9tecte auto les mati\u00e8res.')+
         _srcBtn2('custom',preset==='custom','&#127912;','Personnalis\u00e9','Vos mati\u00e8res et couleurs.')+
-        _srcBtn2('none',preset==='none','&#11036;','Couleur unique','Tous les \u00e9v\u00e9nements pareil.')+
+        _srcBtn2('none',preset==='none','&#11036;','Couleur unique','Tous pareil.')+
       '</div>'+
       '<div id="ob-c1-color" style="'+(preset==='none'?'margin-top:12px':'display:none;margin-top:12px')+'">'+
         '<label class="ob-lbl" style="display:block;margin-bottom:8px">COULEUR</label>'+
@@ -240,9 +258,10 @@ function _sCColors(d){
       '</div>'+
       (hasCal2?'<div style="margin-top:16px"><label class="ob-lbl" style="display:block;margin-bottom:8px">COULEUR CALENDRIER 2</label>'+_obColorGrid('ob-c2g',c2,'_obPickCal2Color')+'</div>':'')+
       '</div>',
-    b:'<div class="ob-row"><button class="ob-btn-g" onclick="_obBack()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button><div class="ob-row-right"><button class="ob-btn-skip" onclick="_obSkip()">Passer</button><button class="ob-btn-p" onclick="_obNext()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>'
+    b:nav
   };
 }
+
 
 // Step 2: Profil
 function _s2(){

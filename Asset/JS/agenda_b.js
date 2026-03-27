@@ -9,13 +9,15 @@ function _loadCfg() {
   AW_CALENDAR_ID    = c.calendars && c.calendars[0] ? c.calendars[0] : '';
   AW_CALENDAR_ID_2  = c.calendars && c.calendars[1] ? c.calendars[1] : '';
   AW_ICAL_URL       = c.cal1Ical || c.icalUrl || '';
+  AW_CAL2_ICAL      = c.cal2Ical || '';
+  AW_EXTRA_CALS     = c.extraCals || [];
   AW_CAL1_PRESET    = c.cal1Preset   || 'ecam';
   AW_CAL1_COLOR_CFG = c.cal1Color    || 'blue';
   AW_CAL1_SUBJECTS  = c.cal1Subjects || [];
   AW_CAL2_COLOR_CFG = c.cal2Color    || 'lime';
   return !!(AW_API_KEY && AW_CALENDAR_ID) || !!(c.cal1Ical);
 }
-let AW_API_KEY = '', AW_CALENDAR_ID = '', AW_CALENDAR_ID_2 = '', AW_ICAL_URL = '';
+let AW_API_KEY = '', AW_CALENDAR_ID = '', AW_CALENDAR_ID_2 = '', AW_ICAL_URL = '', AW_CAL2_ICAL = '', AW_EXTRA_CALS = [];
 let AW_CAL1_PRESET = 'ecam', AW_CAL1_COLOR_CFG = 'blue', AW_CAL1_SUBJECTS = [], AW_CAL2_COLOR_CFG = 'lime';
 const AW_CAL2_COLOR = 'lime';
 const AW_FETCH_DAYS = 84; // 12 semaines
@@ -169,7 +171,10 @@ function awParseICal(text) {
 async function awFetch() {
   const monday = awMondayOf(new Date());
   monday.setHours(0, 0, 0, 0);
-  const tMin = monday.toISOString();
+  // Fetch 4 weeks back + AW_FETCH_DAYS forward
+  const fetchStart = new Date(monday);
+  fetchStart.setDate(monday.getDate() - 28);
+  const tMin = fetchStart.toISOString();
   const tMax = new Date(monday.getTime() + (AW_FETCH_DAYS + 7) * 86400000).toISOString();
 
   const buildUrl = (calId) =>
@@ -196,14 +201,41 @@ async function awFetch() {
   const datas = await Promise.all(responses.map(r => r.json()));
   const events = datas.flatMap((data, idx) => parseEvents(data, idx === 1));
   events.sort((a, b) => new Date(a.start) - new Date(b.start));
-  if (AW_ICAL_URL) {
-    try {
-      const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(AW_ICAL_URL)}`);
-      const text = await res.text();
-      events.push(...awParseICal(text));
-      events.sort((a, b) => new Date(a.start) - new Date(b.start));
-    } catch(e) { console.warn('iCal fetch failed:', e); }
+  // Fetch iCal sources
+  const icalSources = [];
+  if (AW_ICAL_URL) icalSources.push({ url: AW_ICAL_URL, cal2: false, color: null });
+  if (AW_CAL2_ICAL) icalSources.push({ url: AW_CAL2_ICAL, cal2: true, color: AW_CAL2_COLOR_CFG });
+  if (AW_EXTRA_CALS && AW_EXTRA_CALS.length) {
+    AW_EXTRA_CALS.forEach(function(ec) {
+      if (ec.type === 'ical' && ec.url) icalSources.push({ url: ec.url, cal2: true, color: ec.color || 'lime' });
+    });
   }
+  for (const src of icalSources) {
+    try {
+      const proxyUrl = src.url.replace(/^webcal:\/\//i,'https://');
+      const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(proxyUrl)}`);
+      const text = await res.text();
+      const parsed = awParseICal(text).map(ev => ({ ...ev, cal2: src.cal2 }));
+      events.push(...parsed);
+    } catch(e) { console.warn('iCal fetch failed:', src.url, e); }
+  }
+  // Also fetch extra Google calendars
+  if (AW_EXTRA_CALS && AW_EXTRA_CALS.length && AW_API_KEY) {
+    const extraGoogleCals = AW_EXTRA_CALS.filter(ec => ec.type === 'google' && ec.url);
+    for (const ec of extraGoogleCals) {
+      try {
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(ec.url)}/events`
+          + `?key=${AW_API_KEY}&timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}&singleEvents=true&orderBy=startTime&maxResults=250`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const parsed = parseEvents(data, true);
+        // Apply custom color
+        if (ec.color) parsed.forEach(ev => { ev._extraColor = ec.color; });
+        events.push(...parsed);
+      } catch(e) { console.warn('Extra Google cal failed:', ec.url, e); }
+    }
+  }
+  events.sort((a, b) => new Date(a.start) - new Date(b.start));
   return events;
 }
 
@@ -680,11 +712,15 @@ function awRenderCompact(byDay, today) {
   let targetDay = null;
   const skipped = [];
 
+  // Start from today, look forward for the next day with events
   for (let i = 0; i < AW_FETCH_DAYS; i++) {
     const d  = new Date(base); d.setDate(base.getDate() + i);
     const ds = awDateStr(d);
+    // Pour aujourd'hui: afficher tous les events (y compris passés)
+    // Pour les jours futurs: seulement les events non terminés
+    const isToday2 = ds === today;
     const future = (byDay[ds] || []).filter(({ev}) =>
-      ev.start.length === 10 ? ds >= today : new Date(ev.end) > nowTs
+      isToday2 ? true : (ev.start.length === 10 ? ds >= today : new Date(ev.end) > nowTs)
     );
     if (future.length > 0) { targetDay = { ds, items: future.map(({ev}) => ev) }; break; }
     else skipped.push(ds);
@@ -717,14 +753,14 @@ function awRenderCompact(byDay, today) {
     if (isWE) {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u{1F33F}</div>
-        <div class="aw-empty-title">Bon week-end !</div>
-        <div class="aw-empty-sub">Prochain cours : ${nextMonday}</div>
+        <div class="aw-empty-title">${window._t?window._t('haveGreatWe'):'Have a great weekend!'}</div>
+        <div class="aw-empty-sub">${window._t?window._t('nextClass'):'Next class'}: ${nextMonday}</div>
       </div>`;
     } else {
       html += `<div class="aw-empty-state">
         <div class="aw-empty-icon">\u2705</div>
-        <div class="aw-empty-title">Aucun cours \u00e0 venir</div>
-        <div class="aw-empty-sub">Profites-en !</div>
+        <div class="aw-empty-title">${window._t?window._t('noUpcoming'):'No upcoming events'}</div>
+        <div class="aw-empty-sub">${window._t?window._t('enjoyBreak'):'Enjoy the break!'}</div>
       </div>`;
     }
     compact.innerHTML = html;
