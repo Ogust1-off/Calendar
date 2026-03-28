@@ -211,7 +211,7 @@ async function awFetch() {
       for (const res of responses) {
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e.error && e.error.message) || 'API ' + res.status); }
       }
-      const datas = await Promise.all(responses.filter(r=>r.status==='fulfilled').map(r=>r.value.json()));
+      const datas = await Promise.all(responses.map(r => r.json()));
       datas.forEach((data, idx) => events.push(...parseEvents(data, idx === 1)));
     } catch(e) {
       if (!AW_ICAL_URL) throw e; // Re-throw only if no iCal fallback
@@ -724,41 +724,45 @@ function awRenderCompact(byDay, today) {
   const compact = document.getElementById('aw-compact');
   if (!compact) return;
   const nowTs = Date.now();
+
+  const base = new Date(today + 'T00:00:00');
+  let targetDay = null;
+  const skipped = [];
+
+  // Walk forward from today to find the next day with upcoming events
+  for (let i = 0; i < AW_FETCH_DAYS; i++) {
+    const d  = new Date(base); d.setDate(base.getDate() + i);
+    const ds = awDateStr(d);
+    const future = (byDay[ds] || []).filter(({ev}) =>
+      ev.start.length === 10 ? ds >= today : new Date(ev.end) > nowTs
+    );
+    if (future.length > 0) {
+      targetDay = { ds, items: future.map(({ev}) => ev) };
+      break;
+    } else {
+      skipped.push(ds);
+    }
+  }
+
   let html = '';
 
-  // ── Section 1: Today (always show all events, past greyed) ──
-  const todayItems = (byDay[today] || []).map(({ev}) => ev);
-  if (todayItems.length > 0) {
-    const dayLabel = awFmtDayLabel(today, true);
-    html += `<div class="aw-compact-day-hd">
-      <span class="aw-compact-day-label today">${dayLabel}</span>
-      <span class="aw-today-pill">${window._t?window._t('today2'):'Today'}</span>
-    </div>`;
-    html += todayItems.map(ev => awRowHtml(ev, awEvCache.indexOf(ev))).join('');
+  // Show skipped days (max 6) with "no more events today / no events"
+  const shown = skipped.slice(0, 6);
+  if (shown.length > 0) {
+    html += `<div class="aw-skipped-list">`;
+    html += shown.map(ds => {
+      const isToday = ds === today;
+      const label   = awFmtDayLabel(ds, true);
+      const msg = window._t ? window._t('noMoreToday') : 'No more events today';
+      return `<div class="aw-skipped-row">
+        <span class="aw-skipped-label${isToday ? ' today' : ''}">${label}${isToday ? ` <span class="aw-skipped-today-pill">${window._t?window._t('today2'):'Today'}</span>` : ''}</span>
+        <span class="aw-skipped-msg">${msg}</span>
+      </div>`;
+    }).join('');
+    html += `</div>`;
   }
 
-  // ── Section 2: Next days with future events ──
-  const base = new Date(today + 'T00:00:00');
-  let found = 0;
-  for (let i = 1; i < AW_FETCH_DAYS && found < 3; i++) {
-    const d = new Date(base); d.setDate(base.getDate() + i);
-    const ds = awDateStr(d);
-    const items = (byDay[ds] || []).filter(({ev}) =>
-      ev.start.length === 10 ? true : new Date(ev.end) > nowTs
-    ).map(({ev}) => ev);
-    if (items.length === 0) continue;
-    found++;
-    const isWE = awIsWeekend(ds);
-    const label = awFmtDayLabel(ds, true);
-    html += `<div class="aw-compact-day-hd">
-      <span class="aw-compact-day-label">${label}</span>
-    </div>`;
-    html += items.map(ev => awRowHtml(ev, awEvCache.indexOf(ev))).join('');
-    if (found >= 3) break;
-  }
-
-  // ── Empty state: no events today AND no upcoming ──
-  if (!todayItems.length && found === 0) {
+  if (!targetDay) {
     const isWE = awIsWeekend(today);
     const nextMonday = (() => {
       const d = new Date(today + 'T00:00:00');
@@ -779,8 +783,17 @@ function awRenderCompact(byDay, today) {
         <div class="aw-empty-sub">${window._t?window._t('enjoyBreak'):'Enjoy the break!'}</div>
       </div>`;
     }
+    compact.innerHTML = html;
+    return;
   }
 
+  const isToday  = targetDay.ds === today;
+  const dayLabel = awFmtDayLabel(targetDay.ds, true);
+  html += `<div class="aw-compact-day-hd">
+    <span class="aw-compact-day-label${isToday ? ' today' : ''}">${dayLabel}</span>
+    ${isToday ? `<span class="aw-today-pill">${window._t?window._t('today2'):'Today'}</span>` : ''}
+  </div>`;
+  html += targetDay.items.map(ev => awRowHtml(ev, awEvCache.indexOf(ev))).join('');
   compact.innerHTML = html;
   // Scroll to today's section or first in-progress event
   setTimeout(function() {

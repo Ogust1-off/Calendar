@@ -209,35 +209,40 @@
     .aw-gev-loc{color:rgba(10,20,40,.38)!important}}
 
   /* ── Account ── */
-  .acc-page{padding:0 0 48px;display:flex;flex-direction:column;align-items:stretch;gap:0}
+  .acc-page{padding:0 0 60px;display:flex;flex-direction:column;align-items:stretch;gap:0}
   .acc-hero{display:flex;flex-direction:column;align-items:center;gap:8px;
-    padding:28px 20px 18px;background:var(--bg2);
-    border-bottom:.5px solid var(--sep);margin-bottom:4px}
-  .acc-icon{width:80px;height:80px;border-radius:50%;overflow:hidden;position:relative;
-    box-shadow:0 0 0 3px var(--tint),0 4px 20px rgba(0,0,0,.2);
+    padding:24px 20px 18px;background:var(--bg2);
+    border-bottom:.5px solid var(--sep);margin-bottom:8px}
+  .acc-icon{width:72px;height:72px;border-radius:50%;overflow:hidden;position:relative;
+    box-shadow:0 0 0 2.5px var(--tint),0 2px 12px rgba(0,0,0,.2);
     cursor:pointer;transition:opacity .15s;flex-shrink:0}
   .acc-icon:active{opacity:.7}
   .acc-icon img{width:100%;height:100%;object-fit:cover;display:block}
-  .acc-name{font-size:22px;font-weight:700;letter-spacing:-.035em;color:var(--lbl);cursor:pointer;line-height:1.2}
-  .acc-sub{font-size:12px;color:var(--lbl3)}
-  .acc-st{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:var(--lbl3);padding:0 20px;margin:18px 0 6px}
-  .acc-card{background:var(--bg2);border-radius:16px;overflow:hidden;
-    margin:0 16px;border:.5px solid var(--sep);
-    box-shadow:0 1px 0 rgba(0,0,0,.06)}
-  @media(prefers-color-scheme:light){.acc-card{box-shadow:0 2px 8px rgba(0,0,0,.07)}}
-  .acc-sep{height:.5px;background:var(--sep2);margin:0 0 0 52px}
-  .acc-row{display:flex;align-items:center;gap:14px;padding:13px 16px;border:none;
+  .acc-name{font-size:20px;font-weight:700;letter-spacing:-.03em;color:var(--lbl);cursor:pointer;line-height:1.2}
+  .acc-sub{font-size:11.5px;color:var(--lbl3)}
+  /* Account section titles */
+  .acc-section-title,.acc-st{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--lbl3);padding:0 20px;margin:20px 0 6px;display:block}
+  /* Account cards */
+  .acc-rows,.acc-card{background:var(--bg2);border-radius:16px;overflow:hidden;
+    margin:0 16px;border:.5px solid var(--sep)}
+  @media(prefers-color-scheme:light){.acc-rows,.acc-card{box-shadow:0 1px 6px rgba(0,0,0,.06)}}
+  /* Rows inside cards */
+  .acc-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border:none;
     background:none;color:var(--lbl);font-size:15px;font-family:inherit;cursor:pointer;
-    text-align:left;width:100%;-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:48px}
+    text-align:left;width:100%;-webkit-tap-highlight-color:transparent;transition:background .12s;
+    border-bottom:.5px solid var(--sep2)}
+  .acc-rows .acc-row:last-child,.acc-card .acc-row:last-child{border-bottom:none}
   .acc-row:active{background:var(--bg3)}
   .acc-row-static{cursor:default!important}.acc-row-static:active{background:none!important}
-  .acc-row-ico{font-size:20px;flex-shrink:0;width:30px;text-align:center}
-  .acc-row-lbl{flex:1;font-weight:400}
-  .acc-chv{width:12px;height:12px;color:var(--lbl3);flex-shrink:0;opacity:.6}
-  .acc-badge{font-size:12px;color:var(--lbl3);flex-shrink:0;background:var(--fill);padding:2px 8px;border-radius:6px}
+  .acc-row-ico{font-size:18px;flex-shrink:0;width:28px;text-align:center}
+  .acc-row-lbl{flex:1;font-weight:400;line-height:1.3}
+  /* Chevron — SMALL, not full size */
+  .acc-row-chv,.acc-chv{width:10px;height:10px;color:var(--lbl3);flex-shrink:0;opacity:.5}
+  .acc-row-status,.acc-badge{font-size:12px;color:var(--lbl3);flex-shrink:0}
   .acc-select{background:none;border:none;color:var(--tint);font-size:14px;font-family:inherit;
-    outline:none;cursor:pointer;flex-shrink:0;font-weight:500}
+    outline:none;cursor:pointer;flex-shrink:0;font-weight:500;-webkit-appearance:none;
+    padding-right:4px}
   .acc-row-danger .acc-row-lbl{color:var(--red)}
 
   /* ── Tab bar ── */
