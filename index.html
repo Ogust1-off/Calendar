@@ -151,11 +151,16 @@
   #wk-month-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
   #wk-month-lbl{font-size:22px;font-weight:700;letter-spacing:-.035em;color:var(--lbl);line-height:1}
   #wk-month-lbl span{font-weight:300;color:var(--lbl2);font-size:20px}
-  .wk-today-btn{height:26px;padding:0 11px;border-radius:99px;border:none;background:var(--fill);
+  .wk-nav-btns{display:flex;align-items:center;gap:4px}
+  .wk-nav-btn{width:30px;height:30px;border-radius:50%;border:none;background:var(--fill);
+    color:var(--lbl2);cursor:pointer;display:flex;align-items:center;justify-content:center;
+    -webkit-tap-highlight-color:transparent;transition:background .15s,transform .1s;flex-shrink:0}
+  .wk-nav-btn:active{transform:scale(.88);background:var(--bg3)}
+  .wk-today-btn{height:28px;padding:0 12px;border-radius:99px;border:none;background:var(--fill);
     color:var(--lbl2);font-size:12px;font-weight:500;font-family:inherit;cursor:pointer;
     -webkit-tap-highlight-color:transparent;transition:background .15s,color .15s,transform .1s}
   .wk-today-btn:active{transform:scale(.93)}
-  .wk-today-btn.active{background:var(--tint);color:#fff}
+  .wk-today-btn.active{background:var(--red);color:#fff}
   #wk-days{display:grid;grid-template-columns:repeat(7,1fr);margin:0 -16px;padding:0 4px 10px}
   .wk-mini{display:flex;flex-direction:column;align-items:center;gap:5px;padding:4px 0;
     cursor:pointer;border-radius:10px;-webkit-tap-highlight-color:transparent;transition:background .1s;
@@ -361,6 +366,10 @@
       updateAppBtn:'Update app',langLabel:'Language',themeLabel:'Theme',
       themeDark:'Dark',themeLight:'Light',themeAuto:'Auto',
       logoutBtn:'Sign out & reset',byShortcut:'by Shortcut\u2122',
+      sCalendars:'Calendars',
+      accSrcApi:'Source & API key',accCal1Style:'Calendar 1 colour style',
+      accCal2Color:'Calendar 2 colour',accExtraCals:'Extra calendars',
+      sAdvanced:'Advanced',sApp:'App',sDisplay:'Display',
     },
     fr:{today:'Aujourd\u2019hui',allDay:'Toute la journ\u00e9e',inProgress:'En cours',
       completed:'TERMIN\u00c9',startingSoon:'BIENT\u00d4T',left:'restant',in:'dans ',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',
@@ -373,6 +382,10 @@
       updateAppBtn:'Mettre \u00e0 jour l\u2019app',langLabel:'Langue',themeLabel:'Th\u00e8me',
       themeDark:'Sombre',themeLight:'Clair',themeAuto:'Auto',
       logoutBtn:'D\u00e9connexion & r\u00e9init.',byShortcut:'by Shortcut\u2122',
+      sCalendars:'Calendriers',
+      accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
+      accCal2Color:'Couleur Cal\u00a02',accExtraCals:'Calendriers suppl\u00e9mentaires',
+      sAdvanced:'Avanc\u00e9',sApp:'Application',sDisplay:'Affichage',
     }
   };
   window._t=function(k,a){
@@ -416,7 +429,15 @@
     <div id="wk-hdr">
       <div id="wk-month-row">
         <div id="wk-month-lbl">&#8230;</div>
-        <button class="wk-today-btn" id="wk-today-btn" onclick="wkGoToday()">Today</button>
+        <div class="wk-nav-btns">
+          <button class="wk-nav-btn" id="wk-prev-btn" onclick="wkGoPrev()" aria-label="Previous week">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="wk-today-btn" id="wk-today-btn" onclick="wkGoToday()">Today</button>
+          <button class="wk-nav-btn" id="wk-next-btn" onclick="wkGoNext()" aria-label="Next week">
+            <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
       </div>
       <div id="wk-days"></div>
     </div>
@@ -459,38 +480,28 @@
         </div>
       </div>
 
-      <!-- Calendrier 1 -->
-      <p class="acc-section-title" id="acc-s-cal1">Calendar 1</p>
+      <!-- Calendriers (fusionnés) -->
+      <p class="acc-section-title" id="acc-s-calendars">Calendars</p>
       <div class="acc-rows">
         <button class="acc-row" onclick="_obOpenCalSettings()">
           <span class="acc-row-ico">&#128273;</span>
-          <span class="acc-row-lbl">Source &amp; clé API</span>
+          <span class="acc-row-lbl" id="acc-lbl-src">Source &amp; API key</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
         <button class="acc-row" onclick="_obOpenCal1Style()">
           <span class="acc-row-ico">&#127912;</span>
-          <span class="acc-row-lbl">Style de couleurs Cal 1</span>
+          <span class="acc-row-lbl" id="acc-lbl-c1style">Calendar 1 colour style</span>
           <span class="acc-row-status" id="acc-cal1-preset-badge"></span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-      </div>
-
-      <!-- Calendrier 2 -->
-      <p class="acc-section-title" id="acc-s-cal2" style="display:none">Calendar 2</p>
-      <div class="acc-rows" id="acc-rows-cal2" style="display:none">
-        <button class="acc-row" onclick="_obOpenCal2Color()">
+        <button class="acc-row" id="acc-row-c2color" style="display:none" onclick="_obOpenCal2Color()">
           <span class="acc-row-ico">&#127881;</span>
-          <span class="acc-row-lbl">Couleur Cal 2</span>
+          <span class="acc-row-lbl" id="acc-lbl-c2color">Calendar 2 colour</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-      </div>
-
-      <!-- Avancé -->
-      <p class="acc-section-title">Avanced</p>
-      <div class="acc-rows">
         <button class="acc-row" onclick="_obOpenAdvanced()">
           <span class="acc-row-ico">&#128295;</span>
-          <span class="acc-row-lbl">Calendriers supplémentaires</span>
+          <span class="acc-row-lbl" id="acc-lbl-extra">Extra calendars</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
       </div>
@@ -644,74 +655,22 @@ function wkUpdateHdr(){
 }
 function wkGoToday(){_wkCur=_wkToday;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 function _initWkDaysSwipe(){
-  var days=document.getElementById('wk-days');if(!days)return;
-  var hdr=document.getElementById('wk-hdr');
-  var sx=0,sy=0,active=false,lastDx=0,W=0;
-
-  function onStart(e){
-    sx=e.touches[0].clientX;sy=e.touches[0].clientY;
-    active=false;lastDx=0;
-    var strip=document.getElementById('wk-strip');
-    if(strip){
-      W=strip.offsetWidth;
-      // Disable scroll-snap during drag for manual control
-      strip.style.overflowX='hidden';
-      strip.style.transition='none';
-    }
-  }
-
-  function onMove(e){
-    var dx=e.touches[0].clientX-sx;
-    var dy=e.touches[0].clientY-sy;
-    if(!active&&Math.abs(dx)<6&&Math.abs(dy)<6)return;
-    if(!active&&Math.abs(dy)>Math.abs(dx)*0.9)return;
-    active=true;lastDx=dx;
-
-    // Move the strip in real-time with the finger
-    var strip=document.getElementById('wk-strip');
-    if(strip&&W>0){
-      var curIdx=_wkDates.indexOf(_wkCur);
-      var baseLeft=curIdx*W;
-      strip.scrollLeft=baseLeft-dx; // inverse: finger right = scroll left = prev week
-    }
-    // Translate the header days slightly for preview
-    if(days)days.style.transform='translateX('+(dx*0.3)+'px)';
-    if(e.cancelable)e.preventDefault();
-  }
-
-  function onEnd(e){
-    if(days)days.style.transform='';
-    var strip=document.getElementById('wk-strip');
-    if(strip){
-      strip.style.overflowX='auto';
-      strip.style.transition='';
-    }
-    if(!active||!_wkCur){active=false;return;}
-    var dx=lastDx;
-    var THRESH=W>0?W*0.25:60;
-    // dx>0 (finger moved right) = week -7 ; dx<0 (finger moved left) = week +7
-    var delta=dx>THRESH?-7:dx<-THRESH?7:0;
-    if(delta!==0){
-      var d=new Date(_wkCur+'T00:00:00');
-      d.setDate(d.getDate()+delta);
-      var ds=_ds(d);
-      if(_wkDates.includes(ds)){
-        _wkCur=ds;
-        wkSnap(_wkCur,true,true);
-        wkUpdateHdr();
-        active=false;return;
-      }
-    }
-    // Snap back to current
-    wkSnap(_wkCur,true,false);
-    active=false;
-  }
-
-  [days,hdr].filter(Boolean).forEach(function(el){
-    el.addEventListener('touchstart',onStart,{passive:true});
-    el.addEventListener('touchmove',onMove,{passive:false});
-    el.addEventListener('touchend',onEnd,{passive:true});
-  });
+  // Navigation via boutons < > — swipe supprimé (trop instable)
+  // Les boutons sont dans le HTML : wk-prev-btn, wk-next-btn
+}
+function wkGoPrev(){
+  if(!_wkCur)return;
+  var d=new Date(_wkCur+'T00:00:00');
+  d.setDate(d.getDate()-7);
+  var ds=_ds(d);
+  if(_wkDates.includes(ds)){_wkCur=ds;wkSnap(_wkCur,true,true);wkUpdateHdr();}
+}
+function wkGoNext(){
+  if(!_wkCur)return;
+  var d=new Date(_wkCur+'T00:00:00');
+  d.setDate(d.getDate()+7);
+  var ds=_ds(d);
+  if(_wkDates.includes(ds)){_wkCur=ds;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 }
 
 /* ── Tabs ── */
@@ -836,11 +795,10 @@ function _applyProfile(){
     if(cfg.theme)_applyTheme(cfg.theme); else _applyTheme('auto');
     var pb=document.getElementById('acc-cal1-preset-badge');
     if(pb){var pm={'ecam':'ECAM','custom':'Custom','none':'Single'};pb.textContent=pm[cfg.cal1Preset||'ecam']||'';}
-    // Show/hide cal2 section
+    // Show/hide cal2 button
     var hasCal2=(cfg.calendars&&cfg.calendars[1])||cfg.cal2Ical;
-    var sec2=document.getElementById('acc-s-cal2'),row2=document.getElementById('acc-rows-cal2');
-    if(sec2)sec2.style.display=hasCal2?'':'none';
-    if(row2)row2.style.display=hasCal2?'':'none';
+    var row2btn=document.getElementById('acc-row-c2color');
+    if(row2btn)row2btn.style.display=hasCal2?'':'none';
   }catch(e){}
 }
 
@@ -857,8 +815,12 @@ function _applyLang(){
   // Account labels
   var map={
     'acc-lang-lbl':'langLabel','acc-theme-lbl':'themeLabel',
-    'acc-settings-lbl':'settingsTitle','acc-refresh-lbl':'refreshBtn',
-    'acc-update-lbl':'updateAppBtn','acc-logout-lbl':'logoutBtn'
+    'acc-refresh-lbl':'refreshBtn',
+    'acc-update-lbl':'updateAppBtn','acc-logout-lbl':'logoutBtn',
+    'acc-s-display':'sDisplay','acc-s-calendars':'sCalendars',
+    'acc-s-app':'sApp',
+    'acc-lbl-src':'accSrcApi','acc-lbl-c1style':'accCal1Style',
+    'acc-lbl-c2color':'accCal2Color','acc-lbl-extra':'accExtraCals'
   };
   Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=t(map[id]);});
   // Theme select options
