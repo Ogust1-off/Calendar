@@ -600,12 +600,12 @@ function awPopOpen(el, idx) {
   const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
   if (isLight) {
     // Light mode: white frosted glass with very subtle color tint
-    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.07) 0%, rgba(255,255,255,0) 60%), rgba(250,250,255,0.96)`;
-    pop.style.borderTop = `2px solid rgba(${accentRgb},0.4)`;
+    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.07) 0%, rgba(255,255,255,0) 60%), rgba(252,252,255,0.96)`;
+    pop.style.borderLeft = `3px solid rgba(${accentRgb},0.5)`;
   } else {
     // Dark mode: deep frosted glass with subtle color tint
     pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.12) 0%, rgba(${accentRgb},0.04) 100%), rgba(22,26,40,0.94)`;
-    pop.style.borderTop = `2px solid rgba(${accentRgb},0.5)`;
+    pop.style.borderLeft = `3px solid rgba(${accentRgb},0.5)`;
   }
   pop.innerHTML = `
     <div class="aw-pop-accent" style="background:${accent}"></div>
@@ -661,8 +661,20 @@ function awPopOpen(el, idx) {
     </div>`;
 
   document.body.appendChild(pop);
-  // CSS handles positioning — don't override with JS
-  // (CSS already sets: fixed, full width, above tab bar)
+  // Position: above tab bar, horizontally centered, near the tapped event
+  const TAB_H = 49 + 22; // --tb + margin
+  const safeBot = parseFloat(getComputedStyle(document.documentElement)
+    .getPropertyValue('--sab') || '0') || 0;
+  const maxBot = TAB_H + safeBot;
+  const popW = Math.min(340, window.innerWidth - 24);
+  pop.style.width = popW + 'px';
+  pop.style.maxWidth = 'none';
+  // Center horizontally
+  pop.style.left = Math.round((window.innerWidth - popW) / 2) + 'px';
+  pop.style.right = 'auto';
+  // Place above tab bar, anchored to bottom
+  pop.style.bottom = maxBot + 'px';
+  pop.style.top = 'auto';
 
   requestAnimationFrame(() => pop.classList.add('visible'));
 

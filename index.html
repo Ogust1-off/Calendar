@@ -16,6 +16,7 @@
   <link rel="apple-touch-icon" sizes="120x120" href="Asset/Picture/icon-120.png"/>
   <link rel="icon" sizes="32x32" href="Asset/Picture/icon-32.png"/>
   <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/web-haptics/dist/web-haptics.umd.js"></script>
   <style>
   /* ── Tokens ── */
   :root{
@@ -256,7 +257,7 @@
   #tb{position:fixed;bottom:0;left:0;right:0;
     height:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 14px);
     padding-bottom:env(safe-area-inset-bottom,0px);
-    display:flex;align-items:flex-start;justify-content:center;z-index:600;
+    display:flex;align-items:flex-start;justify-content:center;z-index:200;
     background:none;border-top:none}
   #tb-pill{position:relative;display:flex;align-items:center;
     background:rgba(28,28,30,.9);
@@ -938,25 +939,30 @@ setInterval(function(){
 },700);
 
 /* ── Init ── */
-// Haptic feedback (iOS PWA: AudioContext trick; Android: vibrate API)
-function _haptic(style){
-  // iOS: play a 0ms silent buffer — triggers Taptic Engine on supported devices
-  // style: 'light'|'medium'|'heavy'|'selection'
+// Haptic feedback via web-haptics (https://haptics.lochie.me)
+var _wh = null;
+function _hapticInit(){
   try{
-    if(window.navigator.vibrate){
-      var ms=style==='heavy'?18:style==='medium'?10:6;
-      window.navigator.vibrate(ms);
-      return;
+    if(window.WebHaptics){
+      _wh = new window.WebHaptics.WebHaptics();
     }
-    // iOS AudioContext trick
-    var ctx=new(window.AudioContext||window.webkitAudioContext)();
-    var buf=ctx.createBuffer(1,1,22050);
-    var src=ctx.createBufferSource();src.buffer=buf;
-    src.connect(ctx.destination);src.start(0);
-    setTimeout(function(){ctx.close();},100);
+  }catch(e){}
+}
+function _haptic(style){
+  // Map old style names → web-haptics preset names
+  // light→'light', medium→'medium', heavy→'heavy', selection→'selection'
+  // success, error, warning also supported
+  try{
+    if(_wh){ _wh.trigger(style||'medium'); return; }
+    // Fallback: navigator.vibrate
+    if(navigator.vibrate){
+      var ms=style==='heavy'?18:style==='medium'?10:style==='selection'?4:6;
+      navigator.vibrate(ms);
+    }
   }catch(e){}
 }
 window.addEventListener('load',function(){
+  _hapticInit();
   goTab(0);
   _applyProfile();
   _applyLang();
