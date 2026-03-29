@@ -376,6 +376,19 @@
       themeDark:'Dark',themeLight:'Light',themeAuto:'Auto',
       logoutBtn:'Sign out & reset',byShortcut:'by Shortcut\u2122',
       sCalendars:'Calendars',
+      btnNext:'Next',btnBack:'Back',btnSkip:'Skip',btnSave:'Save',btnClose:'Close',btnOpen:'Open Calendar',
+      obSource:'Source',obSourceSub:'How to connect your calendar.',
+      obKeysTitle:'Keys & IDs',obKeysSub:'Connection details.',
+      obCal1Style:'Cal 1 Style',obCal1StyleSub:'Assign colours to events.',
+      obEcamPreset:'ECAM Preset',obEcamSub:'Auto-detects subjects.',
+      obCustomPreset:'Custom',obCustomSub:'Your own subjects & colours.',
+      obSingleColor:'Single colour',obSingleSub:'All events same colour.',
+      obCal2Color:'Calendar 2 Colour',obCal2ColorSub:'Colour for all Cal 2 events.',
+      obSaved:'Saved!',obSavedRefresh:'Saved! Refreshing…',
+      obCalSourceSub:'Type of connection.',
+      obKeysAndIdsSub:'Connection information.',
+      obExtraCalsTitle:'Extra Calendars',obExtraCalsSub:'Add as many calendars as you like.',
+      obAddCalendar:'+ Add calendar',
       accSrcApi:'Source & API key',accCal1Style:'Calendar 1 colour style',
       accCal2Color:'Calendar 2 colour',accExtraCals:'Extra calendars',
       sAdvanced:'Advanced',sApp:'App',sDisplay:'Display',
@@ -392,6 +405,19 @@
       themeDark:'Sombre',themeLight:'Clair',themeAuto:'Auto',
       logoutBtn:'D\u00e9connexion & r\u00e9init.',byShortcut:'by Shortcut\u2122',
       sCalendars:'Calendriers',
+      btnNext:'Suivant',btnBack:'Retour',btnSkip:'Passer',btnSave:'Enregistrer',btnClose:'Fermer',btnOpen:'Ouvrir le calendrier',
+      obSource:'Source',obSourceSub:'Comment acc\u00e9der \u00e0 votre calendrier.',
+      obKeysTitle:'Cl\u00e9s & IDs',obKeysSub:'Informations de connexion.',
+      obCal1Style:'Style Cal 1',obCal1StyleSub:'Attribuer des couleurs aux \u00e9v\u00e9nements.',
+      obEcamPreset:'Pr\u00e9d\u00e9fini ECAM',obEcamSub:'D\u00e9tecte auto les mati\u00e8res.',
+      obCustomPreset:'Personnalis\u00e9',obCustomSub:'Vos propres mati\u00e8res.',
+      obSingleColor:'Couleur unique',obSingleSub:'Tous les \u00e9v\u00e9nements pareil.',
+      obCal2Color:'Couleur Cal 2',obCal2ColorSub:'Couleur pour tous les \u00e9v\u00e9nements du Cal 2.',
+      obSaved:'Enregistr\u00e9\u00a0!',obSavedRefresh:'Enregistr\u00e9\u00a0! Rechargement\u2026',
+      obCalSourceSub:'Type de connexion \u00e0 votre calendrier.',
+      obKeysAndIdsSub:'Informations de connexion.',
+      obExtraCalsTitle:'Calendriers suppl.',obExtraCalsSub:'Ajoutez autant de calendriers que souhait\u00e9.',
+      obAddCalendar:'+ Ajouter un calendrier',
       accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
       accCal2Color:'Couleur Cal\u00a02',accExtraCals:'Calendriers suppl\u00e9mentaires',
       sAdvanced:'Avanc\u00e9',sApp:'Application',sDisplay:'Affichage',
@@ -439,11 +465,11 @@
       <div id="wk-month-row">
         <div id="wk-month-lbl">&#8230;</div>
         <div class="wk-nav-btns">
-          <button class="wk-nav-btn" id="wk-prev-btn" onclick="wkGoPrev()" aria-label="Previous week">
+          <button class="wk-nav-btn haptic-btn" id="wk-prev-btn" onclick="wkGoPrev()" aria-label="Previous week">
             <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <button class="wk-today-btn" id="wk-today-btn" onclick="wkGoToday()">Today</button>
-          <button class="wk-nav-btn" id="wk-next-btn" onclick="wkGoNext()" aria-label="Next week">
+          <button class="wk-today-btn haptic-btn" id="wk-today-btn" onclick="wkGoToday()">Today</button>
+          <button class="wk-nav-btn haptic-btn" id="wk-next-btn" onclick="wkGoNext()" aria-label="Next week">
             <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
         </div>
@@ -492,12 +518,12 @@
       <!-- Calendriers (fusionnés) -->
       <p class="acc-section-title" id="acc-s-calendars">Calendars</p>
       <div class="acc-rows">
-        <button class="acc-row" onclick="_obOpenCalSettings()">
+        <button class="acc-row haptic-btn" onclick="_obOpenCalSettings()" class="acc-row haptic-btn">
           <span class="acc-row-ico">&#128273;</span>
           <span class="acc-row-lbl" id="acc-lbl-src">Source &amp; API key</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button class="acc-row" onclick="_obOpenCal1Style()">
+        <button class="acc-row haptic-btn" onclick="_obOpenCal1Style()">
           <span class="acc-row-ico">&#127912;</span>
           <span class="acc-row-lbl" id="acc-lbl-c1style">Calendar 1 colour style</span>
           <span class="acc-row-status" id="acc-cal1-preset-badge"></span>
@@ -508,7 +534,7 @@
           <span class="acc-row-lbl" id="acc-lbl-c2color">Calendar 2 colour</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button class="acc-row" onclick="_obOpenAdvanced()">
+        <button class="acc-row haptic-btn" onclick="_obOpenAdvanced()">
           <span class="acc-row-ico">&#128295;</span>
           <span class="acc-row-lbl" id="acc-lbl-extra">Extra calendars</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -523,12 +549,12 @@
           <span class="acc-row-lbl" id="acc-refresh-lbl">Refresh calendar</span>
           <span id="acc-refresh-status" class="acc-row-status"></span>
         </button>
-        <button class="acc-row" onclick="accUpdateApp()">
+        <button class="acc-row haptic-btn" onclick="accUpdateApp()">
           <span class="acc-row-ico">&#11014;&#65039;</span>
           <span class="acc-row-lbl" id="acc-update-lbl">Update app</span>
           <span id="acc-update-status" class="acc-row-status"></span>
         </button>
-        <button class="acc-row acc-row-danger" onclick="accLogout()">
+        <button class="acc-row acc-row-danger haptic-btn" onclick="accLogout()">
           <span class="acc-row-ico">&#128682;</span>
           <span class="acc-row-lbl" id="acc-logout-lbl">Sign out &amp; reset</span>
         </button>
@@ -543,21 +569,21 @@
   <nav id="tb">
     <div id="tb-pill">
       <div id="tb-slider"></div>
-      <button class="tbtn on" id="tb-0" onclick="goTab(0)">
+      <button class="tbtn on haptic-btn" id="tb-0" onclick="goTab(0)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/>
           <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
         </svg>
         <span id="tab-lbl-0">Agenda</span>
       </button>
-      <button class="tbtn" id="tb-1" onclick="goTab(1)">
+      <button class="tbtn haptic-btn" id="tb-1" onclick="goTab(1)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="4" width="18" height="18" rx="3"/>
           <path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>
         </svg>
         <span id="tab-lbl-1">Week</span>
       </button>
-      <button class="tbtn" id="tb-2" onclick="goTab(2)">
+      <button class="tbtn haptic-btn" id="tb-2" onclick="goTab(2)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
         </svg>
@@ -964,25 +990,34 @@ setInterval(function(){
 },700);
 
 /* ── Init ── */
-// Haptic feedback — web-haptics (haptics.lochie.me) via esm.sh
-var _haptic = function(style){ /* will be replaced by module */ };
+// Haptic feedback via web-haptics (haptics.lochie.me)
+var _haptic = function(s){ try{if(navigator.vibrate){navigator.vibrate(s==='heavy'?18:s==='medium'?10:4);}}catch(e){} };
+// Load haptics via ES module
 (function(){
-  var s = document.createElement('script');
-  s.type = 'module';
-  s.textContent = [
-    'import{WebHaptics}from"https://esm.sh/web-haptics";',
-    'try{',
-    '  var h=new WebHaptics();',
-    '  window._haptic=function(style){try{h.trigger(style||"medium");}catch(e){}};',
-    '}catch(e){',
-    '  // fallback: vibrate API',
-    '  window._haptic=function(style){',
-    '    try{if(navigator.vibrate){var ms=style==="heavy"?18:style==="medium"?10:style==="selection"?4:6;navigator.vibrate(ms);}}catch(e){}',
-    '  };',
-    '}'
-  ].join('');
+  var s=document.createElement('script');
+  s.type='module';
+  s.textContent=
+    'import{WebHaptics}from"https://esm.sh/web-haptics@1";'+
+    'try{'+
+    '  const h=new WebHaptics();'+
+    '  window._haptic=function(style){try{h.trigger(style||"medium");}catch(e){}};'+
+    '  // Attach to all haptic-btn elements (current and future)'+
+    '  function _attachHaptics(){'+
+    '    document.querySelectorAll(".haptic-btn:not([data-h])").forEach(function(b){'+
+    '      b.setAttribute("data-h","1");'+
+    '      b.addEventListener("click",function(){'+
+    '        var s=b.classList.contains("ob-btn-danger")||b.classList.contains("acc-row-danger")?"warning":"selection";'+
+    '        try{h.trigger(s);}catch(e){}'+
+    '      });'+
+    '    });'+
+    '  }'+
+    '  _attachHaptics();'+
+    '  var obs=new MutationObserver(_attachHaptics);'+
+    '  obs.observe(document.body,{childList:true,subtree:true});'+
+    '}catch(e){}';
   document.head.appendChild(s);
 })();
+
 window.addEventListener('load',function(){
   goTab(0);
   _applyProfile();

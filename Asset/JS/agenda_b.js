@@ -482,7 +482,7 @@ function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackD
   const fullName  = ev.summary || '(Sans titre)';
   const shortName = fullName.includes(' - ') ? fullName.split(' - ')[0].trim() : fullName;
   const loc       = ev.location ? ev.location.split(',')[0].trim() : '';
-  const color     = awColorFor(shortName, ev.cal2);
+  const color     = ev._extraColor || awColorFor(shortName, ev.cal2);
 
   const colorHex = AW_COLOR_HEX;
   const accent = colorHex[color] || '#3b82f6';
@@ -567,7 +567,7 @@ function awUpdateTimer() {
 }
 
 function awPopOpen(el, idx) {
-  if(typeof _haptic==='function')_haptic('light');
+  if(typeof _haptic==='function')_haptic('selection');
   awPopClose();
 
   const ev      = awEvCache[idx];
@@ -581,7 +581,7 @@ function awPopOpen(el, idx) {
   const group = groupMatch ? groupMatch[0].trim() : '';
   const now   = awIsNow(ev.start, ev.end);
   const past  = !now && awIsPast(ev.end);
-  const color = awColorFor(shortName, ev.cal2);
+  const color = ev._extraColor || awColorFor(shortName, ev.cal2);
   const dur   = awFmtDuration(ev.start, ev.end);
   const pct   = now ? awProgress(ev.start, ev.end) : 0;
   const msTillStart = new Date(ev.start) - Date.now();
@@ -735,7 +735,7 @@ function awRenderCompact(byDay, today) {
     const d  = new Date(base); d.setDate(base.getDate() + i);
     const ds = awDateStr(d);
     const future = (byDay[ds] || []).filter(({ev}) =>
-      ev.start.length === 10 ? ds >= today : new Date(ev.end) > nowTs
+      ev.start.length > 10 && new Date(ev.end) > nowTs // exclude all-day events
     );
     if (future.length > 0) {
       targetDay = { ds, items: future.map(({ev}) => ev) };
@@ -1041,7 +1041,19 @@ setInterval(() => {
 
   // Detect event start or end → force reload
   for (const ev of awEvCache) {
-    if (ev.start.length === 10) continue; // skip all-day
+    if (ev.start.length === 10) {
+      // All-day event: render as header banner in the grid
+      const allDayBar = document.createElement('div');
+      const adColor = items[k]?.ev?._extraColor || awColorFor((ev.summary||'').split(' - ')[0].trim(), ev.cal2);
+      const adHex = AW_COLOR_HEX[adColor] || '#3b82f6';
+      allDayBar.style.cssText = `background:${adHex}22;border-left:3px solid ${adHex};` +
+        `padding:4px 10px 4px 10px;margin:0;font-size:11px;font-weight:600;color:${adHex};` +
+        `white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;`;
+      allDayBar.textContent = ev.summary || '';
+      allDayBar.onclick = function(){ if(typeof awPopOpen==='function') awPopOpen(allDayBar, awEvCache.indexOf(ev)); };
+      col.insertBefore(allDayBar, col.firstChild);
+      continue;
+    }
     const msTillStart = new Date(ev.start) - Date.now();
     const msTillEnd   = new Date(ev.end)   - Date.now();
     if ((msTillStart > -1000 && msTillStart <= 0) ||
