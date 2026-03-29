@@ -567,6 +567,7 @@ function awUpdateTimer() {
 }
 
 function awPopOpen(el, idx) {
+  if(typeof _haptic==='function')_haptic('light');
   awPopClose();
 
   const ev      = awEvCache[idx];
@@ -660,19 +661,18 @@ function awPopOpen(el, idx) {
     </div>`;
 
   document.body.appendChild(pop);
-  pop.style.position='fixed'; pop.style.zIndex='9999';
-  if (window.innerWidth<600) {
-    pop.style.left='10px'; pop.style.right='10px'; pop.style.top='auto';
-    pop.style.bottom='calc(64px + env(safe-area-inset-bottom,0px))';
-    pop.style.maxWidth='none'; pop.style.borderRadius='20px';
-  } else {
-    const rect=el.getBoundingClientRect(), popW=280, m=10;
-    let left=rect.right+m;
-    if(left+popW>window.innerWidth-m) left=rect.left-popW-m;
-    if(left<m) left=m;
-    pop.style.left=left+'px';
-    pop.style.top=Math.max(m,Math.min(rect.top,window.innerHeight-320))+'px';
-  }
+  pop.style.position='fixed';
+  pop.style.zIndex='9999';
+  // Always bottom sheet — full width, centered
+  pop.style.left='0';
+  pop.style.right='0';
+  pop.style.width='100%';
+  pop.style.maxWidth='none';
+  pop.style.top='auto';
+  pop.style.bottom='0';
+  pop.style.borderRadius='20px 20px 0 0';
+  pop.style.maxHeight='80vh';
+  pop.style.overflowY='auto';
 
   requestAnimationFrame(() => pop.classList.add('visible'));
 

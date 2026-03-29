@@ -653,19 +653,19 @@ function wkUpdateHdr(){
     days.appendChild(btn);
   });
 }
-function wkGoToday(){_wkCur=_wkToday;wkSnap(_wkCur,true,true);wkUpdateHdr();}
+function wkGoToday(){_haptic('medium');_wkCur=_wkToday;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 function _initWkDaysSwipe(){
   // Navigation via boutons < > — swipe supprimé (trop instable)
   // Les boutons sont dans le HTML : wk-prev-btn, wk-next-btn
 }
-function wkGoPrev(){
+function wkGoPrev(){_haptic('light');
   if(!_wkCur)return;
   var d=new Date(_wkCur+'T00:00:00');
   d.setDate(d.getDate()-7);
   var ds=_ds(d);
   if(_wkDates.includes(ds)){_wkCur=ds;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 }
-function wkGoNext(){
+function wkGoNext(){_haptic('light');
   if(!_wkCur)return;
   var d=new Date(_wkCur+'T00:00:00');
   d.setDate(d.getDate()+7);
@@ -676,6 +676,7 @@ function wkGoNext(){
 /* ── Tabs ── */
 var VIDS=['v-agenda','v-week','v-account'],TIDS=['tb-0','tb-1','tb-2'],_tab=0;
 function goTab(i){
+  _haptic('light');
   _tab=i;
   VIDS.forEach(function(id,j){
     var el=document.getElementById(id);if(!el)return;
@@ -763,7 +764,7 @@ function _initPillSwipe(){
     var newTab=tab0;
     if(dx>THRESH&&tab0<btns.length-1)newTab=tab0+1;
     else if(dx<-THRESH&&tab0>0)newTab=tab0-1;
-    if(newTab!==tab0)goTab(newTab);
+    if(newTab!==tab0){_haptic('selection');goTab(newTab);}
     else _updateSlider();
     live=false;
   },{passive:true});
@@ -858,24 +859,24 @@ function _applyTheme(v){
 }
 function showCalSettings(){ _obOpenCalSettings(); }
 
-function accRefresh(){
+function accRefresh(){_haptic('medium');
   var ico=document.getElementById('acc-refresh-ico'),st=document.getElementById('acc-refresh-status');
-  if(ico)ico.textContent='&#9203;';if(st)st.textContent='Updating\u2026';
+  if(ico)ico.innerHTML='&#9203;';if(st)st.innerHTML='Updating…';
   _wkDirty=true;
   if(typeof awInit==='function'){
     var p=awInit();
-    var ok=function(){if(ico)ico.textContent='&#128260;';if(st)st.textContent='';};
-    var done2=function(){if(ico)ico.textContent='&#9989;';if(st)st.textContent='Done!';setTimeout(ok,2500);};
+    var ok=function(){if(ico)ico.innerHTML='&#128260;';if(st)st.innerHTML='';};
+    var done2=function(){if(ico)ico.innerHTML='&#9989;';if(st)st.innerHTML='Done!';setTimeout(ok,2500);};
     if(p&&p.then)p.then(done2);else setTimeout(done2,1200);
   }
 }
 function accUpdateApp(){
-  var st=document.getElementById('acc-update-status');if(st)st.textContent='&#8987; Clearing\u2026';
+  var st=document.getElementById('acc-update-status');if(st)st.innerHTML='&#8987; Clearing…';
   var p='caches' in window?caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c);}));}):Promise.resolve();
   p.then(function(){
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister();}));}).then(function(){if(st)st.textContent='&#9989; Done!';setTimeout(function(){location.reload(true);},800);});
-    }else{if(st)st.textContent='&#9989; Done!';setTimeout(function(){location.reload(true);},800);}
+      navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister();}));}).then(function(){if(st)st.innerHTML='&#9989; Done!';setTimeout(function(){location.reload(true);},800);});
+    }else{if(st)st.innerHTML='&#9989; Done!';setTimeout(function(){location.reload(true);},800);}
   });
 }
 function accLogout(){
@@ -935,6 +936,24 @@ setInterval(function(){
 },700);
 
 /* ── Init ── */
+// Haptic feedback (iOS PWA: AudioContext trick; Android: vibrate API)
+function _haptic(style){
+  // iOS: play a 0ms silent buffer — triggers Taptic Engine on supported devices
+  // style: 'light'|'medium'|'heavy'|'selection'
+  try{
+    if(window.navigator.vibrate){
+      var ms=style==='heavy'?18:style==='medium'?10:6;
+      window.navigator.vibrate(ms);
+      return;
+    }
+    // iOS AudioContext trick
+    var ctx=new(window.AudioContext||window.webkitAudioContext)();
+    var buf=ctx.createBuffer(1,1,22050);
+    var src=ctx.createBufferSource();src.buffer=buf;
+    src.connect(ctx.destination);src.start(0);
+    setTimeout(function(){ctx.close();},100);
+  }catch(e){}
+}
 window.addEventListener('load',function(){
   goTab(0);
   _applyProfile();
