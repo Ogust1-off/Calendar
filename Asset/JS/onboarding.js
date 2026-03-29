@@ -134,7 +134,7 @@ function _s1cal(){
 function _sCS(d,src){
   if(!d.calSource){d.calSource='google';_obSave(d);src='google';}
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(1,4)+'</div></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(1,6)+'</div></div>'+
       '<h2 class="ob-h2">Source</h2><p class="ob-p2">Comment acc\u00e9der \u00e0 votre calendrier\u00a0?</p>'+
       '<div class="ob-src-group">'+
         _srcBtn('google',src==='google','&#128273;','Google Calendar','Cl\u00e9 API + ID. Recommand\u00e9.')+
@@ -148,7 +148,7 @@ function _sCS(d,src){
 // Sous-\u00e9tape: Cl\u00e9 API
 function _sCAPI(d){
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(1,4)+'</div></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(2,6)+'</div></div>'+
       '<h2 class="ob-h2">Cl\u00e9 API Google</h2><p class="ob-p2">Pour acc\u00e9der \u00e0 vos calendriers.</p>'+
       '<div class="ob-field"><label class="ob-lbl">CL\u00c9 API</label>'+
       '<div class="ob-inp-wrap"><input type="password" id="ob-apikey" class="ob-inp" placeholder="AIzaSy\u2026" value="'+_obEsc(d.apiKey||'')+'" autocomplete="off" spellcheck="false"/>'+
@@ -163,7 +163,7 @@ function _sCAPI(d){
 // Sous-\u00e9tape: IDs Google
 function _sCGIDs(d){
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(2,4)+'</div></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(3,6)+'</div></div>'+
       '<h2 class="ob-h2">Calendriers Google</h2><p class="ob-p2">IDs de vos calendriers.</p>'+
       '<div class="ob-field"><label class="ob-lbl">CAL 1 \u2014 ID <span style="color:var(--red)">*</span></label>'+
       '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off" spellcheck="false"/>'+
@@ -179,7 +179,7 @@ function _sCGIDs(d){
 // Sous-\u00e9tape: Liens iCal
 function _sCIcal(d){
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(1,3)+'</div></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(3,6)+'</div></div>'+
       '<h2 class="ob-h2">Liens iCal</h2><p class="ob-p2">Copiez depuis iPhone ou Google Calendar.</p>'+
       '<div class="ob-field"><label class="ob-lbl">CAL 1 <span style="color:var(--red)">*</span></label>'+
       '<input type="url" id="ob-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal1Ical||'')+'" autocomplete="off" spellcheck="false"/>'+
@@ -195,7 +195,7 @@ function _sCIcal(d){
 // Sous-\u00e9tape: Les deux (Cal1=Google, Cal2=iCal)
 function _sCBoth(d){
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(2,4)+'</div></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(3,6)+'</div></div>'+
       '<h2 class="ob-h2">Vos calendriers</h2><p class="ob-p2">Cal\u00a01 via Google, Cal\u00a02 via lien iCal.</p>'+
       '<div class="ob-field"><label class="ob-lbl">CAL 1 \u2014 ID GOOGLE <span style="color:var(--red)">*</span></label>'+
       '<input type="text" id="ob-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off" spellcheck="false"/>'+
@@ -217,7 +217,7 @@ function _sCColors(d){
   if(src==='ical'){
     d.cal1Preset='none';_obSave(d);
     return {
-      c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(2,3)+'</div></div>'+
+      c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(4,6)+'</div></div>'+
         '<h2 class="ob-h2">Couleur du calendrier</h2>'+
         '<p class="ob-p2">Choisissez la couleur des événements.</p>'+
         '<label class="ob-lbl" style="display:block;margin-bottom:8px">CALENDRIER 1</label>'+
@@ -239,7 +239,7 @@ function _sCColors(d){
   var subjList=subs.length?subs:defaultSubs;
   var subjRows=subjList.map(function(s,i){return _obSubjRow(s,i);}).join('');
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(3,4)+'</div></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(4,6)+'</div></div>'+
       '<h2 class="ob-h2">Couleurs</h2>'+
       '<label class="ob-lbl" style="display:block;margin-bottom:10px">STYLE CALENDRIER 1</label>'+
       '<div class="ob-src-group" id="ob-preset-grp">'+
@@ -267,7 +267,7 @@ function _sCColors(d){
 function _s2(){
   var d=_obLoad(),photo=d.photo||'',name=d.displayName||'';
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(3,4)+'</div><span class="ob-opt-badge">Optionnel</span></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(5,6)+'</div><span class="ob-opt-badge">Optionnel</span></div>'+
       '<h2 class="ob-h2">Votre profil</h2><p class="ob-p2">Photo et pr\u00e9nom.</p>'+
       '<div class="ob-avatar-row"><div class="ob-avatar-preview" id="ob-av-preview">'+
         (photo?'<img src="'+_obEsc(photo)+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>':
@@ -290,7 +290,7 @@ function _s3(){
   function tb(v,lbl){return '<button class="ob-pref-btn'+(theme===v?' ob-pref-on':'')+'" onclick="_obPickTheme(\''+v+'\',this)">'+lbl+'</button>';}
   var thIco=theme==='dark'?'\u{1F319}':theme==='light'?'\u2600\uFE0F':'\u2728';
   return {
-    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(4,4)+'</div></div>'+
+    c:'<div class="ob-form"><div class="ob-step-row"><div class="ob-dots">'+_obDots(6,6)+'</div></div>'+
       '<h2 class="ob-h2">Pr\u00e9f\u00e9rences</h2><p class="ob-p2">Langue et th\u00e8me.</p>'+
       '<div class="ob-pref-row"><div class="ob-pref-ico">&#127760;</div><div class="ob-pref-label">Langue</div>'+
         '<div class="ob-pref-btns" id="ob-lang-btns">'+lb('fr','Fran\u00e7ais')+lb('en','English')+'</div></div>'+
