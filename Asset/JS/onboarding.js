@@ -89,7 +89,7 @@ function _obNext(){
   }
   if(_obStep<_OB_STEPS-1){_obStep++;_obRender();}
 }
-function _obBack(){
+function _obBack(){if(typeof _haptic==="function")_haptic("light");
   if(_obStep===1&&_obCalSub>0){_obCalSub--;_obRender();return;}
   if(_obStep>(_obIsSettings?1:0)){_obStep--;_obRender();}
 }
@@ -409,14 +409,14 @@ function _srcBtn2(val,active,ico,title,sub){
     '<div class="ob-src-ico">'+ico+'</div><div class="ob-src-body"><div class="ob-src-title">'+title+'</div><div class="ob-src-sub">'+sub+'</div></div>'+
     '<div class="ob-src-chk">'+(active?'&#10003;':'')+'</div></button>';
 }
-function _obPickSrc(val,btn){
+function _obPickSrc(val,btn){if(typeof _haptic==="function")_haptic("selection");
   var parent=btn.parentElement;
   if(parent)parent.querySelectorAll('.ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
   btn.classList.add('ob-src-on');
   var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
   var d=_obLoad();d.calSource=val;_obSave(d);
 }
-function _obPickPreset(val,btn){
+function _obPickPreset(val,btn){if(typeof _haptic==="function")_haptic("selection");
   var parent=btn.parentElement;
   if(parent)parent.querySelectorAll('.ob-preset-btn').forEach(function(b){b.classList.remove('ob-preset-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
   btn.classList.add('ob-preset-on');
@@ -452,8 +452,8 @@ function _obSelColor(key,gid){
     b.innerHTML=on?'<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':'';
   });
 }
-function _obPickCal1Color(k,g){_obSelColor(k,g);var d=_obLoad();d.cal1Color=k;_obSave(d);}
-function _obPickCal2Color(k,g){_obSelColor(k,g);var d=_obLoad();d.cal2Color=k;_obSave(d);}
+function _obPickCal1Color(k,g){if(typeof _haptic==="function")_haptic("light");_obSelColor(k,g);var d=_obLoad();d.cal1Color=k;_obSave(d);}
+function _obPickCal2Color(k,g){if(typeof _haptic==="function")_haptic("light");_obSelColor(k,g);var d=_obLoad();d.cal2Color=k;_obSave(d);}
 function _obPickSubjColor(k,g){_obSelColor(k,g);_obSaveSubjs();}
 
 // Mati\u00e8res
@@ -736,7 +736,7 @@ function _obExtraColorPop(btn,i){
 .ob-inp-wrap{position:relative;display:flex;align-items:center}
 .ob-inp{width:100%;padding:13px 44px 13px 14px;background:var(--fill);
   border:1.5px solid var(--sep);border-radius:12px;color:var(--lbl);
-  font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;box-sizing:border-box;
+  font-size:15px;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;box-sizing:border-box;
   transition:border-color .18s,box-shadow .18s}
 .ob-inp:focus{border-color:var(--tint);box-shadow:0 0 0 3px rgba(10,132,255,.15)}
 .ob-field>.ob-inp{padding:13px 14px}
@@ -751,10 +751,11 @@ function _obExtraColorPop(btn,i){
 .ob-hint-l{margin:0;padding:0 14px 12px 28px;color:var(--lbl2);font-size:12.5px;line-height:1.9}
 .ob-hint-l strong{color:var(--lbl)}
 .ob-src-group{display:flex;flex-direction:column;gap:6px;margin-bottom:4px}
-.ob-src-btn,.ob-preset-btn{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:13px;
+.ob-src-btn,.ob-preset-btn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:14px;
   border:1.5px solid var(--sep);background:var(--fill);
   color:var(--lbl);font-family:inherit;cursor:pointer;text-align:left;width:100%;
-  -webkit-tap-highlight-color:transparent;transition:border-color .15s,background .15s}
+  -webkit-tap-highlight-color:transparent;transition:border-color .18s,background .18s,transform .1s;
+  -webkit-appearance:none}
 .ob-src-btn:active,.ob-preset-btn:active{transform:scale(.98)}
 .ob-src-btn.ob-src-on,.ob-preset-btn.ob-preset-on{border-color:var(--tint);background:rgba(10,132,255,.1)}
 .ob-src-ico{font-size:22px;flex-shrink:0;width:30px;text-align:center}
@@ -794,10 +795,10 @@ function _obExtraColorPop(btn,i){
 .ob-check-path{stroke-dasharray:60;stroke-dashoffset:60;animation:ob-draw .5s .2s ease forwards}
 @keyframes ob-draw{to{stroke-dashoffset:0}}
 .ob-done-h{font-size:28px;font-weight:800;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
-.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-radius:13px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);flex:1;-webkit-tap-highlight-color:transparent;transition:transform .1s}
+.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);flex:1;-webkit-tap-highlight-color:transparent;transition:transform .12s;-webkit-appearance:none;appearance:none}
 .ob-btn-p:active{transform:scale(.97)}
 .ob-btn-p.ob-btn-full{width:100%}
-.ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:13px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:var(--fill);color:var(--lbl2);flex-shrink:0;-webkit-tap-highlight-color:transparent}
+.ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:var(--fill);color:var(--lbl2);flex-shrink:0;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none}
 .ob-btn-g:active{transform:scale(.97)}
 .ob-btn-skip{background:none;border:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--lbl3);font-family:inherit;padding:14px 10px}
 .ob-row{display:flex;align-items:center;gap:8px}

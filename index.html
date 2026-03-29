@@ -238,6 +238,8 @@
     text-align:left;width:100%;-webkit-tap-highlight-color:transparent;transition:background .12s;
     border-bottom:.5px solid var(--sep2)}
   .acc-rows .acc-row:last-child,.acc-card .acc-row:last-child{border-bottom:none}
+  /* Handle hidden rows — use :not style to skip display:none */
+  .acc-rows .acc-row[style*="display:none"]+.acc-row{border-top:none}
   .acc-row:active{background:var(--bg3)}
   .acc-row-static{cursor:default!important}.acc-row-static:active{background:none!important}
   .acc-row-ico{font-size:18px;flex-shrink:0;width:28px;text-align:center}
@@ -254,7 +256,7 @@
   #tb{position:fixed;bottom:0;left:0;right:0;
     height:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 14px);
     padding-bottom:env(safe-area-inset-bottom,0px);
-    display:flex;align-items:flex-start;justify-content:center;z-index:200;
+    display:flex;align-items:flex-start;justify-content:center;z-index:600;
     background:none;border-top:none}
   #tb-pill{position:relative;display:flex;align-items:center;
     background:rgba(28,28,30,.9);
@@ -840,7 +842,7 @@ function _applyLang(){
 }
 
 /* ── Account actions ── */
-function accSetLang(lang){
+function accSetLang(lang){_haptic('medium');
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.lang=lang;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
   location.reload();
 }
@@ -879,7 +881,7 @@ function accUpdateApp(){
     }else{if(st)st.innerHTML='&#9989; Done!';setTimeout(function(){location.reload(true);},800);}
   });
 }
-function accLogout(){
+function accLogout(){_haptic('heavy');
   var lang=typeof window._getLang==='function'?window._getLang():'en';
   var msg=lang==='fr'?'R\u00e9initialiser et se d\u00e9connecter\u00a0?':'Sign out and reset the app?';
   if(!confirm(msg))return;

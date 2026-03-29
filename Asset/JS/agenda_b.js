@@ -600,12 +600,12 @@ function awPopOpen(el, idx) {
   const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
   if (isLight) {
     // Light mode: white frosted glass with very subtle color tint
-    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.08) 0%, rgba(255,255,255,0) 60%), rgba(255,255,255,0.92)`;
-    pop.style.border = `1px solid rgba(${accentRgb},0.18)`;
+    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.07) 0%, rgba(255,255,255,0) 60%), rgba(250,250,255,0.96)`;
+    pop.style.borderTop = `2px solid rgba(${accentRgb},0.4)`;
   } else {
     // Dark mode: deep frosted glass with subtle color tint
-    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.12) 0%, rgba(${accentRgb},0.04) 100%), rgba(22,26,40,0.92)`;
-    pop.style.border = `1px solid rgba(${accentRgb},0.22)`;
+    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.12) 0%, rgba(${accentRgb},0.04) 100%), rgba(22,26,40,0.94)`;
+    pop.style.borderTop = `2px solid rgba(${accentRgb},0.5)`;
   }
   pop.innerHTML = `
     <div class="aw-pop-accent" style="background:${accent}"></div>
@@ -661,18 +661,8 @@ function awPopOpen(el, idx) {
     </div>`;
 
   document.body.appendChild(pop);
-  pop.style.position='fixed';
-  pop.style.zIndex='9999';
-  // Always bottom sheet — full width, centered
-  pop.style.left='0';
-  pop.style.right='0';
-  pop.style.width='100%';
-  pop.style.maxWidth='none';
-  pop.style.top='auto';
-  pop.style.bottom='0';
-  pop.style.borderRadius='20px 20px 0 0';
-  pop.style.maxHeight='80vh';
-  pop.style.overflowY='auto';
+  // CSS handles positioning — don't override with JS
+  // (CSS already sets: fixed, full width, above tab bar)
 
   requestAnimationFrame(() => pop.classList.add('visible'));
 

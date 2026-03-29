@@ -152,8 +152,10 @@ Copyright © 2026 Ogust'1. All rights reserved.
 /* Liquid Glass popover upgrade */
 .aw-pop {
   position: fixed;
-  z-index: 9999;
-  left: 0; right: 0; bottom: 0;
+  z-index: 500; /* below tab bar (z-index:200 pill floats above, z-index:200 tb) */
+  left: 0; right: 0;
+  /* Stop just above the tab bar: --tb=49px + safe-area + 14px ≈ 63px */
+  bottom: calc(49px + env(safe-area-inset-bottom, 0px) + 22px);
   width: 100%; max-width: none;
   background: rgba(22,26,40,0.96);
   border: none;
@@ -161,10 +163,10 @@ Copyright © 2026 Ogust'1. All rights reserved.
   border-radius: 20px 20px 0 0;
   box-shadow: 0 -8px 40px rgba(0,0,0,0.45), 0 -2px 12px rgba(0,0,0,0.3);
   overflow: hidden;
-  max-height: 80vh;
+  max-height: 70vh;
   overflow-y: auto;
   opacity: 0;
-  transform: translateY(100%);
+  transform: translateY(110%);
   transform-origin: bottom center;
   transition: opacity 0.22s ease, transform 0.28s cubic-bezier(.32,1.15,.45,1);
   pointer-events: none;
@@ -197,9 +199,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
   .aw-color-dot[data-color="orange"]  { box-shadow: 0 0 7px rgba(249,115,22,0.4); }
   .aw-color-dot[data-color="grey"]    { box-shadow: 0 0 7px rgba(148,163,184,0.3); }
   .aw-pop {
-    background: rgba(248,248,252,0.97);
-    border-top-color: rgba(0,0,0,0.08);
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.12), 0 -1px 6px rgba(0,0,0,0.06);
+    background: rgba(250,250,255,0.97);
+    border-top-color: rgba(0,0,0,0.07);
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.10), 0 -1px 4px rgba(0,0,0,0.05);
     backdrop-filter: blur(40px) saturate(200%);
   }
 }
@@ -714,9 +716,9 @@ Copyright © 2026 Ogust'1. All rights reserved.
 
   /* Popover light */
   .aw-pop {
-    background: rgba(248,248,252,0.97);
-    border-top-color: rgba(0,0,0,0.08);
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.12), 0 -1px 6px rgba(0,0,0,0.06);
+    background: rgba(250,250,255,0.97);
+    border-top-color: rgba(0,0,0,0.07);
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.10), 0 -1px 4px rgba(0,0,0,0.05);
     backdrop-filter: blur(40px) saturate(200%);
   }
   .aw-pop-close { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4); }
