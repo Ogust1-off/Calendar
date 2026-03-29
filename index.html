@@ -16,7 +16,6 @@
   <link rel="apple-touch-icon" sizes="120x120" href="Asset/Picture/icon-120.png"/>
   <link rel="icon" sizes="32x32" href="Asset/Picture/icon-32.png"/>
   <link rel="stylesheet" href="Asset/CSS/styleagenda_b.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/web-haptics/dist/web-haptics.umd.js"></script>
   <style>
   /* ── Tokens ── */
   :root{
@@ -248,6 +247,13 @@
   /* Chevron — SMALL, not full size */
   .acc-row-chv,.acc-chv{width:10px;height:10px;color:var(--lbl3);flex-shrink:0;opacity:.5}
   .acc-row-status,.acc-badge{font-size:12px;color:var(--lbl3);flex-shrink:0}
+  /* Segmented control */
+  .acc-seg{display:flex;background:var(--bg3);border-radius:8px;padding:2px;gap:2px;flex-shrink:0}
+  .acc-seg-btn{padding:4px 10px;border-radius:6px;border:none;background:none;
+    color:var(--lbl2);font-size:12.5px;font-weight:500;font-family:inherit;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;transition:background .15s,color .15s;white-space:nowrap;line-height:1.4}
+  .acc-seg-btn.on{background:var(--bg2);color:var(--lbl);
+    box-shadow:0 1px 3px rgba(0,0,0,.2),0 .5px 0 rgba(0,0,0,.1)}
   .acc-select{background:none;border:none;color:var(--tint);font-size:14px;font-family:inherit;
     outline:none;cursor:pointer;flex-shrink:0;font-weight:500;-webkit-appearance:none;
     padding-right:4px}
@@ -467,19 +473,19 @@
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico">&#127760;</span>
           <span class="acc-row-lbl" id="acc-lang-lbl">Language</span>
-          <select class="acc-select" id="acc-lang" onchange="accSetLang(this.value)">
-            <option value="en">English</option>
-            <option value="fr">Fran&#231;ais</option>
-          </select>
+          <div class="acc-seg" id="acc-lang-seg">
+            <button class="acc-seg-btn" data-val="en" onclick="accSetLang('en')">EN</button>
+            <button class="acc-seg-btn" data-val="fr" onclick="accSetLang('fr')">FR</button>
+          </div>
         </div>
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico" id="acc-theme-ico">&#10024;</span>
           <span class="acc-row-lbl" id="acc-theme-lbl">Theme</span>
-          <select class="acc-select" id="acc-theme" onchange="accSetTheme(this.value)">
-            <option value="auto">Auto</option>
-            <option value="dark">Dark</option>
-            <option value="light">Light</option>
-          </select>
+          <div class="acc-seg" id="acc-theme-seg">
+            <button class="acc-seg-btn" data-val="auto" onclick="accSetTheme('auto')" id="acc-theme-auto">Auto</button>
+            <button class="acc-seg-btn" data-val="dark" onclick="accSetTheme('dark')" id="acc-theme-dark">&#127769;</button>
+            <button class="acc-seg-btn" data-val="light" onclick="accSetTheme('light')" id="acc-theme-light">&#9728;&#65039;</button>
+          </div>
         </div>
       </div>
 
@@ -794,9 +800,22 @@ function _applyProfile(){
       var greeting=lang==='fr'?'Bonjour, '+cfg.displayName+' !':'Hi, '+cfg.displayName+'!';
       if(nbName)nbName.childNodes[0].textContent=greeting;
     }
-    var sel=document.getElementById('acc-lang');if(sel&&cfg.lang)sel.value=cfg.lang;
-    var tsel=document.getElementById('acc-theme');if(tsel&&cfg.theme)tsel.value=cfg.theme;
-    if(cfg.theme)_applyTheme(cfg.theme); else _applyTheme('auto');
+    // Sync lang segmented control
+    var langSeg=document.getElementById('acc-lang-seg');
+    if(langSeg){
+      langSeg.querySelectorAll('.acc-seg-btn').forEach(function(b){
+        b.classList.toggle('on',b.dataset.val===(cfg.lang||'en'));
+      });
+    }
+    // Sync theme segmented control
+    var themeSeg=document.getElementById('acc-theme-seg');
+    var curTheme=cfg.theme||'auto';
+    if(themeSeg){
+      themeSeg.querySelectorAll('.acc-seg-btn').forEach(function(b){
+        b.classList.toggle('on',b.dataset.val===curTheme);
+      });
+    }
+    if(curTheme)_applyTheme(curTheme); else _applyTheme('auto');
     var pb=document.getElementById('acc-cal1-preset-badge');
     if(pb){var pm={'ecam':'ECAM','custom':'Custom','none':'Single'};pb.textContent=pm[cfg.cal1Preset||'ecam']||'';}
     // Show/hide cal2 button
@@ -828,12 +847,11 @@ function _applyLang(){
   };
   Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=t(map[id]);});
   // Theme select options
-  var tsel=document.getElementById('acc-theme');
-  if(tsel){tsel.options[0].text=t('themeAuto');tsel.options[1].text=t('themeDark');tsel.options[2].text=t('themeLight');}
+  // Theme labels are in segmented control — no update needed
   // Navbar sub
   var sub=document.querySelector('.nb-sub');if(sub)sub.textContent=t('byShortcut');
   // Lang selector
-  var lsel=document.getElementById('acc-lang');if(lsel)lsel.value=l;
+  // Lang is segmented control — updated in _applyProfile
   // Rerender if data available
   if(window._awByDay&&typeof awRenderCompact==='function'){
     var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
@@ -848,8 +866,15 @@ function accSetLang(lang){_haptic('medium');
   location.reload();
 }
 function accSetTheme(v){
+  _haptic('selection');
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.theme=v;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
   _applyTheme(v);
+  // Sync segmented control
+  var seg=document.getElementById('acc-theme-seg');
+  if(seg)seg.querySelectorAll('.acc-seg-btn').forEach(function(b){b.classList.toggle('on',b.dataset.val===v);});
+  // Update theme icon
+  var ico=document.getElementById('acc-theme-ico');
+  if(ico)ico.innerHTML=v==='dark'?'&#127769;':v==='light'?'&#9728;&#65039;':'&#10024;';
 }
 function _themeIcon(v){return v==='dark'?'🌙':v==='light'?'☀️':'✨';}
 function _applyTheme(v){
@@ -939,30 +964,26 @@ setInterval(function(){
 },700);
 
 /* ── Init ── */
-// Haptic feedback via web-haptics (https://haptics.lochie.me)
-var _wh = null;
-function _hapticInit(){
-  try{
-    if(window.WebHaptics){
-      _wh = new window.WebHaptics.WebHaptics();
-    }
-  }catch(e){}
-}
-function _haptic(style){
-  // Map old style names → web-haptics preset names
-  // light→'light', medium→'medium', heavy→'heavy', selection→'selection'
-  // success, error, warning also supported
-  try{
-    if(_wh){ _wh.trigger(style||'medium'); return; }
-    // Fallback: navigator.vibrate
-    if(navigator.vibrate){
-      var ms=style==='heavy'?18:style==='medium'?10:style==='selection'?4:6;
-      navigator.vibrate(ms);
-    }
-  }catch(e){}
-}
+// Haptic feedback — web-haptics (haptics.lochie.me) via esm.sh
+var _haptic = function(style){ /* will be replaced by module */ };
+(function(){
+  var s = document.createElement('script');
+  s.type = 'module';
+  s.textContent = [
+    'import{WebHaptics}from"https://esm.sh/web-haptics";',
+    'try{',
+    '  var h=new WebHaptics();',
+    '  window._haptic=function(style){try{h.trigger(style||"medium");}catch(e){}};',
+    '}catch(e){',
+    '  // fallback: vibrate API',
+    '  window._haptic=function(style){',
+    '    try{if(navigator.vibrate){var ms=style==="heavy"?18:style==="medium"?10:style==="selection"?4:6;navigator.vibrate(ms);}}catch(e){}',
+    '  };',
+    '}'
+  ].join('');
+  document.head.appendChild(s);
+})();
 window.addEventListener('load',function(){
-  _hapticInit();
   goTab(0);
   _applyProfile();
   _applyLang();

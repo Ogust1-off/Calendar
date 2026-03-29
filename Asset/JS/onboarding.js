@@ -547,44 +547,55 @@ function _obAccDone(msg,cb){
 // Bouton 1: Source & API
 function _obOpenCalSettings(){
   if(document.getElementById('ob-overlay'))return;
-  _obAccSheet(function(con,bot){
-    var d=_obLoad(),src=d.calSource||'google';
-    con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Source &amp; API</h2><p class="ob-p2">Connexion \u00e0 votre calendrier.</p>'+
-      '<div class="ob-src-group" id="ob-acc-src">'+
-        _srcBtn('google',src==='google','&#128273;','Google Calendar','Cl\u00e9 API + ID.')+
-        _srcBtn('ical',src==='ical','&#128241;','Lien iCal','Depuis iPhone ou Google.')+
-        _srcBtn('both',src==='both','&#128279;','Les deux','Cal 1 Google + Cal 2 iCal.')+
-      '</div>'+
-      '<div id="ob-acc-gf" style="'+(src==='google'||src==='both'?'margin-top:14px':'display:none;margin-top:14px')+'">'+
-        '<div class="ob-field"><label class="ob-lbl">CL\u00c9 API</label><div class="ob-inp-wrap"><input type="password" id="ob-cs-api" class="ob-inp" placeholder="AIzaSy\u2026" value="'+_obEsc(d.apiKey||'')+'" autocomplete="off"/><button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-cs-api\',this)">'+_eyeIcon(false)+'</button></div><div class="ob-err" id="ob-cs-api-err"></div></div>'+
-        '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 1 \u2014 ID GOOGLE</label><input type="text" id="ob-cs-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off"/><div class="ob-err" id="ob-cs-cal0-err"></div></div>'+
-      '</div>'+
-      '<div id="ob-acc-gf2" style="'+(src==='google'?'margin-top:10px':'display:none;margin-top:10px')+'">'+
-        '<div class="ob-field"><label class="ob-lbl">CAL 2 \u2014 ID GOOGLE <span class="ob-opt">optionnel</span></label><input type="text" id="ob-cs-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[1])||'')+'" autocomplete="off"/></div>'+
-      '</div>'+
-      '<div id="ob-acc-if" style="'+(src==='ical'?'margin-top:14px':'display:none;margin-top:14px')+'">'+
-        '<div class="ob-field"><label class="ob-lbl">CAL 1 \u2014 LIEN ICAL</label><input type="url" id="ob-cs-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal1Ical||'')+'" autocomplete="off"/><div class="ob-err" id="ob-cs-ical0-err"></div></div>'+
-        '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 \u2014 LIEN ICAL <span class="ob-opt">optionnel</span></label><input type="url" id="ob-cs-ical1" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>'+
-      '</div>'+
-      '<div id="ob-acc-bf" style="'+(src==='both'?'margin-top:10px':'display:none;margin-top:10px')+'">'+
-        '<div class="ob-field"><label class="ob-lbl">CAL 2 \u2014 LIEN ICAL <span class="ob-opt">optionnel</span></label><input type="url" id="ob-cs-both-ical" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>'+
-      '</div></div>';
-    bot.innerHTML='<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obAccSaveSrc()">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
-    // Hook source buttons to show/hide fields
-    setTimeout(function(){
-      var grp=document.getElementById('ob-acc-src');if(!grp)return;
-      grp.querySelectorAll('.ob-src-btn').forEach(function(b){
-        b.addEventListener('click',function(){
-          var s=_obLoad().calSource||'google';
-          var gf=document.getElementById('ob-acc-gf'),gf2=document.getElementById('ob-acc-gf2'),iff=document.getElementById('ob-acc-if'),bf=document.getElementById('ob-acc-bf');
-          if(gf)gf.style.display=(s==='google'||s==='both'?'':'none');
-          if(gf2)gf2.style.display=(s==='google'?'':'none');
-          if(iff)iff.style.display=(s==='ical'?'':'none');
-          if(bf)bf.style.display=(s==='both'?'':'none');
-        });
-      });
-    },50);
-  });
+  _obAccSheet(function(con,bot){_obCalSettingsPage1(con,bot);});
+}
+function _obCalSettingsPage1(con,bot){
+  var d=_obLoad(),src=d.calSource||'google';
+  con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Source</h2><p class="ob-p2">Type de connexion à votre calendrier.</p>'+
+    '<div class="ob-src-group" id="ob-acc-src">'+
+      _srcBtn('google',src==='google','&#128273;','Google Calendar','Clé API + ID calendrier.')+
+      _srcBtn('ical',src==='ical','&#128241;','Lien iCal','Depuis iPhone ou Google Calendar.')+
+      _srcBtn('both',src==='both','&#128279;','Les deux','Cal 1 Google + Cal 2 iCal.')+
+    '</div></div>';
+  bot.innerHTML='<div class="ob-row"><div class="ob-row-right">'+
+    '<button class="ob-btn-p" onclick="_obCalSettingsPage2()">Suivant <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>'+
+    '</div></div>';
+}
+function _obCalSettingsPage2(){
+  var el=document.getElementById('ob-overlay');if(!el)return;
+  var con=el.querySelector('#ob-cal-content'),bot=el.querySelector('#ob-cal-bottom');
+  if(!con||!bot)return;
+  var d=_obLoad(),src=d.calSource||'google';
+  var fields='';
+  if(src==='google'||src==='both'){
+    fields+='<div class="ob-field"><label class="ob-lbl">CLÉ API</label>'+
+      '<div class="ob-inp-wrap"><input type="password" id="ob-cs-api" class="ob-inp" placeholder="AIzaSy…" value="'+_obEsc(d.apiKey||'')+'" autocomplete="off"/>'+
+      '<button class="ob-eye" type="button" onclick="_obToggleEye(\'ob-cs-api\',this)">'+_eyeIcon(false)+'</button></div>'+
+      '<div class="ob-err" id="ob-cs-api-err"></div></div>'+
+      '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 1 — ID GOOGLE</label>'+
+      '<input type="text" id="ob-cs-cal0" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[0])||'')+'" autocomplete="off"/>'+
+      '<div class="ob-err" id="ob-cs-cal0-err"></div></div>';
+    if(src==='google'){
+      fields+='<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 — ID GOOGLE <span class="ob-opt">optionnel</span></label>'+
+        '<input type="text" id="ob-cs-cal1" class="ob-inp ob-mono" placeholder="xxxx@group.calendar.google.com" value="'+_obEsc((d.calendars&&d.calendars[1])||'')+'" autocomplete="off"/></div>';
+    }else{
+      fields+='<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 — LIEN ICAL <span class="ob-opt">optionnel</span></label>'+
+        '<input type="url" id="ob-cs-both-ical" class="ob-inp ob-mono" placeholder="webcal://…" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>';
+    }
+  } else {
+    fields='<div class="ob-field"><label class="ob-lbl">CAL 1 — LIEN ICAL</label>'+
+      '<input type="url" id="ob-cs-ical0" class="ob-inp ob-mono" placeholder="webcal://…" value="'+_obEsc(d.cal1Ical||'')+'" autocomplete="off"/>'+
+      '<div class="ob-err" id="ob-cs-ical0-err"></div></div>'+
+      '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 — LIEN ICAL <span class="ob-opt">optionnel</span></label>'+
+      '<input type="url" id="ob-cs-ical1" class="ob-inp ob-mono" placeholder="webcal://…" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>';
+  }
+  con.innerHTML='<div class="ob-form"><h2 class="ob-h2">Clés &amp; IDs</h2><p class="ob-p2">Informations de connexion.</p>'+fields+'</div>';
+  con.classList.remove('ob-slide');void con.offsetWidth;con.classList.add('ob-slide');
+  bot.innerHTML='<div class="ob-row">'+
+    '<button class="ob-btn-g" onclick="_obCalSettingsPage1(document.getElementById(\'ob-cal-content\'),document.getElementById(\'ob-cal-bottom\'))">'+
+    '<svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Retour</button>'+
+    '<div class="ob-row-right"><button class="ob-btn-p" onclick="_obAccSaveSrc()">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
+  setTimeout(function(){var i=con.querySelector('input');if(i)i.focus();},300);
 }
 function _obAccSaveSrc(){
   var d=_obLoad(),src=d.calSource||'google';
@@ -622,7 +633,7 @@ function _obOpenCal1Style(){
         '<div id="ob-cs-subj-list">'+sr+'</div>'+
         '<button class="ob-btn-g" style="width:100%;margin-top:8px;font-size:13px" onclick="_obAddSubjCs()">+ Ajouter</button>'+
       '</div></div>';
-    bot.innerHTML='<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obSaveSubjs();_obAccDone(\'Enregistr\u00e9\u00a0!\',null)">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
+    bot.innerHTML='<div class="ob-row"><div class="ob-row-right"><button class="ob-btn-p" onclick="_obSaveSubjs();_obAccDone(\'Enregistr\u00e9\u00a0!\',function(){if(typeof _applyProfile===\'function\')_applyProfile();})">Enregistrer <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div></div>';
   });
 }
 
@@ -695,7 +706,7 @@ function _obExtraColorPop(btn,i){
 #ob-overlay.ob-in{opacity:1}
 #ob-overlay.ob-out{opacity:0;pointer-events:none}
 #ob-sheet{position:relative;width:100%;background:var(--bg2,#1c1c1e);border-radius:26px 26px 0 0;
-  border-top:1px solid var(--sep,rgba(255,255,255,.11));min-height:65vh;max-height:95dvh;
+  border-top:1px solid var(--sep,rgba(255,255,255,.11));min-height:min(65vh,auto);max-height:95dvh;
   display:flex;flex-direction:column;overflow:hidden;
   box-shadow:0 -20px 60px rgba(0,0,0,.7);
   transform:translateY(60px);transition:transform .38s cubic-bezier(.32,1.2,.45,1);will-change:transform}
@@ -710,7 +721,7 @@ function _obExtraColorPop(btn,i){
 .ob-x{position:absolute;top:18px;right:16px;z-index:10;width:28px;height:28px;border-radius:50%;
   background:var(--fill);border:none;cursor:pointer;color:var(--lbl2);
   display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
-#ob-content,#ob-cal-content{flex:1;overflow-y:auto;padding:16px 20px 4px;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
+#ob-content,#ob-cal-content{flex:1;overflow-y:auto;padding:16px 20px 8px;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
 #ob-bottom,#ob-cal-bottom{padding:10px 22px calc(env(safe-area-inset-bottom,0px)+12px);position:relative;z-index:1;flex-shrink:0}
 .ob-slide{animation:obslide .22s cubic-bezier(.25,.8,.25,1) both}
 @keyframes obslide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}

@@ -605,7 +605,6 @@ function awPopOpen(el, idx) {
   } else {
     // Dark mode: deep frosted glass with subtle color tint
     pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.12) 0%, rgba(${accentRgb},0.04) 100%), rgba(22,26,40,0.94)`;
-    pop.style.borderLeft = `3px solid rgba(${accentRgb},0.5)`;
   }
   pop.innerHTML = `
     <div class="aw-pop-accent" style="background:${accent}"></div>
