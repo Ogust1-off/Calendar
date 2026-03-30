@@ -41,11 +41,11 @@ Copyright © 2026 Ogust'1. All rights reserved.
 /* ── Skipped days cascade ── */
 .aw-skipped-list { border-bottom: 1px solid var(--border); }
 .aw-skipped-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 7px 22px; border-bottom: 1px solid var(--border); opacity: 0.6;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+  padding: 7px 18px; border-bottom: 1px solid var(--border); opacity: 0.75;
 }
 .aw-skipped-row:last-child { border-bottom: none; }
-.aw-skipped-label { font-size: 12px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.aw-skipped-label { font-size: 12px; font-weight: 500; color: var(--muted); display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .aw-skipped-label.today { color: rgb(235, 76, 70); }/*Old var(--accent)*/
 .aw-skipped-today-pill {
   font-size: 9px; font-weight: 600;
@@ -54,7 +54,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   border: 1px solid rgba(235, 76, 70,0.2);/*Old rgba(96,165,250,0.2)*/
   padding: 1px 6px; border-radius: 99px; letter-spacing: 0.05em; text-transform: uppercase;
 }
-.aw-skipped-msg { font-size: 11px; color: var(--faint); font-style: italic; }
+.aw-skipped-msg { font-size: 11px; color: var(--faint); font-style: italic; text-align: right; }
 
 /* ── Compact day header ── */
 .aw-compact-day-hd {

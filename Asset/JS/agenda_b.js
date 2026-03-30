@@ -567,7 +567,7 @@ function awUpdateTimer() {
 }
 
 function awPopOpen(el, idx) {
-  if(typeof _haptic==='function')_haptic('selection');
+  if(typeof _haptic==='function')_haptic('light');
   awPopClose();
 
   const ev      = awEvCache[idx];
@@ -605,6 +605,7 @@ function awPopOpen(el, idx) {
   } else {
     // Dark mode: deep frosted glass with subtle color tint
     pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.12) 0%, rgba(${accentRgb},0.04) 100%), rgba(22,26,40,0.94)`;
+    pop.style.borderLeft = `3px solid rgba(${accentRgb},0.5)`;
   }
   pop.innerHTML = `
     <div class="aw-pop-accent" style="background:${accent}"></div>
@@ -735,7 +736,7 @@ function awRenderCompact(byDay, today) {
     const d  = new Date(base); d.setDate(base.getDate() + i);
     const ds = awDateStr(d);
     const future = (byDay[ds] || []).filter(({ev}) =>
-      ev.start.length > 10 && new Date(ev.end) > nowTs // exclude all-day events
+      ev.start.length > 10 && new Date(ev.end) > nowTs
     );
     if (future.length > 0) {
       targetDay = { ds, items: future.map(({ev}) => ev) };
@@ -1041,19 +1042,7 @@ setInterval(() => {
 
   // Detect event start or end → force reload
   for (const ev of awEvCache) {
-    if (ev.start.length === 10) {
-      // All-day event: render as header banner in the grid
-      const allDayBar = document.createElement('div');
-      const adColor = items[k]?.ev?._extraColor || awColorFor((ev.summary||'').split(' - ')[0].trim(), ev.cal2);
-      const adHex = AW_COLOR_HEX[adColor] || '#3b82f6';
-      allDayBar.style.cssText = `background:${adHex}22;border-left:3px solid ${adHex};` +
-        `padding:4px 10px 4px 10px;margin:0;font-size:11px;font-weight:600;color:${adHex};` +
-        `white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;`;
-      allDayBar.textContent = ev.summary || '';
-      allDayBar.onclick = function(){ if(typeof awPopOpen==='function') awPopOpen(allDayBar, awEvCache.indexOf(ev)); };
-      col.insertBefore(allDayBar, col.firstChild);
-      continue;
-    }
+    if (ev.start.length === 10) continue; // skip all-day
     const msTillStart = new Date(ev.start) - Date.now();
     const msTillEnd   = new Date(ev.end)   - Date.now();
     if ((msTillStart > -1000 && msTillStart <= 0) ||
@@ -1094,7 +1083,10 @@ function awRenderDay(ds, container) {
   const availH=Math.max(200, window.innerHeight-navH-wkH-64);
   AW_PX_PER_HOUR=Math.max(48,Math.round(availH/11));
   const gridH=24*AW_PX_PER_HOUR;
-  const items=byDay[ds]||[], timed=items.filter(x=>x.ev.start.length>10);
+  const items=byDay[ds]||[];
+  // All-day events: render as top banner
+  const allDay=items.filter(x=>x.ev.start.length===10);
+  const timed=items.filter(x=>x.ev.start.length>10);
   const laid=awLayoutColumns(timed);
   const now=new Date(), nowH=now.getHours()+now.getMinutes()/60;
   let html=`<div class="awd-grid" style="height:${gridH}px"><div class="awd-gutter">`;
@@ -1106,6 +1098,28 @@ function awRenderDay(ds, container) {
     awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart)).join('');
   html+='</div></div>';
   container.innerHTML=html;
+  // Insert all-day banners at top of column
+  if(allDay.length>0){
+    var col=container.querySelector('.awd-col');
+    if(col){
+      var wrap=document.createElement('div');
+      wrap.style.cssText='position:sticky;top:0;z-index:20;background:var(--bg2);border-bottom:.5px solid var(--sep2);';
+      allDay.forEach(function(item){
+        var ev=item.ev;
+        var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
+        var adHex=AW_COLOR_HEX[adColor]||'#3b82f6';
+        var bar=document.createElement('div');
+        bar.style.cssText='padding:4px 10px;font-size:11px;font-weight:600;color:'+adHex+
+          ';border-left:3px solid '+adHex+';background:'+adHex+'18;'+
+          'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
+        bar.textContent=ev.summary||'';
+        var idx=awEvCache.indexOf(ev);
+        bar.onclick=function(){if(typeof awPopOpen==='function')awPopOpen(bar,idx);};
+        wrap.appendChild(bar);
+      });
+      col.insertBefore(wrap,col.firstChild);
+    }
+  }
   let scrollTo;
   if(typeof window._wkScrollTop==='number') scrollTo=window._wkScrollTop;
   else if(isToday){scrollTo=nowH*AW_PX_PER_HOUR-availH*0.38; window._wkScrollTop=Math.max(0,scrollTo);}
