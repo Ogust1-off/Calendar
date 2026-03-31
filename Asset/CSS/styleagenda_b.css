@@ -1,3 +1,63 @@
+
+/* ── All-day events row — Apple Calendar style ──────────────── */
+.awd-allday-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 5px 8px 5px 0;
+  background: var(--bg);
+  border-bottom: .5px solid var(--sep2);
+  min-height: 28px;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+.awd-allday-label {
+  font-size: 10px;
+  color: var(--lbl3);
+  flex-shrink: 0;
+  width: 52px;
+  text-align: right;
+  padding-right: 6px;
+  padding-top: 4px;
+  line-height: 1;
+}
+.awd-allday-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.awd-allday-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px 3px 6px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity .15s, transform .1s;
+  max-width: 100%;
+  overflow: hidden;
+}
+.awd-allday-pill:active { opacity: .75; transform: scale(.97); }
+.awd-pill-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: rgba(255,255,255,.45);
+}
+.awd-pill-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /*Shortcut™ CSS file for Agenda by Augustin de Chalendar
 Copyright © 2026 Ogust'1. All rights reserved.
 */
@@ -708,6 +768,8 @@ Copyright © 2026 Ogust'1. All rights reserved.
     backdrop-filter: blur(48px) saturate(220%);
   }
   .aw-pop-close { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4); }
+[data-theme="light"] .aw-pop-close { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4); }
+[data-theme="dark"] .aw-pop-close { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
   .aw-pop-close:hover { background: rgba(0,0,0,0.1); color: rgba(0,0,0,0.8); }
   .aw-pop-title { color: rgba(10,20,40,0.9); }
   .aw-pop-row   { color: rgba(10,20,40,0.55); }

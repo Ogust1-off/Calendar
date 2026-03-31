@@ -132,9 +132,17 @@ function awColorFor(name, isCal2) {
   return AW_COLORS[h % AW_COLORS.length];
 }
 
-function awTimeToHours(iso) {
+function _obEscText(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function awTimeToHours(iso, startIso) {
   const d = new Date(iso);
-  return d.getHours() + d.getMinutes() / 60;
+  let h = d.getHours() + d.getMinutes() / 60;
+  // If ending at exactly midnight (h===0) and different day than start (or no start) → treat as 24h
+  if (h === 0 && d.getSeconds() === 0) {
+    if (!startIso) return 24;
+    const ds = new Date(startIso);
+    if (d.toDateString() !== ds.toDateString()) return 24;
+  }
+  return h;
 }
 
 function awParseICal(text) {
@@ -158,7 +166,7 @@ function awParseICal(text) {
     if (!start) continue;
     events.push({
       summary:     get('SUMMARY'),
-      location:    get('LOCATION'),
+      location:    get('LOCATION').replace(/\\n/g,'\n').replace(/\\,/g,',').trim(),
       description: get('DESCRIPTION'),
       start, end,
     });
@@ -345,7 +353,8 @@ function awRowHtml(ev, idx = -1) {
   const colorHex = AW_COLOR_HEX;
   const accent = colorHex[color] || '#3b82f6';
 
-  const isLM = window.matchMedia('(prefers-color-scheme: light)').matches;
+  const _th=document.documentElement.dataset.theme;
+  const isLM = _th==='light' ? true : _th==='dark' ? false : window.matchMedia('(prefers-color-scheme: light)').matches;
 
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
@@ -399,7 +408,7 @@ function awLayoutColumns(timedItems) {
   const items = timedItems.map(({ev, i}) => ({
     ev, i,
     s: awTimeToHours(ev.start),
-    e: awTimeToHours(ev.end),
+    e: awTimeToHours(ev.end, ev.start),
     col: 0, totalCols: 1, sameStart: false,
     stackDepth: 0, isTopStacked: true, visibleHeight: null,
   }));
@@ -486,7 +495,8 @@ function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackD
 
   const colorHex = AW_COLOR_HEX;
   const accent = colorHex[color] || '#3b82f6';
-  const isLM = window.matchMedia('(prefers-color-scheme: light)').matches;
+  const _th=document.documentElement.dataset.theme;
+  const isLM = _th==='light' ? true : _th==='dark' ? false : window.matchMedia('(prefers-color-scheme: light)').matches;
 
   const bgAlpha    = isLM ? '33' : '44';
   const bg = `${accent}${bgAlpha}`;
@@ -497,7 +507,7 @@ function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackD
   const locColor    = isLM ? 'rgba(10,20,40,0.38)' : 'rgba(255,255,255,0.45)';
 
   const startH  = awTimeToHours(ev.start);
-  const endH    = awTimeToHours(ev.end);
+  const endH    = awTimeToHours(ev.end, ev.start);
   const clampS  = Math.max(startH, AW_HOUR_START);
   const clampE  = Math.min(endH,   AW_HOUR_END);
   if (clampS >= clampE) return '';
@@ -597,7 +607,8 @@ function awPopOpen(el, idx) {
   pop.className = 'aw-pop';
   const hexToRgb = h => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `${r},${g},${b}`; };
   const accentRgb = hexToRgb(accent);
-  const isLight = window.matchMedia('(prefers-color-scheme: light)').matches;
+  const _th2=document.documentElement.dataset.theme;
+  const isLight = _th2==='light' ? true : _th2==='dark' ? false : window.matchMedia('(prefers-color-scheme: light)').matches;
   if (isLight) {
     // Light mode: white frosted glass with very subtle color tint
     pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.07) 0%, rgba(255,255,255,0) 60%), rgba(252,252,255,0.96)`;
@@ -622,7 +633,7 @@ function awPopOpen(el, idx) {
       </div>
       ${ev.location ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
-        <span>${ev.location.split(',')[0].trim()}${mapUrl ? ' <a class="aw-map-link" href="' + mapUrl + '" target="_blank" rel="noopener" style="color:var(--accent)" onmouseover="this.style.textDecoration=\'underline\'" onmouseout="this.style.textDecoration=\'none\'">\u2197 Locate</a>' : ''}</span>
+        <span>${ev.location.replace(/\\n/g,' · ').replace(/\n/g,' · ').split('\n')[0]}${mapUrl ? ' <a class="aw-map-link" href="' + mapUrl + '" target="_blank" rel="noopener" style="color:var(--accent)">\u2197 Locate</a>' : ''}</span>
       </div>` : ''}
       ${teacher ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 13c0-2.76 2.24-5 5-5s5 2.24 5 5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
@@ -1098,27 +1109,26 @@ function awRenderDay(ds, container) {
     awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart)).join('');
   html+='</div></div>';
   container.innerHTML=html;
-  // Insert all-day banners at top of column
+  // All-day events: Apple Calendar style — dedicated row ABOVE the scrollable grid
   if(allDay.length>0){
-    var col=container.querySelector('.awd-col');
-    if(col){
-      var wrap=document.createElement('div');
-      wrap.style.cssText='position:sticky;top:0;z-index:20;background:var(--bg2);border-bottom:.5px solid var(--sep2);';
-      allDay.forEach(function(item){
-        var ev=item.ev;
-        var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
-        var adHex=AW_COLOR_HEX[adColor]||'#3b82f6';
-        var bar=document.createElement('div');
-        bar.style.cssText='padding:4px 10px;font-size:11px;font-weight:600;color:'+adHex+
-          ';border-left:3px solid '+adHex+';background:'+adHex+'18;'+
-          'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;';
-        bar.textContent=ev.summary||'';
-        var idx=awEvCache.indexOf(ev);
-        bar.onclick=function(){if(typeof awPopOpen==='function')awPopOpen(bar,idx);};
-        wrap.appendChild(bar);
-      });
-      col.insertBefore(wrap,col.firstChild);
-    }
+    var allDayRow=document.createElement('div');
+    allDayRow.className='awd-allday-row';
+    allDayRow.innerHTML='<div class="awd-allday-label">all-day</div><div class="awd-allday-pills" id="awd-pills-'+ds+'">';
+    allDay.forEach(function(item){
+      var ev=item.ev;
+      var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
+      var adHex=AW_COLOR_HEX[adColor]||'#3b82f6';
+      var idx=awEvCache.indexOf(ev);
+      var pill=document.createElement('button');
+      pill.className='awd-allday-pill';
+      pill.style.cssText='background:'+adHex+';color:#fff;';
+      pill.innerHTML='<span class="awd-pill-dot" style="background:rgba(255,255,255,.5)"></span>'+
+        '<span class="awd-pill-name">'+_obEscText(ev.summary||'')+'</span>';
+      pill.onclick=function(){if(typeof awPopOpen==='function')awPopOpen(pill,idx);};
+      allDayRow.querySelector('.awd-allday-pills').appendChild(pill);
+    });
+    allDayRow.querySelector('.awd-allday-pills').innerHTML+=  '</div>';
+    container.insertBefore(allDayRow, container.firstChild);
   }
   let scrollTo;
   if(typeof window._wkScrollTop==='number') scrollTo=window._wkScrollTop;
