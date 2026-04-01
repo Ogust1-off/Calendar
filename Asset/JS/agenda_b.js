@@ -146,33 +146,45 @@ function awTimeToHours(iso, startIso) {
 }
 
 function awParseICal(text) {
+  // RFC 5545 unfolding: continuation lines start with space/tab
+  const unfolded = text.replace(/\r\n[ \t]/g, '').replace(/\r/g, '');
+  // iCal unescape
+  const unescape = (s) => s
+    .replace(/\\n/g, '\n')
+    .replace(/\\,/g, ',')
+    .replace(/\\;/g, ';')
+    .replace(/\\\\/g, '\\')
+    .trim();
   const events = [];
-  const blocks = text.split('BEGIN:VEVENT');
+  const blocks = unfolded.split('BEGIN:VEVENT');
   for (let i = 1; i < blocks.length; i++) {
     const block = blocks[i];
     const get = (key) => {
-      const m = block.match(new RegExp(`${key}(?:;[^:]*)?:([^\r\n]+)`));
-      return m ? m[1].trim() : '';
+      const m = block.match(new RegExp('^' + key + '(?:;[^:\\r\\n]*)?:([^\\r\\n]+)', 'm'));
+      return m ? unescape(m[1].trim()) : '';
     };
     const parseDate = (str) => {
       if (!str) return '';
-      if (str.length === 8) return `${str.slice(0,4)}-${str.slice(4,6)}-${str.slice(6,8)}`;
-      return new Date(
-        str.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z?/, '$1-$2-$3T$4:$5:$6')
-      ).toISOString();
+      if (/^\d{8}$/.test(str)) return str.slice(0,4)+'-'+str.slice(4,6)+'-'+str.slice(6,8);
+      try {
+        return new Date(
+          str.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)/, '$1-$2-$3T$4:$5:$6$7')
+        ).toISOString();
+      } catch(e) { return ''; }
     };
     const start = parseDate(get('DTSTART'));
     const end   = parseDate(get('DTEND'));
     if (!start) continue;
     events.push({
       summary:     get('SUMMARY'),
-      location:    get('LOCATION').replace(/\\n/g,'\n').replace(/\\,/g,',').trim(),
+      location:    get('LOCATION'),
       description: get('DESCRIPTION'),
       start, end,
     });
   }
   return events;
 }
+
 
 // ── API ────────────────────────────────────────────────────────────────────────
 
@@ -669,6 +681,13 @@ function awPopOpen(el, idx) {
         <span id="aw-pop-pct">${pct}% elapsed</span>
         <span id="aw-pop-rem">${awFmtRemainingLong(ev.end)} left</span>
       </div>` : ''}
+      ${ev.description ? `<details class="aw-pop-desc-details">
+        <summary class="aw-pop-desc-summary">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4.5L6 7.5L10 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Description
+        </summary>
+        <div class="aw-pop-desc-body">${ev.description.replace(/\\n/g,'\n').replace(/\n/g,'<br>').replace(/\\,/g,',')}</div>
+      </details>` : ''}
     </div>`;
 
   document.body.appendChild(pop);
@@ -968,7 +987,26 @@ function awRender(events) {
   awLastUpdated = Date.now();
   if (typeof window._hideSplash === 'function') window._hideSplash();
   awUpdateTimer();
-  events.forEach((ev, i) => { const d = ev.start.slice(0, 10); (byDay[d] = byDay[d] || []).push({ ev, i }); });
+  events.forEach((ev, i) => {
+    const startD = ev.start.slice(0, 10);
+    // For timed events that span multiple days (e.g. 21:00→01:00 next day)
+    // add the event to every day it covers
+    if (ev.start.length > 10 && ev.end.length > 10) {
+      const endD = ev.end.slice(0, 10);
+      if (endD !== startD) {
+        // Spans at least 2 days — add to each day
+        let cur = new Date(startD + 'T00:00:00');
+        const endDate = new Date(endD + 'T00:00:00');
+        while (cur <= endDate) {
+          const ds = awDateStr(cur);
+          (byDay[ds] = byDay[ds] || []).push({ ev, i });
+          cur.setDate(cur.getDate() + 1);
+        }
+        return; // skip the default push below
+      }
+    }
+    (byDay[startD] = byDay[startD] || []).push({ ev, i });
+  });
   window._awByDay = byDay;
 
   awRenderCompact(byDay, today);
@@ -1109,11 +1147,19 @@ function awRenderDay(ds, container) {
     awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart)).join('');
   html+='</div></div>';
   container.innerHTML=html;
-  // All-day events: Apple Calendar style — dedicated row ABOVE the scrollable grid
+  // All-day events: sticky row ABOVE the scroll container (inside .wk-page)
+  // Remove old allday row if exists
+  var oldRow=container.parentElement&&container.parentElement.querySelector('.awd-allday-row');
+  if(oldRow)oldRow.remove();
   if(allDay.length>0){
     var allDayRow=document.createElement('div');
     allDayRow.className='awd-allday-row';
-    allDayRow.innerHTML='<div class="awd-allday-label">all-day</div><div class="awd-allday-pills" id="awd-pills-'+ds+'">';
+    var labelEl=document.createElement('div');
+    labelEl.className='awd-allday-label';
+    labelEl.textContent='all-day';
+    allDayRow.appendChild(labelEl);
+    var pillsEl=document.createElement('div');
+    pillsEl.className='awd-allday-pills';
     allDay.forEach(function(item){
       var ev=item.ev;
       var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
@@ -1121,14 +1167,21 @@ function awRenderDay(ds, container) {
       var idx=awEvCache.indexOf(ev);
       var pill=document.createElement('button');
       pill.className='awd-allday-pill';
-      pill.style.cssText='background:'+adHex+';color:#fff;';
-      pill.innerHTML='<span class="awd-pill-dot" style="background:rgba(255,255,255,.5)"></span>'+
-        '<span class="awd-pill-name">'+_obEscText(ev.summary||'')+'</span>';
+      pill.style.background=adHex;
+      var dot=document.createElement('span');dot.className='awd-pill-dot';
+      var name=document.createElement('span');name.className='awd-pill-name';
+      name.textContent=ev.summary||'';
+      pill.appendChild(dot);pill.appendChild(name);
       pill.onclick=function(){if(typeof awPopOpen==='function')awPopOpen(pill,idx);};
-      allDayRow.querySelector('.awd-allday-pills').appendChild(pill);
+      pillsEl.appendChild(pill);
     });
-    allDayRow.querySelector('.awd-allday-pills').innerHTML+=  '</div>';
-    container.insertBefore(allDayRow, container.firstChild);
+    allDayRow.appendChild(pillsEl);
+    // Insert as sibling BEFORE the scrollable grid container → stays fixed in wk-page column
+    if(container.parentElement){
+      container.parentElement.insertBefore(allDayRow, container);
+    } else {
+      container.insertBefore(allDayRow, container.firstChild);
+    }
   }
   let scrollTo;
   if(typeof window._wkScrollTop==='number') scrollTo=window._wkScrollTop;
