@@ -225,10 +225,10 @@ Copyright © 2026 Ogust'1. All rights reserved.
   background: linear-gradient(145deg,
     rgba(var(--pop-accent-rgb,30,50,80),0.12) 0%,
     rgba(var(--pop-accent-rgb,30,50,80),0.04) 100%),
-    rgba(22,26,40,0.95);
-  border: 1px solid rgba(255,255,255,0.1);
+    var(--bg2);
+  border: 1px solid var(--border);
   border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 4px 20px rgba(0,0,0,0.25);
   overflow: hidden;
   opacity: 0;
   transform: scale(0.92) translateY(8px);
@@ -237,7 +237,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   pointer-events: none;
   backdrop-filter: blur(48px) saturate(200%);
   -webkit-backdrop-filter: blur(48px) saturate(200%);
-  color: rgba(255,255,255,0.88);
+  color: var(--lbl);
 }
 .aw-pop.visible {
   opacity: 1;
@@ -245,34 +245,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   pointer-events: all;
 }
 /* Light mode pop */
-@media (prefers-color-scheme: light) {
-  .aw-pop {
-    background: linear-gradient(145deg,
-      rgba(var(--pop-accent-rgb,30,100,200),0.07) 0%,
-      rgba(255,255,255,0) 60%),
-      rgba(252,252,255,0.97);
-    border-color: rgba(0,0,0,0.09);
-    box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.07);
-    color: rgba(0,0,0,0.88);
-  }
-}
-[data-theme="light"] .aw-pop {
-  background: linear-gradient(145deg,
-    rgba(var(--pop-accent-rgb,30,100,200),0.07) 0%,
-    rgba(255,255,255,0) 60%),
-    rgba(252,252,255,0.97) !important;
-  border-color: rgba(0,0,0,0.09) !important;
-  box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.07) !important;
-  color: rgba(0,0,0,0.88) !important;
-}
-[data-theme="dark"] .aw-pop {
-  background: linear-gradient(145deg,
-    rgba(var(--pop-accent-rgb,30,50,80),0.12) 0%,
-    rgba(var(--pop-accent-rgb,30,50,80),0.04) 100%),
-    rgba(22,26,40,0.95) !important;
-  border-color: rgba(255,255,255,0.1) !important;
-  color: rgba(255,255,255,0.88) !important;
-}
+/* Pop adapts automatically via CSS vars (--bg2, --lbl, --border, --fill) */
 
 /* Light mode for color dots */
 @media (prefers-color-scheme: light) {
@@ -809,7 +782,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   }
   .aw-pop-close { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4); }
 [data-theme="light"] .aw-pop-close { background: rgba(0,0,0,0.05); color: rgba(0,0,0,0.4); }
-[data-theme="dark"] .aw-pop-close { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); }
+[data-theme="dark"] .aw-pop-close { background: var(--fill); color: var(--lbl2); }
   .aw-pop-close:hover { background: rgba(0,0,0,0.1); color: rgba(0,0,0,0.8); }
   .aw-pop-title { color: rgba(10,20,40,0.9); }
   .aw-pop-row   { color: rgba(10,20,40,0.55); }

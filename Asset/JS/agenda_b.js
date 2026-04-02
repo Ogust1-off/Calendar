@@ -134,13 +134,16 @@ function awColorFor(name, isCal2) {
 
 function _obEscText(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function awTimeToHours(iso, startIso) {
+  if (!iso) return 0;
   const d = new Date(iso);
   let h = d.getHours() + d.getMinutes() / 60;
-  // If ending at exactly midnight (h===0) and different day than start (or no start) → treat as 24h
+  // If exactly midnight (00:00:00) and different local date than start → treat as 24h (end of day)
   if (h === 0 && d.getSeconds() === 0) {
     if (!startIso) return 24;
-    const ds = new Date(startIso);
-    if (d.toDateString() !== ds.toDateString()) return 24;
+    // Compare LOCAL date strings (YYYY-MM-DD)
+    const startLocalDate = startIso.slice(0,10);
+    const endLocalDate   = iso.slice(0,10);
+    if (endLocalDate !== startLocalDate) return 24;
   }
   return h;
 }
@@ -165,12 +168,22 @@ function awParseICal(text) {
     };
     const parseDate = (str) => {
       if (!str) return '';
+      // DATE only (all-day)
       if (/^\d{8}$/.test(str)) return str.slice(0,4)+'-'+str.slice(4,6)+'-'+str.slice(6,8);
-      try {
-        return new Date(
-          str.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z?)/, '$1-$2-$3T$4:$5:$6$7')
-        ).toISOString();
-      } catch(e) { return ''; }
+      // UTC datetime (ends with Z) → convert to local ISO string to keep consistent with getHours()
+      if (str.endsWith('Z') || str.endsWith('z')) {
+        try {
+          const d = new Date(str.replace(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/i, '$1-$2-$3T$4:$5:$6Z'));
+          // Keep as UTC ISO — getHours() will use local, but .slice(0,10) uses UTC date
+          // Actually just use local padded string so both are consistent
+          return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')
+            +'T'+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+        } catch(e) { return ''; }
+      }
+      // Local datetime (no Z) — keep as local string: YYYYMMDDTHHMMSS → YYYY-MM-DDTHH:MM:SS
+      const m = str.match(/(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})/);
+      if (m) return m[1]+'-'+m[2]+'-'+m[3]+'T'+m[4]+':'+m[5]+':'+m[6];
+      return '';
     };
     const start = parseDate(get('DTSTART'));
     const end   = parseDate(get('DTEND'));
@@ -1193,21 +1206,24 @@ function awRenderDay(ds, container) {
       container.insertBefore(allDayRow, container.firstChild);
     }
   }
-  // Calculate scroll to show the right time — same absolute position regardless of allday strip
+  // Scroll to show the relevant time — always based on hour position (never memorized)
   var targetH;
-  if(typeof window._wkScrollTop==='number'){
-    targetH=window._wkScrollTop;
-  } else if(isToday){
-    targetH=Math.max(0, nowH*AW_PX_PER_HOUR - window.innerHeight*0.35);
-    window._wkScrollTop=targetH;
+  if(isToday){
+    targetH=Math.max(0, nowH*AW_PX_PER_HOUR - 200);
   } else if(timed.length>0){
-    targetH=Math.max(0, awClampStartH(timed[0].ev, ds)*AW_PX_PER_HOUR - window.innerHeight*0.3);
+    // Scroll to first event of this day
+    var firstH = awClampStartH(timed[0].ev, ds);
+    targetH=Math.max(0, firstH*AW_PX_PER_HOUR - 100);
   } else {
-    targetH=7*AW_PX_PER_HOUR;
+    targetH=7*AW_PX_PER_HOUR; // default: show 07:00
   }
   container.scrollTop=targetH;
+  // Sync all other day containers to the same scroll position
+  window._wkScrollTop=targetH;
   container.addEventListener('scroll',function(){
-    const top=container.scrollTop; window._wkScrollTop=top;
-    document.querySelectorAll('.wk-grid-host').forEach(h=>{if(h!==container&&h.children.length>0)h.scrollTop=top;});
+    const top=container.scrollTop;
+    window._wkScrollTop=top;
+    // Sync sibling day containers
+    document.querySelectorAll('.wk-grid-host').forEach(function(h){if(h!==container&&h.children.length>0)h.scrollTop=top;});
   },{passive:true});
 }
