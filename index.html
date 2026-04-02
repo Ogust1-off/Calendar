@@ -957,22 +957,21 @@ var _wh = null;
 function _hapticInit(){
   try{
     if(window.WebHaptics){
-      _wh = new window.WebHaptics.WebHaptics();
-    }
-  }catch(e){}
-}
-function _haptic(s){try{if(navigator.vibrate){navigator.vibrate(s==='heavy'?18:s==='medium'?10:4);}}catch(e){}}
-// ESM haptics (https://haptics.lochie.me)
-(function(){var sc=document.createElement('script');sc.type='module';
-sc.textContent=
-  'import{WebHaptics}from"https://esm.sh/web-haptics@1.0.1";'+
-  'try{const h=new WebHaptics();window._haptic=function(s){try{h.trigger(s);}catch(e){}};'+
-  'document.addEventListener("click",function(e){'+
-  'var b=e.target.closest("button");if(!b||b.dataset.h)return;b.dataset.h="1";'+
-  'var s=b.classList.contains("acc-row-danger")||b.classList.contains("ob-btn-danger")?"warning":'+
-  'b.classList.contains("ob-btn-p")?"medium":"selection";'+
-  'try{h.trigger(s);}catch(e){}},true);}catch(e){}';
-document.head.appendChild(sc);})();
+}}catch(e){}}
+// Haptics — native Vibration API (works Android; iOS needs user gesture)
+(function(){
+  var PAT={selection:[4],light:[8],medium:[12],heavy:[18,8,12],success:[8,60,8],warning:[15,50,15],error:[20,60,20,60,20]};
+  window._haptic=function(s){try{if(navigator.vibrate)navigator.vibrate(PAT[s]||PAT.medium);}catch(e){}};
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    var s=b.classList.contains('acc-row-danger')||b.classList.contains('btn-danger')?'warning':
+          b.classList.contains('ob-btn-p')||b.id==='wk-today-btn'?'medium':
+          b.classList.contains('wk-nav-btn')||b.classList.contains('tbtn')||
+          b.classList.contains('acc-seg-btn')||b.classList.contains('wk-mini')||
+          b.classList.contains('ob-src-btn')||b.classList.contains('ob-preset-btn')?'selection':'light';
+    window._haptic(s);
+  },true);
+})();
 
 window.addEventListener('load',function(){
   goTab(0);

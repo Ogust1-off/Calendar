@@ -21,9 +21,11 @@
   flex-shrink: 0;
   width: 52px;
   text-align: right;
-  padding-right: 6px;
-  padding-top: 4px;
+  /* Match .awd-gutter border */
+  padding-right: 7px;
+  padding-top: 5px;
   line-height: 1;
+  border-right: .5px solid var(--sep);
 }
 .awd-allday-pills {
   display: flex;
@@ -31,6 +33,7 @@
   gap: 4px;
   flex: 1;
   min-width: 0;
+  padding-left: 6px;
 }
 .awd-allday-pill {
   display: inline-flex;
@@ -218,7 +221,11 @@ Copyright © 2026 Ogust'1. All rights reserved.
   z-index: 9998;
   width: 340px;
   max-width: calc(100vw - 24px);
-  background: rgba(22,26,40,0.94);
+  /* Dark by default — overridden by light selectors below */
+  background: linear-gradient(145deg,
+    rgba(var(--pop-accent-rgb,30,50,80),0.12) 0%,
+    rgba(var(--pop-accent-rgb,30,50,80),0.04) 100%),
+    rgba(22,26,40,0.95);
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.06);
@@ -230,11 +237,41 @@ Copyright © 2026 Ogust'1. All rights reserved.
   pointer-events: none;
   backdrop-filter: blur(48px) saturate(200%);
   -webkit-backdrop-filter: blur(48px) saturate(200%);
+  color: rgba(255,255,255,0.88);
 }
 .aw-pop.visible {
   opacity: 1;
   transform: scale(1) translateY(0);
   pointer-events: all;
+}
+/* Light mode pop */
+@media (prefers-color-scheme: light) {
+  .aw-pop {
+    background: linear-gradient(145deg,
+      rgba(var(--pop-accent-rgb,30,100,200),0.07) 0%,
+      rgba(255,255,255,0) 60%),
+      rgba(252,252,255,0.97);
+    border-color: rgba(0,0,0,0.09);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.07);
+    color: rgba(0,0,0,0.88);
+  }
+}
+[data-theme="light"] .aw-pop {
+  background: linear-gradient(145deg,
+    rgba(var(--pop-accent-rgb,30,100,200),0.07) 0%,
+    rgba(255,255,255,0) 60%),
+    rgba(252,252,255,0.97) !important;
+  border-color: rgba(0,0,0,0.09) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.14), 0 2px 10px rgba(0,0,0,0.07) !important;
+  color: rgba(0,0,0,0.88) !important;
+}
+[data-theme="dark"] .aw-pop {
+  background: linear-gradient(145deg,
+    rgba(var(--pop-accent-rgb,30,50,80),0.12) 0%,
+    rgba(var(--pop-accent-rgb,30,50,80),0.04) 100%),
+    rgba(22,26,40,0.95) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: rgba(255,255,255,0.88) !important;
 }
 
 /* Light mode for color dots */
@@ -814,3 +851,13 @@ Copyright © 2026 Ogust'1. All rights reserved.
   -webkit-overflow-scrolling: touch;
 }
 .aw-pop-desc-body a { color: var(--tint); }
+
+/* Pop text colors — theme aware */
+@media(prefers-color-scheme:light){
+  .aw-pop-title,.aw-pop-body{color:rgba(0,0,0,.88);}
+  .aw-pop-row,.aw-pop-icon,.aw-pop-desc-summary{color:rgba(0,0,0,.55);}
+}
+[data-theme="light"] .aw-pop-title,[data-theme="light"] .aw-pop-body{color:rgba(0,0,0,.88)!important;}
+[data-theme="light"] .aw-pop-row,[data-theme="light"] .aw-pop-icon,[data-theme="light"] .aw-pop-desc-summary{color:rgba(0,0,0,.55)!important;}
+[data-theme="dark"] .aw-pop-title,[data-theme="dark"] .aw-pop-body{color:rgba(255,255,255,.88)!important;}
+[data-theme="dark"] .aw-pop-row,[data-theme="dark"] .aw-pop-icon,[data-theme="dark"] .aw-pop-desc-summary{color:rgba(255,255,255,.55)!important;}

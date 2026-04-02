@@ -414,13 +414,30 @@ function awRowHtml(ev, idx = -1) {
 // - Sort by start time, longest first if same start
 // - Start diff < 23min → side-by-side at same indent level
 // - Start diff ≥ 23min → goes under the deepest active event
-function awLayoutColumns(timedItems) {
+// Clamp start/end hours for multi-day events to the displayed day [0..24]
+function awClampStartH(ev, viewDs) {
+  const startD = ev.start.slice(0,10);
+  if (viewDs && startD !== viewDs) {
+    // Event started before this day → starts at 0 (midnight)
+    return 0;
+  }
+  return awTimeToHours(ev.start);
+}
+function awClampEndH(ev, viewDs) {
+  const endD = ev.end ? ev.end.slice(0,10) : '';
+  if (viewDs && endD && endD !== viewDs) {
+    // Event ends after this day → show until 24 (midnight end of day)
+    return 24;
+  }
+  return awTimeToHours(ev.end, ev.start);
+}
+function awLayoutColumns(timedItems, viewDs) {
   const THRESHOLD = 23 / 60;
 
   const items = timedItems.map(({ev, i}) => ({
     ev, i,
-    s: awTimeToHours(ev.start),
-    e: awTimeToHours(ev.end, ev.start),
+    s: awClampStartH(ev, viewDs),
+    e: awClampEndH(ev, viewDs),
     col: 0, totalCols: 1, sameStart: false,
     stackDepth: 0, isTopStacked: true, visibleHeight: null,
   }));
@@ -497,7 +514,7 @@ function awLayoutColumns(timedItems) {
 }
 
 // Time-grid event block — true side-by-side only when same start time
-function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackDepth = 0, isTopStacked = true, visibleHeight = null, nextCoverStart = null) {
+function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackDepth = 0, isTopStacked = true, visibleHeight = null, nextCoverStart = null, viewDs = null) {
   const now       = awIsNow(ev.start, ev.end);
   const past      = !now && awIsPast(ev.end);
   const fullName  = ev.summary || '(Sans titre)';
@@ -518,8 +535,8 @@ function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackD
   const timeColor   = isLM ? 'rgba(10,20,40,0.52)' : 'rgba(255,255,255,0.6)';
   const locColor    = isLM ? 'rgba(10,20,40,0.38)' : 'rgba(255,255,255,0.45)';
 
-  const startH  = awTimeToHours(ev.start);
-  const endH    = awTimeToHours(ev.end, ev.start);
+  const startH  = awClampStartH(ev, viewDs);
+  const endH    = awClampEndH(ev, viewDs);
   const clampS  = Math.max(startH, AW_HOUR_START);
   const clampE  = Math.min(endH,   AW_HOUR_END);
   if (clampS >= clampE) return '';
@@ -617,19 +634,12 @@ function awPopOpen(el, idx) {
   const pop = document.createElement('div');
   pop.id = 'aw-pop';
   pop.className = 'aw-pop';
+  // Let CSS handle background via data-theme / prefers-color-scheme
+  // Only set the accent color as a CSS custom property for the tint
   const hexToRgb = h => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `${r},${g},${b}`; };
   const accentRgb = hexToRgb(accent);
-  const _th2=document.documentElement.dataset.theme;
-  const isLight = _th2==='light' ? true : _th2==='dark' ? false : window.matchMedia('(prefers-color-scheme: light)').matches;
-  if (isLight) {
-    // Light mode: white frosted glass with very subtle color tint
-    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.07) 0%, rgba(255,255,255,0) 60%), rgba(252,252,255,0.96)`;
-    pop.style.borderLeft = `3px solid rgba(${accentRgb},0.5)`;
-  } else {
-    // Dark mode: deep frosted glass with subtle color tint
-    pop.style.background = `linear-gradient(145deg, rgba(${accentRgb},0.12) 0%, rgba(${accentRgb},0.04) 100%), rgba(22,26,40,0.94)`;
-    pop.style.borderLeft = `3px solid rgba(${accentRgb},0.5)`;
-  }
+  pop.style.setProperty('--pop-accent-rgb', accentRgb);
+  pop.style.borderLeft = `3px solid ${accent}`;
   pop.innerHTML = `
     <div class="aw-pop-accent" style="background:${accent}"></div>
     <button class="aw-pop-close" onclick="awPopClose()" aria-label="Fermer">
@@ -1136,7 +1146,7 @@ function awRenderDay(ds, container) {
   // All-day events: render as top banner
   const allDay=items.filter(x=>x.ev.start.length===10);
   const timed=items.filter(x=>x.ev.start.length>10);
-  const laid=awLayoutColumns(timed);
+  const laid=awLayoutColumns(timed, ds);
   const now=new Date(), nowH=now.getHours()+now.getMinutes()/60;
   let html=`<div class="awd-grid" style="height:${gridH}px"><div class="awd-gutter">`;
   for(let h=1;h<24;h++) html+=`<div class="awd-hour-lbl" style="top:${h*AW_PX_PER_HOUR}px">${String(h).padStart(2,'0')}:00</div>`;
@@ -1144,7 +1154,7 @@ function awRenderDay(ds, container) {
   for(let h=0;h<=24;h++) html+=`<div class="${h%6===0?'awd-hline major':'awd-hline'}" style="top:${h*AW_PX_PER_HOUR}px"></div>`;
   if(isToday) html+=`<div class="awd-now" style="top:${nowH*AW_PX_PER_HOUR}px"><div class="awd-now-dot"></div></div>`;
   html+=laid.map(({ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart})=>
-    awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart)).join('');
+    awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart,ds)).join('');
   html+='</div></div>';
   container.innerHTML=html;
   // All-day events: sticky row ABOVE the scroll container (inside .wk-page)
