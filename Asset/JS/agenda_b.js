@@ -639,7 +639,7 @@ function awPopOpen(el, idx) {
   const hexToRgb = h => { const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16); return `${r},${g},${b}`; };
   const accentRgb = hexToRgb(accent);
   pop.style.setProperty('--pop-accent-rgb', accentRgb);
-  pop.style.borderLeft = `3px solid ${accent}`;
+  // No border-left — handled by CSS accent bar
   pop.innerHTML = `
     <div class="aw-pop-accent" style="background:${accent}"></div>
     <button class="aw-pop-close" onclick="awPopClose()" aria-label="Fermer">
@@ -967,9 +967,9 @@ function awRenderCalendar(byDay, today) {
     const items   = byDay[ds] || [];
     const timed   = items.filter(({ev}) => ev.start.length > 10);
 
-    const laid = awLayoutColumns(timed);
+    const laid = awLayoutColumns(timed, ds);
     html += `<div class="aw-tcol${isToday ? ' today' : ''}${isWE ? ' we' : ''}${isPast && !isToday ? ' past' : ''}">`;
-    html += laid.map(({ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart}) => awGridEvHtml(ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart)).join('');
+    html += laid.map(({ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart}) => awGridEvHtml(ev, i, col, totalCols, sameStart, stackDepth, isTopStacked, visibleHeight, nextCoverStart, ds)).join('');
     html += `</div>`;
   }
   html += `</div>`;
@@ -1193,12 +1193,19 @@ function awRenderDay(ds, container) {
       container.insertBefore(allDayRow, container.firstChild);
     }
   }
-  let scrollTo;
-  if(typeof window._wkScrollTop==='number') scrollTo=window._wkScrollTop;
-  else if(isToday){scrollTo=nowH*AW_PX_PER_HOUR-availH*0.38; window._wkScrollTop=Math.max(0,scrollTo);}
-  else if(timed.length>0) scrollTo=awTimeToHours(timed[0].ev.start)*AW_PX_PER_HOUR-availH*0.25;
-  else scrollTo=7*AW_PX_PER_HOUR;
-  container.scrollTop=Math.max(0,scrollTo);
+  // Calculate scroll to show the right time — same absolute position regardless of allday strip
+  var targetH;
+  if(typeof window._wkScrollTop==='number'){
+    targetH=window._wkScrollTop;
+  } else if(isToday){
+    targetH=Math.max(0, nowH*AW_PX_PER_HOUR - window.innerHeight*0.35);
+    window._wkScrollTop=targetH;
+  } else if(timed.length>0){
+    targetH=Math.max(0, awClampStartH(timed[0].ev, ds)*AW_PX_PER_HOUR - window.innerHeight*0.3);
+  } else {
+    targetH=7*AW_PX_PER_HOUR;
+  }
+  container.scrollTop=targetH;
   container.addEventListener('scroll',function(){
     const top=container.scrollTop; window._wkScrollTop=top;
     document.querySelectorAll('.wk-grid-host').forEach(h=>{if(h!==container&&h.children.length>0)h.scrollTop=top;});

@@ -514,7 +514,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-tdays::-webkit-scrollbar { height: 3px; }
 .aw-tdays::-webkit-scrollbar-track { background: transparent; }
-.aw-tdays::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 99px; }
+.aw-tdays::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
 
 /* Day headers row */
 .aw-tdays-head-wrap {
@@ -593,7 +593,7 @@ Copyright © 2026 Ogust'1. All rights reserved.
   overflow: hidden;
 }
 .aw-tcol:last-child { border-right: none; }
-.aw-tcol.we  { background: rgba(255,255,255,0.015); }
+.aw-tcol.we  { background: rgba(128,128,128,0.04); }
 
 /* ── Time-grid event blocks ── */
 .aw-gev {
