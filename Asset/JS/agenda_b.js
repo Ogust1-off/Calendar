@@ -1206,24 +1206,22 @@ function awRenderDay(ds, container) {
       container.insertBefore(allDayRow, container.firstChild);
     }
   }
-  // Scroll to show the relevant time — always based on hour position (never memorized)
+  // Scroll to show the relevant time — purely based on hour, no cross-day sync
   var targetH;
   if(isToday){
+    // Show current time with a little space above
     targetH=Math.max(0, nowH*AW_PX_PER_HOUR - 200);
   } else if(timed.length>0){
-    // Scroll to first event of this day
-    var firstH = awClampStartH(timed[0].ev, ds);
+    // Show first event of this day
+    var firstH=awClampStartH(timed[0].ev,ds);
     targetH=Math.max(0, firstH*AW_PX_PER_HOUR - 100);
   } else {
-    targetH=7*AW_PX_PER_HOUR; // default: show 07:00
+    targetH=Math.max(0, 7*AW_PX_PER_HOUR); // default: 07:00
   }
-  container.scrollTop=targetH;
-  // Sync all other day containers to the same scroll position
-  window._wkScrollTop=targetH;
+  // Apply with a small delay to let the DOM settle after allday row insertion
+  requestAnimationFrame(function(){ container.scrollTop=targetH; });
   container.addEventListener('scroll',function(){
-    const top=container.scrollTop;
-    window._wkScrollTop=top;
-    // Sync sibling day containers
-    document.querySelectorAll('.wk-grid-host').forEach(function(h){if(h!==container&&h.children.length>0)h.scrollTop=top;});
+    // NO cross-sync — each day computes its own scroll target
+    // Syncing causes misalignment when days have different allday band heights
   },{passive:true});
 }

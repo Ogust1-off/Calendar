@@ -825,12 +825,61 @@ Copyright © 2026 Ogust'1. All rights reserved.
 }
 .aw-pop-desc-body a { color: var(--tint); }
 
-/* Pop text colors — theme aware */
-@media(prefers-color-scheme:light){
-  .aw-pop-title,.aw-pop-body{color:rgba(0,0,0,.88);}
-  .aw-pop-row,.aw-pop-icon,.aw-pop-desc-summary{color:rgba(0,0,0,.55);}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   FORCED THEME OVERRIDES — beat @media prefers-color-scheme
+   Place LAST so specificity wins over all @media rules above
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Forced LIGHT mode ── */
+[data-theme="light"] .aw-pop {
+  background: linear-gradient(145deg,rgba(var(--pop-accent-rgb,30,100,200),0.06) 0%,rgba(255,255,255,0) 60%),rgba(252,252,255,0.97) !important;
+  border-color: rgba(0,0,0,0.09) !important;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.13), 0 2px 8px rgba(0,0,0,0.07) !important;
+  color: rgba(10,20,40,0.88) !important;
 }
-[data-theme="light"] .aw-pop-title,[data-theme="light"] .aw-pop-body{color:rgba(0,0,0,.88)!important;}
-[data-theme="light"] .aw-pop-row,[data-theme="light"] .aw-pop-icon,[data-theme="light"] .aw-pop-desc-summary{color:rgba(0,0,0,.55)!important;}
-[data-theme="dark"] .aw-pop-title,[data-theme="dark"] .aw-pop-body{color:rgba(255,255,255,.88)!important;}
-[data-theme="dark"] .aw-pop-row,[data-theme="dark"] .aw-pop-icon,[data-theme="dark"] .aw-pop-desc-summary{color:rgba(255,255,255,.55)!important;}
+[data-theme="light"] .aw-pop-title { color: rgba(10,20,40,0.90) !important; }
+[data-theme="light"] .aw-pop-row   { color: rgba(10,20,40,0.55) !important; }
+[data-theme="light"] .aw-pop-icon  { color: rgba(10,20,40,0.38) !important; }
+[data-theme="light"] .aw-pop-close { background: rgba(0,0,0,0.06) !important; color: rgba(10,20,40,0.45) !important; }
+[data-theme="light"] .aw-pop-muted { color: rgba(10,20,40,0.40) !important; }
+[data-theme="light"] .aw-pop-tag   { border-color: rgba(0,0,0,0.12) !important; color: rgba(10,20,40,0.45) !important; background: rgba(0,0,0,0.04) !important; }
+[data-theme="light"] .aw-pop-desc-summary { color: rgba(10,20,40,0.45) !important; }
+[data-theme="light"] .aw-pop-desc-body    { color: rgba(10,20,40,0.60) !important; }
+/* Light event grid text */
+[data-theme="light"] .aw-gev-name { color: rgba(10,20,40,0.88) !important; }
+[data-theme="light"] .aw-gev-time { color: rgba(10,20,40,0.52) !important; }
+[data-theme="light"] .aw-gev-loc  { color: rgba(10,20,40,0.38) !important; }
+/* Light grid backgrounds */
+[data-theme="light"] .awd-gutter, [data-theme="light"] .awd-col,
+[data-theme="light"] .wk-grid-host { background: var(--bg) !important; }
+[data-theme="light"] .aw-tcol.we  { background: rgba(0,0,0,0.02) !important; }
+
+/* ── Forced DARK mode ── */
+[data-theme="dark"] .aw-pop {
+  background: linear-gradient(145deg,rgba(var(--pop-accent-rgb,30,50,80),0.14) 0%,rgba(var(--pop-accent-rgb,30,50,80),0.05) 100%),rgba(22,26,40,0.96) !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 4px 20px rgba(0,0,0,0.35) !important;
+  color: rgba(255,255,255,0.88) !important;
+}
+[data-theme="dark"] .aw-pop-title { color: rgba(255,255,255,0.92) !important; }
+[data-theme="dark"] .aw-pop-row   { color: rgba(255,255,255,0.55) !important; }
+[data-theme="dark"] .aw-pop-icon  { color: rgba(255,255,255,0.35) !important; }
+[data-theme="dark"] .aw-pop-close { background: rgba(255,255,255,0.09) !important; color: rgba(255,255,255,0.50) !important; }
+[data-theme="dark"] .aw-pop-muted { color: rgba(255,255,255,0.40) !important; }
+[data-theme="dark"] .aw-pop-tag   { border-color: rgba(255,255,255,0.14) !important; color: rgba(255,255,255,0.55) !important; background: rgba(255,255,255,0.06) !important; }
+[data-theme="dark"] .aw-pop-desc-summary { color: rgba(255,255,255,0.40) !important; }
+[data-theme="dark"] .aw-pop-desc-body    { color: rgba(255,255,255,0.55) !important; }
+/* Dark event grid text */
+[data-theme="dark"] .aw-gev-name { color: rgba(255,255,255,0.92) !important; }
+[data-theme="dark"] .aw-gev-time { color: rgba(255,255,255,0.60) !important; }
+[data-theme="dark"] .aw-gev-loc  { color: rgba(255,255,255,0.45) !important; }
+/* Dark grid backgrounds */
+[data-theme="dark"] .awd-col  { background: var(--bg2) !important; }
+[data-theme="dark"] .awd-gutter { background: var(--bg) !important; }
+[data-theme="dark"] .aw-tcol.we { background: rgba(255,255,255,0.015) !important; }
+/* Dark compact view */
+[data-theme="dark"] .aw-event   { background: var(--bg2) !important; border-bottom-color: var(--sep2) !important; }
+[data-theme="dark"] .aw-event .aw-title { color: var(--lbl) !important; }
+[data-theme="dark"] .aw-event .aw-meta  { color: var(--lbl3) !important; }
