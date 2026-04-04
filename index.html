@@ -630,9 +630,30 @@ function wkInit(byDay,today){
 function wkPrefetch(ds){var idx=_wkDates.indexOf(ds);[-1,0,1].forEach(function(d){var i=idx+d;if(i>=0&&i<_wkDates.length)wkRenderPage(_wkDates[i]);});}
 function wkRenderPage(ds){
   var strip=document.getElementById('wk-strip');if(!strip)return;
-  var host=strip.querySelector('.wk-page[data-date="'+ds+'"] .wk-grid-host');
+  var page=strip.querySelector('.wk-page[data-date="'+ds+'"]');
+  if(!page)return;
+  var host=page.querySelector('.wk-grid-host');
   if(!host||host.children.length>0)return;
   if(typeof awRenderDay==='function')awRenderDay(ds,host);
+  // After awRenderDay: if this page has NO allday row, insert a hidden placeholder
+  // so all wk-grid-host elements have the same top offset (alignment fix)
+  setTimeout(function(){
+    var hasAllDay=page.querySelector('.awd-allday-row');
+    var hasPlaceholder=page.querySelector('.awd-allday-placeholder');
+    if(!hasAllDay&&!hasPlaceholder){
+      // Find the tallest allday row among rendered siblings
+      var maxH=0;
+      strip.querySelectorAll('.awd-allday-row').forEach(function(r){
+        maxH=Math.max(maxH,r.offsetHeight);
+      });
+      if(maxH>0){
+        var ph=document.createElement('div');
+        ph.className='awd-allday-placeholder';
+        ph.style.cssText='height:'+maxH+'px;flex-shrink:0;';
+        page.insertBefore(ph,host);
+      }
+    }
+  },50);
 }
 function wkSnap(ds,smooth,render){
   var strip=document.getElementById('wk-strip');if(!strip)return;
@@ -879,7 +900,7 @@ function _applyTheme(v){
 }
 function showCalSettings(){ _obOpenCalSettings(); }
 
-function accRefresh(){_haptic('medium');_haptic('medium');
+function accRefresh(){_haptic('medium');
   var ico=document.getElementById('acc-refresh-ico'),st=document.getElementById('acc-refresh-status');
   if(ico)ico.innerHTML='&#9203;';if(st)st.innerHTML='Updating…';
   _wkDirty=true;
@@ -899,7 +920,7 @@ function accUpdateApp(){
     }else{if(st)st.innerHTML='&#9989; Done!';setTimeout(function(){location.reload(true);},800);}
   });
 }
-function accLogout(){_haptic('heavy');_haptic('heavy');
+function accLogout(){_haptic('warning');
   var lang=typeof window._getLang==='function'?window._getLang():'en';
   var msg=lang==='fr'?'R\u00e9initialiser et se d\u00e9connecter\u00a0?':'Sign out and reset the app?';
   if(!confirm(msg))return;
@@ -943,38 +964,44 @@ setInterval(function(){
   if(typeof awLastUpdated!=='undefined'&&window._awByDay&&awLastUpdated!==_lastTs){
     _lastTs=awLastUpdated;
     var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
-    _wkToday=today;_wkByDay=window._awByDay;_wkDirty=true;
-    if(_tab===1){
-      // Refresh header and re-render current page without resetting position
-      wkInit(_wkByDay,_wkToday);
-    }
+    _wkToday=today;_wkByDay=window._awByDay;
     wkUpdateHdr();
+    if(_tab===1&&_wkDates.length){
+      // Refresh only already-rendered pages (don't reset scroll position)
+      _wkDates.forEach(function(ds){
+        var host=document.querySelector('.wk-page[data-date="'+ds+'"] .wk-grid-host');
+        if(host&&host.children.length>0){
+          // Re-render in place, preserving scroll
+          var scroll=host.scrollTop;
+          if(typeof awRenderDay==='function')awRenderDay(ds,host,true);
+          host.scrollTop=scroll;
+        }
+      });
+    }
   }
-  var lm=window.matchMedia('(prefers-color-scheme:light)').matches;
-  if(typeof _lm==='undefined')_lm=lm;
-  if(lm!==_lm){_lm=lm;_wkDirty=true;if(_tab===1&&_wkByDay)wkInit(_wkByDay,_wkToday);}
 },700);
 
-/* ── Init ── */
-// Haptic feedback via web-haptics (https://haptics.lochie.me)
-var _wh = null;
-function _hapticInit(){
-  try{
-    if(window.WebHaptics){
-}}catch(e){}}
-// Haptics — native Vibration API (works Android; iOS needs user gesture)
+/* ── Haptics ── */
+// Minimal, reliable haptic feedback using native Vibration API
+// Works on Android; iOS Safari does not support navigator.vibrate
 (function(){
-  var PAT={selection:[4],light:[8],medium:[12],heavy:[18,8,12],success:[8,60,8],warning:[15,50,15],error:[20,60,20,60,20]};
-  window._haptic=function(s){try{if(navigator.vibrate)navigator.vibrate(PAT[s]||PAT.medium);}catch(e){}};
-  document.addEventListener('click',function(e){
-    var b=e.target.closest('button');if(!b)return;
-    var s=b.classList.contains('acc-row-danger')||b.classList.contains('btn-danger')?'warning':
-          b.classList.contains('ob-btn-p')||b.id==='wk-today-btn'?'medium':
-          b.classList.contains('wk-nav-btn')||b.classList.contains('tbtn')||
-          b.classList.contains('acc-seg-btn')||b.classList.contains('wk-mini')||
-          b.classList.contains('ob-src-btn')||b.classList.contains('ob-preset-btn')?'selection':'light';
-    window._haptic(s);
-  },true);
+  // Simple patterns: short = light, longer = heavier
+  var H={
+    selection: 5,
+    light:    10,
+    medium:   18,
+    heavy:    30,
+    success:  [10,80,10],
+    warning:  [20,60,20],
+    error:    [30,50,30,50,30]
+  };
+  window._haptic=function(type){
+    try{
+      if(!navigator.vibrate)return;
+      var p=H[type]||H.light;
+      navigator.vibrate(p);
+    }catch(e){}
+  };
 })();
 
 window.addEventListener('load',function(){

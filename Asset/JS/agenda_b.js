@@ -1147,7 +1147,7 @@ setInterval(() => {
   });
 }, 1000);
 // ── DAY GRID (Week view) ──────────────────────────────────────────────────────
-function awRenderDay(ds, container) {
+function awRenderDay(ds, container, preserveScroll) {
   if (!container) return;
   const byDay=window._awByDay||{}, today=awToday(), isToday=ds===today;
   const navH=(document.getElementById('nb')||{offsetHeight:56}).offsetHeight;
@@ -1218,8 +1218,10 @@ function awRenderDay(ds, container) {
   } else {
     targetH=Math.max(0, 7*AW_PX_PER_HOUR); // default: 07:00
   }
-  // Apply with a small delay to let the DOM settle after allday row insertion
-  requestAnimationFrame(function(){ container.scrollTop=targetH; });
+  // Apply scroll only if not preserving (skip on background refresh)
+  if(!preserveScroll){
+    requestAnimationFrame(function(){ container.scrollTop=targetH; });
+  }
   container.addEventListener('scroll',function(){
     // NO cross-sync — each day computes its own scroll target
     // Syncing causes misalignment when days have different allday band heights
