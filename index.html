@@ -380,6 +380,8 @@
       themeDark:'Dark',themeLight:'Light',themeAuto:'Auto',
       logoutBtn:'Sign out & reset',byShortcut:'by Shortcut\u2122',
       sCalendars:'Calendars',
+      btnNext:'Next',btnBack:'Back',btnSkip:'Skip',btnSave:'Save',btnClose:'Close',btnOpen:'Open calendar',btnAdd:'+ Add',btnAddCal:'+ Add calendar',
+      obSaved:'Saved!',obNoCal2:'No second calendar set up.',
       accSrcApi:'Source & API key',accCal1Style:'Calendar 1 colour style',
       accCal2Color:'Calendar 2 colour',accExtraCals:'Extra calendars',
       sAdvanced:'Advanced',sApp:'App',sDisplay:'Display',
@@ -396,6 +398,8 @@
       themeDark:'Sombre',themeLight:'Clair',themeAuto:'Auto',
       logoutBtn:'D\u00e9connexion & r\u00e9init.',byShortcut:'by Shortcut\u2122',
       sCalendars:'Calendriers',
+      btnNext:'Suivant',btnBack:'Retour',btnSkip:'Passer',btnSave:'Enregistrer',btnClose:'Fermer',btnOpen:'Ouvrir le calendrier',btnAdd:'+ Ajouter',btnAddCal:'+ Ajouter un calendrier',
+      obSaved:'Enregistr\u00e9\u00a0!',obNoCal2:'Aucun deuxi\u00e8me calendrier configur\u00e9.',
       accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
       accCal2Color:'Couleur Cal\u00a02',accExtraCals:'Calendriers suppl\u00e9mentaires',
       sAdvanced:'Avanc\u00e9',sApp:'Application',sDisplay:'Affichage',
@@ -630,30 +634,9 @@ function wkInit(byDay,today){
 function wkPrefetch(ds){var idx=_wkDates.indexOf(ds);[-1,0,1].forEach(function(d){var i=idx+d;if(i>=0&&i<_wkDates.length)wkRenderPage(_wkDates[i]);});}
 function wkRenderPage(ds){
   var strip=document.getElementById('wk-strip');if(!strip)return;
-  var page=strip.querySelector('.wk-page[data-date="'+ds+'"]');
-  if(!page)return;
-  var host=page.querySelector('.wk-grid-host');
+  var host=strip.querySelector('.wk-page[data-date="'+ds+'"] .wk-grid-host');
   if(!host||host.children.length>0)return;
   if(typeof awRenderDay==='function')awRenderDay(ds,host);
-  // After awRenderDay: if this page has NO allday row, insert a hidden placeholder
-  // so all wk-grid-host elements have the same top offset (alignment fix)
-  setTimeout(function(){
-    var hasAllDay=page.querySelector('.awd-allday-row');
-    var hasPlaceholder=page.querySelector('.awd-allday-placeholder');
-    if(!hasAllDay&&!hasPlaceholder){
-      // Find the tallest allday row among rendered siblings
-      var maxH=0;
-      strip.querySelectorAll('.awd-allday-row').forEach(function(r){
-        maxH=Math.max(maxH,r.offsetHeight);
-      });
-      if(maxH>0){
-        var ph=document.createElement('div');
-        ph.className='awd-allday-placeholder';
-        ph.style.cssText='height:'+maxH+'px;flex-shrink:0;';
-        page.insertBefore(ph,host);
-      }
-    }
-  },50);
 }
 function wkSnap(ds,smooth,render){
   var strip=document.getElementById('wk-strip');if(!strip)return;
@@ -687,19 +670,19 @@ function wkUpdateHdr(){
     days.appendChild(btn);
   });
 }
-function wkGoToday(){_haptic('medium');_wkCur=_wkToday;wkSnap(_wkCur,true,true);wkUpdateHdr();}
+function wkGoToday(){_haptic('medium');_wkCur=_wkToday;window._wkScrollTop=undefined;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 function _initWkDaysSwipe(){
   // Navigation via boutons < > — swipe supprimé (trop instable)
   // Les boutons sont dans le HTML : wk-prev-btn, wk-next-btn
 }
-function wkGoPrev(){_haptic('light');
+function wkGoPrev(){_haptic('light');window._wkScrollTop=undefined;
   if(!_wkCur)return;
   var d=new Date(_wkCur+'T00:00:00');
   d.setDate(d.getDate()-7);
   var ds=_ds(d);
   if(_wkDates.includes(ds)){_wkCur=ds;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 }
-function wkGoNext(){_haptic('light');
+function wkGoNext(){_haptic('light');window._wkScrollTop=undefined;
   if(!_wkCur)return;
   var d=new Date(_wkCur+'T00:00:00');
   d.setDate(d.getDate()+7);
@@ -982,26 +965,48 @@ setInterval(function(){
 },700);
 
 /* ── Haptics ── */
-// Minimal, reliable haptic feedback using native Vibration API
-// Works on Android; iOS Safari does not support navigator.vibrate
 (function(){
-  // Simple patterns: short = light, longer = heavier
-  var H={
-    selection: 5,
-    light:    10,
-    medium:   18,
-    heavy:    30,
-    success:  [10,80,10],
-    warning:  [20,60,20],
-    error:    [30,50,30,50,30]
-  };
-  window._haptic=function(type){
+  // Vibration patterns (Android Vibration API)
+  var H={selection:4,light:8,medium:15,heavy:28,success:[8,60,8],warning:[20,60,20],error:[30,50,30,50,30]};
+
+  // iOS PWA: AudioContext silent buffer — triggers Taptic Engine on some iOS versions
+  var _actx=null;
+  function _iosHaptic(){
     try{
-      if(!navigator.vibrate)return;
-      var p=H[type]||H.light;
-      navigator.vibrate(p);
+      if(!_actx)_actx=new(window.AudioContext||window.webkitAudioContext)();
+      // Resume if suspended (iOS requires user gesture)
+      if(_actx.state==='suspended')_actx.resume();
+      var buf=_actx.createBuffer(1,_actx.sampleRate*0.01,_actx.sampleRate);
+      var src=_actx.createBufferSource();
+      src.buffer=buf;src.connect(_actx.destination);src.start(0);
     }catch(e){}
+  }
+
+  window._haptic=function(type){
+    // Android: Vibration API
+    try{if(navigator.vibrate){navigator.vibrate(H[type]||H.light);}}catch(e){}
+    // iOS: AudioContext trick (best effort)
+    _iosHaptic();
   };
+
+  // Global click listener — attach haptic to every button tap
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('button,[role=button]');
+    if(!b)return;
+    var type='light';
+    if(b.classList.contains('acc-row-danger'))           type='warning';
+    else if(b.classList.contains('ob-btn-p'))            type='medium';
+    else if(b.id==='wk-today-btn')                       type='medium';
+    else if(b.classList.contains('tbtn'))                type='selection';
+    else if(b.classList.contains('wk-mini'))             type='selection';
+    else if(b.classList.contains('wk-nav-btn'))          type='light';
+    else if(b.classList.contains('acc-seg-btn'))         type='selection';
+    else if(b.classList.contains('ob-src-btn'))          type='selection';
+    else if(b.classList.contains('ob-preset-btn'))       type='selection';
+    else if(b.classList.contains('awd-allday-pill'))     type='light';
+    else if(b.classList.contains('aw-pop-close'))        type='light';
+    window._haptic(type);
+  },true);
 })();
 
 window.addEventListener('load',function(){

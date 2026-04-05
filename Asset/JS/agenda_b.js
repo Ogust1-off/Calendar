@@ -1218,12 +1218,19 @@ function awRenderDay(ds, container, preserveScroll) {
   } else {
     targetH=Math.max(0, 7*AW_PX_PER_HOUR); // default: 07:00
   }
-  // Apply scroll only if not preserving (skip on background refresh)
+  // Apply scroll: use shared position if available, else compute from time
+  var sharedTop=typeof window._wkScrollTop==='number'?window._wkScrollTop:-1;
   if(!preserveScroll){
-    requestAnimationFrame(function(){ container.scrollTop=targetH; });
+    var finalTop=sharedTop>=0?sharedTop:targetH;
+    requestAnimationFrame(function(){ container.scrollTop=finalTop; });
+    if(sharedTop<0) window._wkScrollTop=targetH; // first day sets the shared position
   }
+  // Sync: when user scrolls this day, copy to all other rendered days
   container.addEventListener('scroll',function(){
-    // NO cross-sync — each day computes its own scroll target
-    // Syncing causes misalignment when days have different allday band heights
+    var top=container.scrollTop;
+    window._wkScrollTop=top;
+    document.querySelectorAll('.wk-grid-host').forEach(function(h){
+      if(h!==container&&h.children.length>0&&Math.abs(h.scrollTop-top)>1)h.scrollTop=top;
+    });
   },{passive:true});
 }
