@@ -1170,41 +1170,36 @@ function awRenderDay(ds, container, preserveScroll) {
     awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart,ds)).join('');
   html+='</div></div>';
   container.innerHTML=html;
-  // All-day events: sticky row ABOVE the scroll container (inside .wk-page)
-  // Remove old allday row if exists
+  // All-day zone — ALWAYS inserted, whether events exist or not
+  // This guarantees all wk-grid-host elements start at the same vertical offset
   var oldRow=container.parentElement&&container.parentElement.querySelector('.awd-allday-row');
   if(oldRow)oldRow.remove();
-  if(allDay.length>0){
-    var allDayRow=document.createElement('div');
-    allDayRow.className='awd-allday-row';
-    var labelEl=document.createElement('div');
-    labelEl.className='awd-allday-label';
-    labelEl.textContent='all-day';
-    allDayRow.appendChild(labelEl);
-    var pillsEl=document.createElement('div');
-    pillsEl.className='awd-allday-pills';
-    allDay.forEach(function(item){
-      var ev=item.ev;
-      var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
-      var adHex=AW_COLOR_HEX[adColor]||'#3b82f6';
-      var idx=awEvCache.indexOf(ev);
-      var pill=document.createElement('button');
-      pill.className='awd-allday-pill';
-      pill.style.background=adHex;
-      var dot=document.createElement('span');dot.className='awd-pill-dot';
-      var name=document.createElement('span');name.className='awd-pill-name';
-      name.textContent=ev.summary||'';
-      pill.appendChild(dot);pill.appendChild(name);
-      pill.onclick=function(){if(typeof awPopOpen==='function')awPopOpen(pill,idx);};
-      pillsEl.appendChild(pill);
-    });
-    allDayRow.appendChild(pillsEl);
-    // Insert as sibling BEFORE the scrollable grid container → stays fixed in wk-page column
-    if(container.parentElement){
-      container.parentElement.insertBefore(allDayRow, container);
-    } else {
-      container.insertBefore(allDayRow, container.firstChild);
-    }
+  var allDayRow=document.createElement('div');
+  allDayRow.className='awd-allday-row'+(allDay.length===0?' awd-allday-empty':'');
+  var labelEl=document.createElement('div');
+  labelEl.className='awd-allday-label';
+  labelEl.textContent='all-day';
+  allDayRow.appendChild(labelEl);
+  var pillsEl=document.createElement('div');
+  pillsEl.className='awd-allday-pills';
+  allDay.forEach(function(item){
+    var ev=item.ev;
+    var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
+    var adHex=AW_COLOR_HEX[adColor]||'#3b82f6';
+    var idx=awEvCache.indexOf(ev);
+    var pill=document.createElement('button');
+    pill.className='awd-allday-pill';
+    pill.style.background=adHex;
+    var dot=document.createElement('span');dot.className='awd-pill-dot';
+    var name=document.createElement('span');name.className='awd-pill-name';
+    name.textContent=ev.summary||'';
+    pill.appendChild(dot);pill.appendChild(name);
+    pill.onclick=function(){if(typeof awPopOpen==='function')awPopOpen(pill,idx);};
+    pillsEl.appendChild(pill);
+  });
+  allDayRow.appendChild(pillsEl);
+  if(container.parentElement){
+    container.parentElement.insertBefore(allDayRow, container);
   }
   // Scroll to show the relevant time — purely based on hour, no cross-day sync
   var targetH;

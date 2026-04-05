@@ -655,7 +655,7 @@ function _obFillAdvanced(con,bot){
       '</div>'+
       '<input class="ob-inp ob-mono" placeholder="ID ou webcal://\u2026" value="'+_obEsc(cal.url||'')+'" oninput="_obExtraUrl('+i+',this)" style="font-size:12.5px;padding:9px 12px"/>'+
       '<div style="display:flex;align-items:center;gap:8px;margin-top:8px">'+
-        '<label class="ob-lbl" style="margin:0;text-transform:none;letter-spacing:0;font-size:12px">Couleur :</label>'+
+        '<label class="ob-lbl" style="margin:0;text-transform:none;letter-spacing:0;font-size:12px">'+_ot('obColor','Colour:')+' </label>'+
         '<button class="ob-color-dot-btn" data-color="'+(cal.color||'blue')+'" style="background:'+hex+';" onclick="_obExtraColorPop(this,'+i+')" title="Couleur"></button>'+
         '<button onclick="_obRemoveExtra('+i+')" style="background:none;border:none;color:#ff453a;font-size:18px;cursor:pointer;margin-left:auto;padding:0 4px">\u00d7</button>'+
       '</div></div>';

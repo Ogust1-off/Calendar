@@ -2,38 +2,41 @@
 /* ── All-day events row — Apple Calendar style ──────────────── */
 .awd-allday-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0;
-  padding: 5px 8px 5px 0;
+  padding: 0;
   background: var(--bg2);
   border-bottom: .5px solid var(--sep);
-  min-height: 30px;
+  /* FIXED height — identical for ALL days, with or without events */
+  height: 32px;
   flex-shrink: 0;
   flex-wrap: nowrap;
   overflow: hidden;
-  /* Sticks at the top — lives inside .wk-page as flex child above wk-grid-host */
   position: relative;
   z-index: 10;
 }
+/* Empty all-day zone: subtle to not distract */
+.awd-allday-empty { opacity: .5; }
 .awd-allday-label {
   font-size: 10px;
   color: var(--lbl3);
   flex-shrink: 0;
   width: 52px;
+  height: 100%;
   text-align: right;
-  /* Match .awd-gutter border */
   padding-right: 7px;
-  padding-top: 5px;
-  line-height: 1;
+  line-height: 32px; /* vertically centered in fixed height zone */
   border-right: .5px solid var(--sep);
 }
 .awd-allday-pills {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* single line — fixed height */
   gap: 4px;
   flex: 1;
   min-width: 0;
-  padding-left: 6px;
+  padding: 0 6px;
+  align-items: center;
+  overflow: hidden;
 }
 .awd-allday-pill {
   display: inline-flex;
@@ -48,8 +51,16 @@
   color: #fff;
   -webkit-tap-highlight-color: transparent;
   transition: opacity .15s, transform .1s;
-  max-width: 100%;
+  /* 50% of the pills area — expands to fill if only one event */
+  flex: 0 0 calc(50% - 4px);
+  max-width: calc(50% - 4px);
+  min-width: 0;
   overflow: hidden;
+}
+/* Single pill: expand to full width */
+.awd-allday-pills:has(.awd-allday-pill:only-child) .awd-allday-pill {
+  flex: 0 0 100%;
+  max-width: 100%;
 }
 .awd-allday-pill:active { opacity: .75; transform: scale(.97); }
 .awd-pill-dot {
