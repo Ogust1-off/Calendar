@@ -7,7 +7,6 @@
   padding: 0;
   background: var(--bg2);
   border-bottom: .5px solid var(--sep);
-  /* FIXED height — identical for ALL days, with or without events */
   height: 32px;
   flex-shrink: 0;
   flex-wrap: nowrap;
@@ -15,8 +14,15 @@
   position: relative;
   z-index: 10;
 }
-/* Empty all-day zone: subtle to not distract */
-.awd-allday-empty { opacity: .5; }
+/* Empty all-day zone: invisible but keeps height for alignment */
+.awd-allday-empty {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+}
+.awd-allday-empty .awd-allday-label {
+  opacity: 0;
+  border-right-color: transparent !important;
+}
 .awd-allday-label {
   font-size: 10px;
   color: var(--lbl3);
@@ -30,14 +36,17 @@
 }
 .awd-allday-pills {
   display: flex;
-  flex-wrap: nowrap; /* single line — fixed height */
+  flex-wrap: nowrap;
   gap: 4px;
   flex: 1;
   min-width: 0;
   padding: 0 6px;
   align-items: center;
-  overflow: hidden;
+  overflow-x: auto;   /* scroll if >2 pills */
+  overflow-y: hidden;
+  scrollbar-width: none; /* hide scrollbar */
 }
+.awd-allday-pills::-webkit-scrollbar { display: none; }
 .awd-allday-pill {
   display: inline-flex;
   align-items: center;
@@ -51,7 +60,7 @@
   color: #fff;
   -webkit-tap-highlight-color: transparent;
   transition: opacity .15s, transform .1s;
-  /* 50% of the pills area — expands to fill if only one event */
+  /* Each pill takes at most 50% — scrollable if >2 events */
   flex: 0 0 calc(50% - 4px);
   max-width: calc(50% - 4px);
   min-width: 0;
