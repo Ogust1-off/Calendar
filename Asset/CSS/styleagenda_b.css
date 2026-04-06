@@ -2,22 +2,24 @@
 /* ── All-day events row — Apple Calendar style ──────────────── */
 .awd-allday-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0;
   padding: 0;
   background: var(--bg2);
   border-bottom: .5px solid var(--sep);
-  height: 32px;
+  /* height is set dynamically by JS */
+  min-height: 32px;
   flex-shrink: 0;
-  flex-wrap: nowrap;
   overflow: hidden;
   position: relative;
   z-index: 10;
+  transition: height .15s ease;
 }
-/* Empty all-day zone: invisible but keeps height for alignment */
+/* Empty all-day zone: transparent + behind grid (z-index -1) */
 .awd-allday-empty {
   background: transparent !important;
   border-bottom-color: transparent !important;
+  z-index: -1 !important;
 }
 .awd-allday-empty .awd-allday-label {
   opacity: 0;
@@ -28,27 +30,29 @@
   color: var(--lbl3);
   flex-shrink: 0;
   width: 52px;
-  height: 100%;
+  min-height: 32px;
   text-align: right;
   padding-right: 7px;
-  line-height: 32px; /* vertically centered in fixed height zone */
+  padding-top: 8px;
+  /* line-height set dynamically by JS for single row, else top-aligned */
   border-right: .5px solid var(--sep);
 }
 .awd-allday-pills {
-  display: flex;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2 columns */
   gap: 4px;
   flex: 1;
   min-width: 0;
-  padding: 0 6px;
-  align-items: center;
-  overflow-x: auto;   /* scroll if >2 pills */
-  overflow-y: hidden;
-  scrollbar-width: none; /* hide scrollbar */
+  padding: 4px 6px;
+  align-content: start;
+  overflow-y: auto;    /* scroll if >5 pills (2.5 rows visible) */
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .awd-allday-pills::-webkit-scrollbar { display: none; }
 .awd-allday-pill {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 5px;
   padding: 3px 8px 3px 6px;
@@ -60,16 +64,13 @@
   color: #fff;
   -webkit-tap-highlight-color: transparent;
   transition: opacity .15s, transform .1s;
-  /* Each pill takes at most 50% — scrollable if >2 events */
-  flex: 0 0 calc(50% - 4px);
-  max-width: calc(50% - 4px);
   min-width: 0;
   overflow: hidden;
+  height: 26px;
 }
-/* Single pill: expand to full width */
-.awd-allday-pills:has(.awd-allday-pill:only-child) .awd-allday-pill {
-  flex: 0 0 100%;
-  max-width: 100%;
+/* Single pill spans both columns */
+.awd-allday-pills .awd-allday-pill:only-child {
+  grid-column: 1 / -1;
 }
 .awd-allday-pill:active { opacity: .75; transform: scale(.97); }
 .awd-pill-dot {
