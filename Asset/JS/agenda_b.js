@@ -543,13 +543,15 @@ function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackD
   const _th=document.documentElement.dataset.theme;
   const isLM = _th==='light' ? true : _th==='dark' ? false : window.matchMedia('(prefers-color-scheme: light)').matches;
 
-  const bgAlpha    = isLM ? '33' : '44';
-  const bg = `${accent}${bgAlpha}`;
+  // Special case: white/liturgical color — always use parchment bg + dark text
+  const isWhite = color === 'white';
+  const bgAlpha    = isWhite ? 'ff' : isLM ? '33' : '44';
+  const bg = isWhite ? accent : `${accent}${bgAlpha}`;
   const glowColor = now ? `${accent}33` : 'transparent';
-  const borderColor = accent;
-  const textColor   = isLM ? 'rgba(10,20,40,0.88)' : 'rgba(255,255,255,0.92)';
-  const timeColor   = isLM ? 'rgba(10,20,40,0.52)' : 'rgba(255,255,255,0.6)';
-  const locColor    = isLM ? 'rgba(10,20,40,0.38)' : 'rgba(255,255,255,0.45)';
+  const borderColor = isWhite ? '#c8b89a' : accent;
+  const textColor   = isWhite ? 'rgba(60,40,20,0.88)' : isLM ? 'rgba(10,20,40,0.88)' : 'rgba(255,255,255,0.92)';
+  const timeColor   = isWhite ? 'rgba(60,40,20,0.55)' : isLM ? 'rgba(10,20,40,0.52)' : 'rgba(255,255,255,0.6)';
+  const locColor    = isWhite ? 'rgba(60,40,20,0.42)' : isLM ? 'rgba(10,20,40,0.38)' : 'rgba(255,255,255,0.45)';
 
   const startH  = awClampStartH(ev, viewDs);
   const endH    = awClampEndH(ev, viewDs);
@@ -623,7 +625,10 @@ function awUpdateTimer() {
 
 function awPopOpen(el, idx) {
   if(typeof _haptic==='function')_haptic('light');
-  awPopClose();
+  // Kill any pending remove timer and remove old pop immediately
+  if (window._awPopRemoveTimer) { clearTimeout(window._awPopRemoveTimer); window._awPopRemoveTimer = null; }
+  const oldPop = document.getElementById('aw-pop');
+  if (oldPop) { if (window._awPopTimer) { clearInterval(window._awPopTimer); window._awPopTimer = null; } oldPop.remove(); }
 
   const ev      = awEvCache[idx];
   if (!ev) return;
@@ -769,11 +774,14 @@ function awPopOutside(e) {
 }
 
 function awPopClose() {
+  // Cancel any in-flight remove timeout (prevents killing a newly opened pop)
+  if (window._awPopRemoveTimer) { clearTimeout(window._awPopRemoveTimer); window._awPopRemoveTimer = null; }
   const pop = document.getElementById('aw-pop');
   if (!pop) return;
   if (window._awPopTimer) { clearInterval(window._awPopTimer); window._awPopTimer = null; }
   pop.classList.remove('visible');
-  setTimeout(() => pop.remove(), 180);
+  const el = pop;
+  window._awPopRemoveTimer = setTimeout(() => { el.remove(); window._awPopRemoveTimer = null; }, 200);
 }
 
 // ── Compact view ──────────────────────────────────────────────────────────────
@@ -1223,27 +1231,7 @@ function awRenderDay(ds, container, preserveScroll) {
   allDayRow.appendChild(pillsEl);
   if(container.parentElement){
     container.parentElement.insertBefore(allDayRow,container);
-    // Sync ONLY the currently visible wk-page and its immediate neighbors (same week)
-    setTimeout(function(){
-      var strip=document.getElementById('wk-strip');if(!strip)return;
-      // Find which pages are rendered (have an allday row)
-      var rendered=Array.from(strip.querySelectorAll('.wk-page')).filter(function(p){
-        return p.querySelector('.awd-allday-row');
-      });
-      // Find the max rowH among rendered pages
-      var maxH=0;
-      rendered.forEach(function(p){
-        var r=p.querySelector('.awd-allday-row');
-        if(r) maxH=Math.max(maxH,parseInt(r.dataset.rowH)||32);
-      });
-      // Apply maxH to ALL rendered pages so heights are uniform
-      rendered.forEach(function(p){
-        var r=p.querySelector('.awd-allday-row');
-        if(r && parseInt(r.style.height)<maxH){
-          r.style.height=maxH+'px';
-        }
-      });
-    },30);
+    // No cross-page height sync — each day is full-width, only one visible at a time
   }
   // Scroll to show the relevant time — purely based on hour, no cross-day sync
   var targetH;

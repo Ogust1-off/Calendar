@@ -476,10 +476,12 @@ function _obOpenColorPop(btn,idx){
   if(existing){existing.remove();if(existing.dataset.idx==idx)return;}
   var pop=document.createElement('div');pop.id='ob-color-pop';pop.dataset.idx=idx;
   pop.style.cssText='position:absolute;z-index:9999;background:var(--bg2,#1c1c1e);border:.5px solid var(--sep);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;width:224px;box-shadow:0 8px 32px rgba(0,0,0,.5);';
+  var _EC=['blue','cyan','violet','amber','emerald','rose','orange','grey'];
   OB_COLORS.forEach(function(c){
     var cur=btn.dataset.color===c.k;
     var b=document.createElement('button');
-    b.style.cssText='width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:'+(cur?'2.5px solid #fff':'2px solid transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;';
+    b.style.cssText='position:relative;width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:'+(cur?'2.5px solid #fff':'2px solid transparent')+';cursor:pointer;display:flex;align-items:center;justify-content:center;';
+    if(!cur&&_EC.indexOf(c.k)>=0){var bd=document.createElement('span');bd.textContent='E';bd.style.cssText='position:absolute;bottom:1px;right:1px;font-size:6px;font-weight:800;color:rgba(255,255,255,.85);pointer-events:none;text-shadow:0 0 2px rgba(0,0,0,.6)';b.appendChild(bd);}
     if(cur)b.innerHTML='<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>';
     b.onclick=function(e){e.stopPropagation();btn.style.background=c.hex;btn.dataset.color=c.k;pop.remove();_obSaveSubjs();};
     pop.appendChild(b);
@@ -678,9 +680,12 @@ function _obExtraColorPop(btn,i){
   var existing=document.getElementById('ob-color-pop');if(existing)existing.remove();
   var pop=document.createElement('div');pop.id='ob-color-pop';
   pop.style.cssText='position:absolute;z-index:9999;background:var(--bg2,#1c1c1e);border:.5px solid var(--sep);border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:7px;width:224px;box-shadow:0 8px 32px rgba(0,0,0,.5);';
+  var _ECAM_C=['blue','cyan','violet','amber','emerald','rose','orange','grey'];
   OB_COLORS.forEach(function(c){
     var b=document.createElement('button');
-    b.style.cssText='width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:2px solid transparent;cursor:pointer;';
+    var isE=_ECAM_C.indexOf(c.k)>=0;
+    b.style.cssText='position:relative;width:28px;height:28px;border-radius:50%;background:'+c.hex+';border:2px solid transparent;cursor:pointer;';
+    if(isE){var badge=document.createElement('span');badge.textContent='E';badge.style.cssText='position:absolute;bottom:1px;right:1px;font-size:6px;font-weight:800;color:rgba(255,255,255,.85);pointer-events:none;text-shadow:0 0 2px rgba(0,0,0,.6)';b.appendChild(badge);}
     b.onclick=function(e){e.stopPropagation();btn.style.background=c.hex;btn.dataset.color=c.k;pop.remove();var d=_obLoad();var ex=d.extraCals||[];if(ex[i])ex[i].color=c.k;d.extraCals=ex;_obSave(d);};
     pop.appendChild(b);
   });
@@ -717,7 +722,7 @@ function _obExtraColorPop(btn,i){
   background:var(--fill);border:none;cursor:pointer;color:var(--lbl2);
   display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
 #ob-content,#ob-cal-content{flex:1;overflow-y:auto;padding:20px 20px 4px;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
-#ob-bottom,#ob-cal-bottom{display:block;padding:12px 20px calc(env(safe-area-inset-bottom,0px)+14px);position:relative;z-index:1;flex-shrink:0;box-sizing:border-box}
+#ob-bottom,#ob-cal-bottom{display:flex;flex-direction:column;gap:6px;padding:12px 20px calc(env(safe-area-inset-bottom,0px)+14px);position:relative;z-index:1;flex-shrink:0}
 .ob-slide{animation:obslide .22s cubic-bezier(.25,.8,.25,1) both}
 @keyframes obslide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
 .ob-step-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -803,7 +808,7 @@ function _obExtraColorPop(btn,i){
 .ob-done-h{font-size:28px;font-weight:800;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
 .ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);-webkit-tap-highlight-color:transparent;transition:transform .12s;-webkit-appearance:none;appearance:none}
 .ob-btn-p:active{transform:scale(.97)}
-.ob-btn-p.ob-btn-full{width:100%}
+.ob-btn-p.ob-btn-full{width:100%;flex-shrink:0}
 .ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:var(--fill);color:var(--lbl2);flex-shrink:0;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none}
 .ob-btn-g:active{transform:scale(.97)}
 .ob-btn-skip{background:none;border:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--lbl3);font-family:inherit;padding:14px 10px}
