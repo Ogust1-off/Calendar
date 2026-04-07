@@ -7,23 +7,22 @@
   padding: 0;
   background: var(--bg2);
   border-bottom: .5px solid var(--sep);
-  /* height is set dynamically by JS */
   min-height: 32px;
   flex-shrink: 0;
   overflow: hidden;
   position: relative;
   z-index: 10;
-  transition: height .15s ease;
 }
-/* Empty all-day zone: transparent + behind grid (z-index -1) */
+/* Empty: always visible with faded text */
 .awd-allday-empty {
-  background: transparent !important;
-  border-bottom-color: transparent !important;
-  z-index: -1 !important;
+  background: var(--bg2);
 }
-.awd-allday-empty .awd-allday-label {
-  opacity: 0;
-  border-right-color: transparent !important;
+.awd-allday-empty .awd-empty-label {
+  font-size: 10.5px;
+  color: var(--lbl3);
+  font-style: italic;
+  padding: 0 6px;
+  align-self: center;
 }
 .awd-allday-label {
   font-size: 10px;
@@ -33,24 +32,27 @@
   min-height: 32px;
   text-align: right;
   padding-right: 7px;
-  padding-top: 8px;
-  /* line-height set dynamically by JS for single row, else top-aligned */
+  padding-top: 9px;
   border-right: .5px solid var(--sep);
 }
 .awd-allday-pills {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 columns */
+  grid-template-columns: 1fr 1fr;
   gap: 4px;
   flex: 1;
   min-width: 0;
-  padding: 4px 6px;
+  padding: 8px 6px;
   align-content: start;
-  overflow-y: auto;    /* scroll if >5 pills (2.5 rows visible) */
-  overflow-x: hidden;
-  scrollbar-width: none;
+  overflow: hidden;   /* default: no scroll */
   -webkit-overflow-scrolling: touch;
 }
-.awd-allday-pills::-webkit-scrollbar { display: none; }
+/* 5+ events: enable vertical scroll */
+.awd-allday-pills.awd-pills-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+.awd-allday-pills.awd-pills-scroll::-webkit-scrollbar { display: none; }
 .awd-allday-pill {
   display: flex;
   align-items: center;
@@ -919,3 +921,13 @@ Copyright © 2026 Ogust'1. All rights reserved.
 [data-theme="light"] .aw-thour      { color: rgba(0,0,0,0.30) !important; }
 [data-theme="light"] .aw-hline      { background: rgba(0,0,0,0.07) !important; }
 [data-theme="light"] .aw-tdays::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12) !important; }
+
+/* White/liturgical pill — dark text */
+.awd-allday-pill.awd-pill-white {
+  color: rgba(60,40,20,0.88) !important;
+  border: 1px solid rgba(180,160,120,0.4) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.awd-allday-pill.awd-pill-white .awd-pill-dot {
+  background: rgba(60,40,20,0.35) !important;
+}

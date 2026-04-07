@@ -120,6 +120,7 @@ const AW_COLOR_HEX = {
   orange:'#f97316',amber:'#f59e0b',yellow:'#eab308',
   lime:'#84cc16',emerald:'#10b981',teal:'#14b8a6',
   cyan:'#06b6d4',sky:'#0ea5e9',slate:'#64748b',grey:'#94a3b8',
+  white:'#f8f4ec',
 };
 function awColorFor(name, isCal2) {
   if (!name) return 'blue';
@@ -1176,51 +1177,73 @@ function awRenderDay(ds, container, preserveScroll) {
   var oldRow=container.parentElement&&container.parentElement.querySelector('.awd-allday-row');
   if(oldRow)oldRow.remove();
   var allDayRow=document.createElement('div');
-  allDayRow.className='awd-allday-row'+(allDay.length===0?' awd-allday-empty':'');
-  // Row height: 1 row=32px, 2 rows=62px, 2.5 rows max visible (scroll after 5)
-  var ROW_H=30, ROW_PAD=4;
-  var pillRows=Math.ceil(allDay.length/2); // 2 columns
-  var visRows=Math.min(pillRows,2); // max 2 full rows + hint of 3rd if more
-  var rowH=allDay.length===0?32:Math.max(32,(visRows*ROW_H)+(visRows-1)*ROW_PAD+8);
-  if(allDay.length>4) rowH=Math.round(2.5*ROW_H+2*ROW_PAD+8); // show 2.5 rows as hint
+  var ROW_H=30,ROW_PAD=4,PILL_PAD=8;
+  // Compute height for THIS day's allday count
+  // 0 events → 32px (empty label row)
+  // 1-2 events → 1 row: ROW_H + 2*PILL_PAD = 46px
+  // 3-4 events → 2 rows: 2*ROW_H + ROW_PAD + 2*PILL_PAD = 76px
+  // 5+ events  → 2.5 rows visible: (2.5*ROW_H) + ROW_PAD + 2*PILL_PAD ≈ 91px, scroll after
+  var n=allDay.length;
+  var rowH;
+  if(n===0)         rowH=32;
+  else if(n<=2)     rowH=ROW_H+2*PILL_PAD;
+  else if(n<=4)     rowH=2*ROW_H+ROW_PAD+2*PILL_PAD;
+  else              rowH=Math.round(2.5*ROW_H)+ROW_PAD+2*PILL_PAD;
+  allDayRow.className='awd-allday-row'+(n===0?' awd-allday-empty':'');
   allDayRow.style.height=rowH+'px';
-  allDayRow.dataset.rowH=rowH;
+  allDayRow.dataset.rowH=String(rowH);
   var labelEl=document.createElement('div');
   labelEl.className='awd-allday-label';
-  labelEl.style.lineHeight=rowH+'px';
-  labelEl.textContent='all-day';
   allDayRow.appendChild(labelEl);
   var pillsEl=document.createElement('div');
-  pillsEl.className='awd-allday-pills';
-  allDay.forEach(function(item){
-    var ev=item.ev;
-    var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
-    var adHex=AW_COLOR_HEX[adColor]||'#3b82f6';
-    var evIdx=awEvCache.indexOf(ev);
-    var pill=document.createElement('button');
-    pill.className='awd-allday-pill';
-    pill.style.background=adHex;
-    var dot=document.createElement('span');dot.className='awd-pill-dot';
-    var name=document.createElement('span');name.className='awd-pill-name';
-    name.textContent=ev.summary||'';
-    pill.appendChild(dot);pill.appendChild(name);
-    pill.onclick=(function(i){return function(){if(typeof awPopOpen==='function')awPopOpen(pill,i);};})(evIdx);
-    pillsEl.appendChild(pill);
-  });
+  pillsEl.className='awd-allday-pills'+(n>4?' awd-pills-scroll':'');
+  if(n===0){
+    // Empty: show "no all-day events" text
+    var emptyEl=document.createElement('span');
+    emptyEl.className='awd-empty-label';
+    emptyEl.textContent=window._t?window._t('noAllDay'):'No all-day events';
+    pillsEl.appendChild(emptyEl);
+  } else {
+    allDay.forEach(function(item){
+      var ev=item.ev;
+      var adColor=ev._extraColor||awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2);
+      var adHex=AW_COLOR_HEX[adColor]||'#3b82f6';
+      var evIdx=awEvCache.indexOf(ev);
+      var pill=document.createElement('button');
+      pill.className='awd-allday-pill'+(adColor==='white'?' awd-pill-white':'');
+      pill.style.background=adHex;
+      var dot=document.createElement('span');dot.className='awd-pill-dot';
+      var name=document.createElement('span');name.className='awd-pill-name';
+      name.textContent=ev.summary||'';
+      pill.appendChild(dot);pill.appendChild(name);
+      pill.onclick=(function(i){return function(){if(typeof awPopOpen==='function')awPopOpen(pill,i);};})(evIdx);
+      pillsEl.appendChild(pill);
+    });
+  }
   allDayRow.appendChild(pillsEl);
   if(container.parentElement){
-    container.parentElement.insertBefore(allDayRow, container);
-    // Compensate other wk-pages: sync all allday rows to same height
+    container.parentElement.insertBefore(allDayRow,container);
+    // Sync ONLY the currently visible wk-page and its immediate neighbors (same week)
     setTimeout(function(){
       var strip=document.getElementById('wk-strip');if(!strip)return;
-      var maxH=0;
-      strip.querySelectorAll('.awd-allday-row').forEach(function(r){maxH=Math.max(maxH,parseInt(r.dataset.rowH)||32);});
-      strip.querySelectorAll('.awd-allday-row').forEach(function(r){
-        r.style.height=maxH+'px';
-        var lbl=r.querySelector('.awd-allday-label');
-        if(lbl)lbl.style.lineHeight=maxH+'px';
+      // Find which pages are rendered (have an allday row)
+      var rendered=Array.from(strip.querySelectorAll('.wk-page')).filter(function(p){
+        return p.querySelector('.awd-allday-row');
       });
-    },20);
+      // Find the max rowH among rendered pages
+      var maxH=0;
+      rendered.forEach(function(p){
+        var r=p.querySelector('.awd-allday-row');
+        if(r) maxH=Math.max(maxH,parseInt(r.dataset.rowH)||32);
+      });
+      // Apply maxH to ALL rendered pages so heights are uniform
+      rendered.forEach(function(p){
+        var r=p.querySelector('.awd-allday-row');
+        if(r && parseInt(r.style.height)<maxH){
+          r.style.height=maxH+'px';
+        }
+      });
+    },30);
   }
   // Scroll to show the relevant time — purely based on hour, no cross-day sync
   var targetH;

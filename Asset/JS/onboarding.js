@@ -437,14 +437,17 @@ var OB_COLORS=[
   {k:'fuchsia',hex:'#d946ef'},{k:'rose',hex:'#f43f5e'},{k:'red',hex:'#ef4444'},
   {k:'orange',hex:'#f97316'},{k:'amber',hex:'#f59e0b'},{k:'yellow',hex:'#eab308'},
   {k:'lime',hex:'#84cc16'},{k:'emerald',hex:'#10b981'},{k:'teal',hex:'#14b8a6'},
-  {k:'cyan',hex:'#06b6d4'},{k:'sky',hex:'#0ea5e9'},{k:'slate',hex:'#64748b'},{k:'grey',hex:'#94a3b8'},
+  {k:'cyan',hex:'#06b6d4'},{k:'sky',hex:'#0ea5e9'},{k:'slate',hex:'#64748b'},{k:'grey',hex:'#94a3b8'},{k:'white',hex:'#f8f4ec'},
 ];
+var _ECAM_COLORS=['blue','cyan','violet','amber','emerald','rose','orange','grey'];
 function _obColorGrid(id,cur,fn){
   var h='<div class="ob-cg" id="'+id+'">';
   OB_COLORS.forEach(function(c){
     var on=c.k===cur;
-    h+='<button class="ob-cb'+(on?' ob-cb-on':'')+'" data-color="'+c.k+'" style="background:'+c.hex+'" onclick="'+fn+'(\''+c.k+'\',\''+id+'\')">'+
-      (on?'<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':'')+'</button>';
+    var isEcam=_ECAM_COLORS.indexOf(c.k)>=0;
+    var badgeHtml=isEcam?'<span class="ob-ecam-badge">E</span>':'';
+    h+='<button class="ob-cb'+(on?' ob-cb-on':'')+(isEcam?' ob-cb-ecam':'')+'" data-color="'+c.k+'" style="background:'+c.hex+'" onclick="'+fn+'(\''+c.k+'\',\''+id+'\')">'+
+      (on?'<svg viewBox="0 0 16 16" fill="none" width="10" height="10"><path d="M3 8l4 4 6-6" stroke="white" stroke-width="2.5" stroke-linecap="round"/></svg>':badgeHtml)+'</button>';
   });
   return h+'</div>';
 }
@@ -714,7 +717,7 @@ function _obExtraColorPop(btn,i){
   background:var(--fill);border:none;cursor:pointer;color:var(--lbl2);
   display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1}
 #ob-content,#ob-cal-content{flex:1;overflow-y:auto;padding:20px 20px 4px;-webkit-overflow-scrolling:touch;position:relative;z-index:1}
-#ob-bottom,#ob-cal-bottom{padding:12px 20px calc(env(safe-area-inset-bottom,0px)+14px);position:relative;z-index:1;flex-shrink:0}
+#ob-bottom,#ob-cal-bottom{display:block;padding:12px 20px calc(env(safe-area-inset-bottom,0px)+14px);position:relative;z-index:1;flex-shrink:0;box-sizing:border-box}
 .ob-slide{animation:obslide .22s cubic-bezier(.25,.8,.25,1) both}
 @keyframes obslide{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
 .ob-step-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
@@ -798,15 +801,20 @@ function _obExtraColorPop(btn,i){
 .ob-check-path{stroke-dasharray:60;stroke-dashoffset:60;animation:ob-draw .5s .2s ease forwards}
 @keyframes ob-draw{to{stroke-dashoffset:0}}
 .ob-done-h{font-size:28px;font-weight:800;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
-.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);flex:1;-webkit-tap-highlight-color:transparent;transition:transform .12s;-webkit-appearance:none;appearance:none}
+.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);-webkit-tap-highlight-color:transparent;transition:transform .12s;-webkit-appearance:none;appearance:none}
 .ob-btn-p:active{transform:scale(.97)}
 .ob-btn-p.ob-btn-full{width:100%}
 .ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:var(--fill);color:var(--lbl2);flex-shrink:0;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none}
 .ob-btn-g:active{transform:scale(.97)}
 .ob-btn-skip{background:none;border:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--lbl3);font-family:inherit;padding:14px 10px}
-.ob-row{display:flex;align-items:center;gap:8px}
+.ob-row{display:flex;align-items:center;gap:8px}.ob-row .ob-btn-p{flex:1}
 .ob-row-right{display:flex;align-items:center;gap:6px;margin-left:auto}
 .ob-legal{font-size:11.5px;color:var(--lbl3);text-align:center;margin:10px 0 0}
+.ob-ecam-badge{position:absolute;bottom:1px;right:1px;font-size:6px;font-weight:800;
+  color:rgba(255,255,255,.85);line-height:1;pointer-events:none;letter-spacing:0;
+  text-shadow:0 0 3px rgba(0,0,0,.5)}
+.ob-cb{position:relative}
+
 `;
   document.head.appendChild(s);
 })();
