@@ -808,7 +808,7 @@ function _obExtraColorPop(btn,i){
 .ob-done-h{font-size:28px;font-weight:800;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
 .ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 22px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);-webkit-tap-highlight-color:transparent;transition:transform .12s;-webkit-appearance:none;appearance:none}
 .ob-btn-p:active{transform:scale(.97)}
-.ob-btn-p.ob-btn-full{width:100%;flex-shrink:0}
+.ob-btn-p.ob-btn-full{align-self:stretch;flex-shrink:0}
 .ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:var(--fill);color:var(--lbl2);flex-shrink:0;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none}
 .ob-btn-g:active{transform:scale(.97)}
 .ob-btn-skip{background:none;border:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--lbl3);font-family:inherit;padding:14px 10px}

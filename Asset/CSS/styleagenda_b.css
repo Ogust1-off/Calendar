@@ -1,39 +1,50 @@
 
 /* ── All-day events row — Apple Calendar style ──────────────── */
 .awd-allday-row {
+  /* Absolute overlay: sits on top of grid, grid scrolls underneath */
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  z-index: 20;
   display: flex;
   align-items: flex-start;
   gap: 0;
   padding: 0;
-  background: var(--bg2);
+  /* Frosted glass effect */
+  background: var(--awd-bg, rgba(var(--bg2-rgb,28,28,30),0.92));
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
   border-bottom: .5px solid var(--sep);
-  min-height: 32px;
-  flex-shrink: 0;
   overflow: hidden;
-  position: relative;
-  z-index: 10;
+  min-height: 36px;
 }
-/* Empty: always visible with faded text */
+/* Empty: even more transparent */
 .awd-allday-empty {
-  background: var(--bg2);
+  background: var(--awd-bg-empty, rgba(var(--bg2-rgb,28,28,30),0.55)) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 .awd-allday-empty .awd-empty-label {
-  font-size: 10.5px;
+  font-size: 10px;
   color: var(--lbl3);
   font-style: italic;
-  padding: 0 6px;
+  padding: 0 8px;
   align-self: center;
+  opacity: 0.7;
 }
+/* wk-page needs relative positioning for the absolute allday overlay */
+.wk-page { position: relative; }
 .awd-allday-label {
   font-size: 10px;
+  font-weight: 500;
   color: var(--lbl3);
   flex-shrink: 0;
   width: 52px;
-  min-height: 32px;
+  min-height: 36px;
   text-align: right;
   padding-right: 7px;
-  padding-top: 9px;
+  padding-top: 10px;
   border-right: .5px solid var(--sep);
+  letter-spacing: -0.01em;
 }
 .awd-allday-pills {
   display: grid;
@@ -41,9 +52,9 @@
   gap: 4px;
   flex: 1;
   min-width: 0;
-  padding: 8px 6px;
+  padding: 5px 6px;
   align-content: start;
-  overflow: hidden;   /* default: no scroll */
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 /* 5+ events: enable vertical scroll */
@@ -931,3 +942,10 @@ Copyright © 2026 Ogust'1. All rights reserved.
 .awd-allday-pill.awd-pill-white .awd-pill-dot {
   background: rgba(60,40,20,0.35) !important;
 }
+
+/* All-day row background vars for frosted glass */
+@media(prefers-color-scheme:light){
+  :root { --awd-bg: rgba(242,242,247,0.92); --awd-bg-empty: rgba(242,242,247,0.6); }
+}
+[data-theme="dark"]  { --awd-bg: rgba(28,28,30,0.92) !important; --awd-bg-empty: rgba(28,28,30,0.6) !important; }
+[data-theme="light"] { --awd-bg: rgba(242,242,247,0.92) !important; --awd-bg-empty: rgba(242,242,247,0.6) !important; }

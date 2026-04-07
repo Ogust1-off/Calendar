@@ -627,6 +627,8 @@ function awPopOpen(el, idx) {
   if(typeof _haptic==='function')_haptic('light');
   // Kill any pending remove timer and remove old pop immediately
   if (window._awPopRemoveTimer) { clearTimeout(window._awPopRemoveTimer); window._awPopRemoveTimer = null; }
+  const oldBackdrop = document.getElementById('aw-pop-backdrop');
+  if (oldBackdrop) oldBackdrop.remove();
   const oldPop = document.getElementById('aw-pop');
   if (oldPop) { if (window._awPopTimer) { clearInterval(window._awPopTimer); window._awPopTimer = null; } oldPop.remove(); }
 
@@ -762,15 +764,12 @@ function awPopOpen(el, idx) {
     }, 1000);
   }
 
-  setTimeout(() => {
-    document.addEventListener('click', awPopOutside, { once: true });
-  }, 10);
-}
-
-function awPopOutside(e) {
-  const pop = document.getElementById('aw-pop');
-  if (pop && !pop.contains(e.target)) awPopClose();
-  else if (pop) document.addEventListener('click', awPopOutside, { once: true });
+  // Backdrop: transparent overlay behind pop, closes on tap
+  const backdrop = document.createElement('div');
+  backdrop.id = 'aw-pop-backdrop';
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9997;-webkit-tap-highlight-color:transparent;';
+  backdrop.addEventListener('click', function() { awPopClose(); }, { once: true });
+  document.body.insertBefore(backdrop, pop);
 }
 
 function awPopClose() {
@@ -780,6 +779,8 @@ function awPopClose() {
   if (!pop) return;
   if (window._awPopTimer) { clearInterval(window._awPopTimer); window._awPopTimer = null; }
   pop.classList.remove('visible');
+  const backdrop = document.getElementById('aw-pop-backdrop');
+  if (backdrop) backdrop.remove();
   const el = pop;
   window._awPopRemoveTimer = setTimeout(() => { el.remove(); window._awPopRemoveTimer = null; }, 200);
 }
@@ -1181,7 +1182,7 @@ function awRenderDay(ds, container, preserveScroll) {
     awGridEvHtml(ev,i,col,totalCols,sameStart,stackDepth,isTopStacked,visibleHeight,nextCoverStart,ds)).join('');
   html+='</div></div>';
   container.innerHTML=html;
-  // All-day zone — ALWAYS inserted for alignment
+  // All-day zone — position:absolute, floats above grid, no layout impact
   var oldRow=container.parentElement&&container.parentElement.querySelector('.awd-allday-row');
   if(oldRow)oldRow.remove();
   var allDayRow=document.createElement('div');
@@ -1230,7 +1231,10 @@ function awRenderDay(ds, container, preserveScroll) {
   }
   allDayRow.appendChild(pillsEl);
   if(container.parentElement){
-    container.parentElement.insertBefore(allDayRow,container);
+    // Insert as absolute overlay at top of wk-page — grid scrolls underneath
+    container.parentElement.appendChild(allDayRow);
+    // Offset the grid-host so content starts below the allday overlay
+    container.style.paddingTop = rowH + 'px';
     // No cross-page height sync — each day is full-width, only one visible at a time
   }
   // Scroll to show the relevant time — purely based on hour, no cross-day sync
