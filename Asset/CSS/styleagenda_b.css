@@ -1,27 +1,21 @@
 
 /* ── All-day events row — Apple Calendar style ──────────────── */
 .awd-allday-row {
-  /* Absolute overlay: sits on top of grid, grid scrolls underneath */
   position: absolute;
   top: 0; left: 0; right: 0;
   z-index: 20;
   display: flex;
   align-items: flex-start;
-  gap: 0;
-  padding: 0;
-  /* Frosted glass effect */
-  background: var(--awd-bg, rgba(var(--bg2-rgb,28,28,30),0.92));
-  backdrop-filter: blur(12px) saturate(160%);
-  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  background: var(--bg2);
   border-bottom: .5px solid var(--sep);
   overflow: hidden;
-  min-height: 36px;
+  min-height: 28px;
+  /* Slight shadow to separate from grid */
+  box-shadow: 0 1px 0 var(--sep2);
 }
-/* Empty: even more transparent */
 .awd-allday-empty {
-  background: var(--awd-bg-empty, rgba(var(--bg2-rgb,28,28,30),0.55)) !important;
-  backdrop-filter: blur(8px) !important;
-  -webkit-backdrop-filter: blur(8px) !important;
+  background: var(--bg2);
+  opacity: 0.7;
 }
 .awd-allday-empty .awd-empty-label {
   font-size: 10px;
@@ -29,31 +23,28 @@
   font-style: italic;
   padding: 0 8px;
   align-self: center;
-  opacity: 0.7;
 }
 /* wk-page needs relative positioning for the absolute allday overlay */
 .wk-page { position: relative; }
 .awd-allday-label {
   font-size: 9.5px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--lbl3);
   flex-shrink: 0;
   width: 52px;
-  min-height: 36px;
+  min-height: 28px;
   text-align: right;
-  padding-right: 8px;
-  padding-top: 11px;
+  padding-right: 7px;
+  padding-top: 8px;
   border-right: .5px solid var(--sep);
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
 }
 .awd-allday-pills {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 3px;
+  gap: 2px;
   flex: 1;
   min-width: 0;
-  padding: 5px 6px 5px 6px;
+  padding: 5px 5px 3px 5px;
   align-content: start;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
@@ -68,30 +59,30 @@
 .awd-allday-pill {
   display: flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 8px 3px 6px;
-  border-radius: 5px;
-  border: none;
+  gap: 4px;
+  padding: 0 7px 0 5px;
+  border-radius: 4px;
+  border: .5px solid transparent;
   cursor: pointer;
   font-size: 11px;
   font-weight: 600;
-  color: #fff;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity .15s, transform .1s;
+  transition: opacity .12s;
   min-width: 0;
   overflow: hidden;
-  height: 26px;
+  height: 22px;
+  /* color/bg/border set inline by JS */
 }
-/* Single pill spans both columns */
-.awd-allday-pills .awd-allday-pill:only-child {
-  grid-column: 1 / -1;
-}
+.awd-allday-pill:active { opacity: 0.7; }
+/* Single pill: spans both columns */
+.awd-allday-pills .awd-allday-pill:only-child { grid-column: 1 / -1; }
+/* Dot inside pill */
 .awd-allday-pill:active { opacity: .75; transform: scale(.97); }
 .awd-pill-dot {
-  width: 7px; height: 7px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: rgba(255,255,255,.45);
+  /* color set inline by JS */
 }
 .awd-pill-name {
   white-space: nowrap;
@@ -952,7 +943,10 @@ Copyright © 2026 Ogust'1. All rights reserved.
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
 }
 .awd-allday-pill.awd-pill-white .awd-pill-dot {
-  background: rgba(60,40,20,0.35) !important;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* color set inline by JS */
 }
 
 /* All-day row background vars for frosted glass */
