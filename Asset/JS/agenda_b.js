@@ -593,7 +593,7 @@ function awGridEvHtml(ev, idx, col = 0, totalCols = 1, sameStart = false, stackD
   return `<div class="aw-gev${now ? ' aw-gev-now' : ''}${past ? ' aw-gev-past' : ''}"
     data-color="${color}" data-ev="${idx}"
     style="top:${top}px;height:${height}px;left:${leftStyle};right:${rightStyle};z-index:${zIndex};cursor:pointer;background:${bg};${now ? `box-shadow:0 2px 10px ${glowColor};` : ''}"
-    onclick="awPopOpen(this,${idx})">
+    onclick="awPopOpen(this,${idx})"${isWhite?' data-white="1"':''}>
     <div class="aw-gev-accent" style="background:${borderColor}"></div>
     <div class="aw-gev-name">${shortName}</div>
     ${showTime ? `<div class="aw-gev-time">${CLOCK_GEV}${awFmtTime(ev.start)} \u2013 ${awFmtTime(ev.end)}</div>` : ''}
@@ -627,8 +627,8 @@ function awPopOpen(el, idx) {
   if(typeof _haptic==='function')_haptic('light');
   // Kill any pending remove timer and remove old pop immediately
   if (window._awPopRemoveTimer) { clearTimeout(window._awPopRemoveTimer); window._awPopRemoveTimer = null; }
-  const oldBackdrop = document.getElementById('aw-pop-backdrop');
-  if (oldBackdrop) oldBackdrop.remove();
+  // Clean up previous outside listener before opening new pop
+  if (window._awPopOutsideFn) { document.removeEventListener('click', window._awPopOutsideFn, true); window._awPopOutsideFn = null; }
   const oldPop = document.getElementById('aw-pop');
   if (oldPop) { if (window._awPopTimer) { clearInterval(window._awPopTimer); window._awPopTimer = null; } oldPop.remove(); }
 
@@ -764,23 +764,38 @@ function awPopOpen(el, idx) {
     }, 1000);
   }
 
-  // Backdrop: transparent overlay behind pop, closes on tap
-  const backdrop = document.createElement('div');
-  backdrop.id = 'aw-pop-backdrop';
-  backdrop.style.cssText = 'position:fixed;inset:0;z-index:9997;-webkit-tap-highlight-color:transparent;';
-  backdrop.addEventListener('click', function() { awPopClose(); }, { once: true });
-  document.body.insertBefore(backdrop, pop);
+  // Outside-click handler with timestamp guard (avoids closing on the same tap that opened)
+  if (window._awPopOutsideFn) {
+    document.removeEventListener('click', window._awPopOutsideFn, true);
+    window._awPopOutsideFn = null;
+  }
+  const _popOpenedAt = Date.now();
+  window._awPopOutsideFn = function _awOutside(e) {
+    // Ignore if fired within 80ms of opening (same click event bubbling)
+    if (Date.now() - _popOpenedAt < 80) return;
+    const p = document.getElementById('aw-pop');
+    if (!p) { document.removeEventListener('click', _awOutside, true); window._awPopOutsideFn = null; return; }
+    // Click inside pop → keep open
+    if (p.contains(e.target)) return;
+    // Click on a calendar event → awPopOpen will handle it, don't double-close
+    if (e.target.closest('.aw-event,.aw-gev,.awd-allday-pill')) return;
+    // Anything else → close
+    awPopClose();
+  };
+  document.addEventListener('click', window._awPopOutsideFn, true);
 }
 
 function awPopClose() {
-  // Cancel any in-flight remove timeout (prevents killing a newly opened pop)
+  // Clean up outside listener
+  if (window._awPopOutsideFn) {
+    document.removeEventListener('click', window._awPopOutsideFn, true);
+    window._awPopOutsideFn = null;
+  }
   if (window._awPopRemoveTimer) { clearTimeout(window._awPopRemoveTimer); window._awPopRemoveTimer = null; }
   const pop = document.getElementById('aw-pop');
   if (!pop) return;
   if (window._awPopTimer) { clearInterval(window._awPopTimer); window._awPopTimer = null; }
   pop.classList.remove('visible');
-  const backdrop = document.getElementById('aw-pop-backdrop');
-  if (backdrop) backdrop.remove();
   const el = pop;
   window._awPopRemoveTimer = setTimeout(() => { el.remove(); window._awPopRemoveTimer = null; }, 200);
 }
@@ -1161,6 +1176,7 @@ setInterval(() => {
 // ── DAY GRID (Week view) ──────────────────────────────────────────────────────
 function awRenderDay(ds, container, preserveScroll) {
   if (!container) return;
+  container.style.paddingTop = '0px'; // reset before recalculating allday height
   const byDay=window._awByDay||{}, today=awToday(), isToday=ds===today;
   const navH=(document.getElementById('nb')||{offsetHeight:56}).offsetHeight;
   const wkH=(document.getElementById('wk-hdr')||{offsetHeight:80}).offsetHeight;

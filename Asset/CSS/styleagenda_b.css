@@ -34,25 +34,26 @@
 /* wk-page needs relative positioning for the absolute allday overlay */
 .wk-page { position: relative; }
 .awd-allday-label {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 9.5px;
+  font-weight: 600;
   color: var(--lbl3);
   flex-shrink: 0;
   width: 52px;
   min-height: 36px;
   text-align: right;
-  padding-right: 7px;
-  padding-top: 10px;
+  padding-right: 8px;
+  padding-top: 11px;
   border-right: .5px solid var(--sep);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
 .awd-allday-pills {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px;
+  gap: 3px;
   flex: 1;
   min-width: 0;
-  padding: 5px 6px;
+  padding: 5px 6px 5px 6px;
   align-content: start;
   overflow: hidden;
   -webkit-overflow-scrolling: touch;
@@ -892,6 +893,17 @@ Copyright © 2026 Ogust'1. All rights reserved.
 [data-theme="dark"] .aw-gev-name   { color: rgba(255,255,255,0.92) !important; }
 [data-theme="dark"] .aw-gev-time   { color: rgba(255,255,255,0.60) !important; }
 [data-theme="dark"] .aw-gev-loc    { color: rgba(255,255,255,0.45) !important; }
+/* White/liturgical events — exempt from dark mode text override */
+[data-white="1"] .aw-gev-name { color: rgba(60,40,20,0.88) !important; }
+[data-white="1"] .aw-gev-time { color: rgba(60,40,20,0.55) !important; }
+[data-white="1"] .aw-gev-loc  { color: rgba(60,40,20,0.40) !important; }
+/* White event card: visible on dark bg via border + shadow */
+[data-white="1"] {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.45), 0 0 0 1px rgba(200,184,154,0.5) !important;
+  opacity: 1 !important;
+}
+/* Past white events: don't let opacity kill visibility */
+[data-white="1"].aw-gev-past { opacity: 0.72 !important; }
 [data-theme="dark"] .aw-tcol.we    { background: rgba(255,255,255,0.015) !important; }
 [data-theme="dark"] .awd-col       { background: var(--bg2) !important; }
 [data-theme="dark"] .awd-gutter    { background: var(--bg) !important; }
