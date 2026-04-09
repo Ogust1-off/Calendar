@@ -178,10 +178,7 @@
   .wk-mini.is-today .wk-mini-num{color:var(--red);font-weight:600}
   .wk-mini.is-sel .wk-mini-num{background:var(--tint);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(10,132,255,.35)}
   .wk-mini.is-today.is-sel .wk-mini-num{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(255,69,58,.35)}
-  .wk-mini-dot{width:4px;height:4px;border-radius:50%;background:var(--lbl3);opacity:0;transition:opacity .15s;margin-top:-2px}
-  .wk-mini.has-ev .wk-mini-dot{opacity:1}
-  .wk-mini.is-sel .wk-mini-dot{background:rgba(255,255,255,.6)}
-  .wk-mini.is-today:not(.is-sel) .wk-mini-dot{background:var(--red)}
+  .wk-mini-dot{display:none}
   #wk-strip{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;
     scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   #wk-strip::-webkit-scrollbar{display:none}
@@ -219,6 +216,7 @@
 
   /* ── Account ── */
   .acc-page{padding:0 0 60px;display:flex;flex-direction:column;align-items:stretch;gap:0}
+  .acc-upd-bar{display:flex;align-items:center;justify-content:center;gap:5px;padding:10px 16px 4px;font-size:11.5px;color:var(--lbl3);letter-spacing:0.01em}
   .acc-hero{display:flex;flex-direction:column;align-items:center;gap:8px;
     padding:24px 20px 18px;background:var(--bg2);
     border-bottom:.5px solid var(--sep);margin-bottom:8px}
@@ -541,7 +539,7 @@
           <span class="acc-row-lbl" id="acc-logout-lbl">Sign out &amp; reset</span>
         </button>
       </div>
-      <p id="acc-upd"></p>
+      <div id="acc-upd" class="acc-upd-bar"></div>
     </div>
   </div>
 
