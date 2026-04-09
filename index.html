@@ -368,7 +368,7 @@
 <script>
 (function(){
   var S={
-    en:{today:'Today',allDay:'All day',inProgress:'In progress',completed:'COMPLETED',
+    en:{today:'Today',allDay:'All day',allDayLabel:'all-day',inProgress:'In progress',completed:'COMPLETED',
       startingSoon:'STARTING SOON',left:'left',in:'in ',inLabel:'In',elapsed:'elapsed',
       justUpdated:'Just updated',offline:'Offline',updateFailed:'Update failed',
       noMoreToday:'No more events today',noUpcoming:'No upcoming events',
@@ -757,14 +757,14 @@ function _updateSlider(){
 function _initPillSwipe(){
   var pill=document.getElementById('tb-pill');if(!pill)return;
   // Only handle touches that START on the pill itself
-  var sx=0,sy=0,tab0=0,live=false,dx=0,pillRect=null;
+  var sx=0,sy=0,tab0=0,live=false,dx=0,t0=0,pillRect=null;
 
   pill.addEventListener('touchstart',function(e){
     // Record pill bounds at touch start
     pillRect=pill.getBoundingClientRect();
     var t=e.touches[0];
     sx=t.clientX;sy=t.clientY;
-    tab0=_tab;live=false;dx=0;
+    tab0=_tab;live=false;dx=0;t0=Date.now();
     var sl=document.getElementById('tb-slider');
     if(sl){sl.style.transition='none';sl.style.willChange='left,width';}
   },{passive:true});
@@ -782,14 +782,14 @@ function _initPillSwipe(){
     var btns=pill.querySelectorAll('.tbtn');
     if(!sl||!btns[tab0])return;
 
-    // Compute normalized progress towards adjacent tab
-    // dx>0 → swipe right → go to higher index (next tab)
-    // dx<0 → swipe left  → go to lower index (prev tab)
     var dir=dx>0?1:-1;
-    var targetTab=Math.min(Math.max(tab0+dir,0),btns.length-1);
-    var DRAG_RANGE=btns[tab0].offsetWidth*0.8;
-    var progress=Math.min(Math.abs(dx)/DRAG_RANGE,1);
-    if(targetTab===tab0)progress*=0.25; // resist at edge
+    var absX=Math.abs(dx);
+    var tabW2=btns[tab0]?btns[tab0].offsetWidth:80;
+    var skip2=(absX>tabW2*1.2)&&(tab0+dir*2>=0)&&(tab0+dir*2<btns.length);
+    var targetTab=Math.min(Math.max(tab0+dir*(skip2?2:1),0),btns.length-1);
+    var DRAG_RANGE=tabW2*(skip2?1.6:0.8);
+    var progress=Math.min(absX/DRAG_RANGE,1);
+    if(targetTab===tab0)progress*=0.25;
 
     var fL=btns[tab0].offsetLeft, fW=btns[tab0].offsetWidth;
     var tL=btns[targetTab].offsetLeft, tW=btns[targetTab].offsetWidth;
@@ -808,8 +808,11 @@ function _initPillSwipe(){
     var btns=pill.querySelectorAll('.tbtn');
     var THRESH=btns[tab0]?btns[tab0].offsetWidth*0.35:35;
     var newTab=tab0;
-    if(dx>THRESH&&tab0<btns.length-1)newTab=tab0+1;
-    else if(dx<-THRESH&&tab0>0)newTab=tab0-1;
+    var vel=Math.abs(dx)/Math.max(1,Date.now()-t0);
+    var tabW=btns[tab0]?btns[tab0].offsetWidth:80;
+    var bigJump=(Math.abs(dx)>tabW*1.2||vel>1.2);
+    if(dx>THRESH)      newTab=Math.min(tab0+(bigJump?2:1),btns.length-1);
+    else if(dx<-THRESH)newTab=Math.max(tab0-(bigJump?2:1),0);
     if(newTab!==tab0){_haptic('selection');goTab(newTab);}
     else _updateSlider();
     live=false;
