@@ -1256,33 +1256,7 @@ function awRenderDay(ds, container, preserveScroll) {
   if(container.parentElement){
     container.parentElement.appendChild(allDayRow);
     container.style.paddingTop=rowH+'px';
-    // Sync paddingTop with ±1 neighbors so hours align during swipe transitions
-    setTimeout(function(){
-      var strip=document.getElementById('wk-strip');if(!strip)return;
-      var pages=strip.querySelectorAll('.wk-page');
-      var myPage=container.parentElement;
-      var myIdx=-1;
-      for(var pi=0;pi<pages.length;pi++){if(pages[pi]===myPage){myIdx=pi;break;}}
-      if(myIdx<0)return;
-      // Collect ±1 neighbors that are rendered
-      var neighbors=[];
-      for(var di=-1;di<=1;di++){
-        var ni=myIdx+di;
-        if(ni<0||ni>=pages.length)continue;
-        var nr=pages[ni].querySelector('.awd-allday-row');
-        var nh=pages[ni].querySelector('.wk-grid-host');
-        if(nr&&nh) neighbors.push({row:nr,host:nh,rh:parseInt(nr.dataset.rowH)||rowH});
-      }
-      if(neighbors.length<2)return;
-      var maxH=0;
-      neighbors.forEach(function(nb){maxH=Math.max(maxH,nb.rh);});
-      neighbors.forEach(function(nb){
-        if(nb.rh<maxH){
-          nb.row.style.height=maxH+'px';
-          nb.host.style.paddingTop=maxH+'px';
-        }
-      });
-    },20);
+    // No neighbor sync — each day shows its own allday height independently
   }
   // Scroll to show the relevant time — purely based on hour, no cross-day sync
   var targetH;
