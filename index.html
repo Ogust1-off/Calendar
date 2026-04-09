@@ -252,12 +252,18 @@
   .acc-select{background:none;border:none;color:var(--tint);font-size:14px;font-family:inherit;
     outline:none;cursor:pointer;flex-shrink:0;font-weight:500;-webkit-appearance:none;padding-right:4px}
   .acc-seg{display:flex;align-items:center;background:var(--fill);border-radius:9px;
-    padding:2px;gap:2px;flex-shrink:0}
-  .acc-seg-btn{padding:5px 11px;border-radius:7px;border:none;background:none;
+    padding:2px;gap:0;flex-shrink:0;position:relative}
+  .acc-seg-pill .acc-seg-slider{
+    position:absolute;top:2px;bottom:2px;border-radius:7px;
+    background:var(--bg2);box-shadow:0 1px 4px rgba(0,0,0,.18),0 .5px 0 rgba(0,0,0,.1);
+    transition:left .22s cubic-bezier(.34,1.15,.64,1),width .22s cubic-bezier(.34,1.15,.64,1);
+    pointer-events:none;z-index:0}
+  .acc-seg-btn{padding:5px 13px;border-radius:7px;border:none;background:none;
     color:var(--lbl2);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;
-    -webkit-tap-highlight-color:transparent;transition:background .15s,color .15s;
-    line-height:1.3;white-space:nowrap}
-  .acc-seg-btn.on{background:var(--bg2);color:var(--lbl);
+    -webkit-tap-highlight-color:transparent;transition:color .15s;
+    line-height:1.3;white-space:nowrap;position:relative;z-index:1}
+  .acc-seg-btn.on{color:var(--lbl);}
+  .acc-seg:not(.acc-seg-pill) .acc-seg-btn.on{background:var(--bg2);
     box-shadow:0 1px 4px rgba(0,0,0,.18),0 .5px 0 rgba(0,0,0,.1)}
   .acc-row-danger .acc-row-lbl{color:var(--red)}
 
@@ -378,13 +384,38 @@
       themeDark:'Dark',themeLight:'Light',themeAuto:'Auto',
       logoutBtn:'Sign out & reset',byShortcut:'by Shortcut\u2122',
       sCalendars:'Calendars',
+      obWelcomeSub:'Your ECAM agenda, always with you.',
+      obFeat1:'Schedule & week grid',obFeat2:'Real-time tracking',obFeat3:'Keys on device',obFeat4:'Offline',
+      obStartBtn:'Get started',obLegal:'Your data never leaves this device.',
+      obSrcTitle:'Source',obSrcSub:'How to access your calendar?',
+      obApiTitle:'Google API Key',obApiSub:'To access your calendars.',
+      obGCalTitle:'Google Calendars',obGCalSub:'IDs of your calendars.',
+      obIcalTitle:'iCal Links',obIcalSub:'Copy from iPhone or Google Calendar.',
+      obBothTitle:'Your calendars',obBothSub:'Cal 1 via Google, Cal 2 via iCal link.',
+      obColTitle:'Calendar colour',obColSub:'Choose the colour for events.',obCal1Lbl:'CALENDAR 1',obCal2Lbl:'CALENDAR 2',
+      obColsTitle:'Colours',obStyleCal1Lbl:'CALENDAR 1 STYLE',obColorLbl:'COLOUR',obSubjsLbl:'SUBJECTS & COLOURS',obCal2ColorLbl:'CALENDAR 2 COLOUR',
+      obProfileTitle:'Your profile',obProfileSub:'Photo and first name.',obFirstNameLbl:'FIRST NAME',
+      obPrefsTitle:'Preferences',obPrefsSub:'Language and theme.',
+      obOptBadge:'Optional',obApiKeyLbl:'API KEY',obCal1Google:'CAL 1 — GOOGLE ID',obCal2Google:'CAL 2 — GOOGLE ID',
+      obCal1Ical:'CAL 1 — ICAL LINK',obCal2Ical:'CAL 2 — ICAL LINK',obOpt:'optional',
+      obSrcApiTitle:'Source & API',obSrcApiSub:'Connect to your calendar.',
+      obStyleTitle:'Style Cal 1',obStyleSub:'Assign colours to events.',
+      obCal2ColTitle:'Colour Cal 2',obCal2ColSub:'Colour for all Cal 2 events.',
+      obExtraTitle:'Extra calendars',obExtraSub:'Add as many calendars as you want.',
+      obSrcGoogle:'Google Calendar',obSrcGoogleSub:'API key + ID. Recommended.',
+      obSrcIcal:'iCal Link',obSrcIcalSub:'From iPhone or Google. No API key.',
+      obSrcBoth:'Both',obSrcBothSub:'Cal 1 Google + Cal 2 iCal.',
+      obPresetEcam:'ECAM Preset',obPresetEcamSub:'Auto-detects subjects.',
+      obPresetCustom:'Custom',obPresetCustomSub:'Your own subjects.',
+      obPresetNone:'Single colour',obPresetNoneSub:'All the same.',
+      obSubjPlaceholder:'Subject…',
       btnNext:'Next',btnBack:'Back',btnSkip:'Skip',btnSave:'Save',btnClose:'Close',btnOpen:'Open calendar',btnAdd:'+ Add',btnAddCal:'+ Add calendar',
       obSaved:'Saved!',obNoCal2:'No second calendar set up.',obColor:'Colour:',noAllDay:'No all-day events',
       accSrcApi:'Source & API key',accCal1Style:'Calendar 1 colour style',
       accCal2Color:'Calendar 2 colour',accExtraCals:'Extra calendars',
       sAdvanced:'Advanced',sApp:'App',sDisplay:'Display',
     },
-    fr:{today:'Aujourd\u2019hui',allDay:'Toute la journ\u00e9e',inProgress:'En cours',
+    fr:{today:'Aujourd\u2019hui',allDay:'Toute la journ\u00e9e',allDayLabel:'journ\u00e9e',inProgress:'En cours',
       completed:'TERMIN\u00c9',startingSoon:'BIENT\u00d4T',left:'restant',in:'dans ',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',
       justUpdated:'Mis \u00e0 jour',offline:'Hors ligne',updateFailed:'\u00c9chec',
       noMoreToday:'Plus d\u2019\u00e9v\u00e9nements aujourd\u2019hui',noUpcoming:'Aucun \u00e9v\u00e9nement \u00e0 venir',
@@ -396,6 +427,31 @@
       themeDark:'Sombre',themeLight:'Clair',themeAuto:'Auto',
       logoutBtn:'D\u00e9connexion & r\u00e9init.',byShortcut:'by Shortcut\u2122',
       sCalendars:'Calendriers',
+      obWelcomeSub:'Votre agenda ECAM, toujours avec vous.',
+      obFeat1:'Agenda & grille horaire',obFeat2:'Suivi en temps réel',obFeat3:'Clés sur l’appareil',obFeat4:'Hors ligne',
+      obStartBtn:'Commencer',obLegal:'Vos données ne quittent pas cet appareil.',
+      obSrcTitle:'Source',obSrcSub:'Comment accéder à votre calendrier ?',
+      obApiTitle:'Clé API Google',obApiSub:'Pour accéder à vos calendriers.',
+      obGCalTitle:'Calendriers Google',obGCalSub:'IDs de vos calendriers.',
+      obIcalTitle:'Liens iCal',obIcalSub:'Copiez depuis iPhone ou Google Calendar.',
+      obBothTitle:'Vos calendriers',obBothSub:'Cal 1 via Google, Cal 2 via lien iCal.',
+      obColTitle:'Couleur du calendrier',obColSub:'Choisissez la couleur des événements.',obCal1Lbl:'CALENDRIER 1',obCal2Lbl:'CALENDRIER 2',
+      obColsTitle:'Couleurs',obStyleCal1Lbl:'STYLE CALENDRIER 1',obColorLbl:'COULEUR',obSubjsLbl:'MATIÈRES & COULEURS',obCal2ColorLbl:'COULEUR CALENDRIER 2',
+      obProfileTitle:'Votre profil',obProfileSub:'Photo et prénom.',obFirstNameLbl:'PRÉNOM',
+      obPrefsTitle:'Préférences',obPrefsSub:'Langue et thème.',
+      obOptBadge:'Optionnel',obApiKeyLbl:'CLÉ API',obCal1Google:'CAL 1 — ID GOOGLE',obCal2Google:'CAL 2 — ID GOOGLE',
+      obCal1Ical:'CAL 1 — LIEN ICAL',obCal2Ical:'CAL 2 — LIEN ICAL',obOpt:'optionnel',
+      obSrcApiTitle:'Source & API',obSrcApiSub:'Connexion à votre calendrier.',
+      obStyleTitle:'Style Cal 1',obStyleSub:'Attribuer des couleurs aux événements.',
+      obCal2ColTitle:'Couleur Cal 2',obCal2ColSub:'Couleur de tous les événements du Cal 2.',
+      obExtraTitle:'Calendriers suppl.',obExtraSub:'Ajoutez autant de calendriers que souhaité.',
+      obSrcGoogle:'Google Calendar',obSrcGoogleSub:'Clé API + ID. Recommandé.',
+      obSrcIcal:'Lien iCal',obSrcIcalSub:'Depuis iPhone ou Google. Sans clé API.',
+      obSrcBoth:'Les deux',obSrcBothSub:'Cal 1 Google + Cal 2 iCal.',
+      obPresetEcam:'Prédéfini ECAM',obPresetEcamSub:'Détecte auto les matières.',
+      obPresetCustom:'Personnalisé',obPresetCustomSub:'Vos matières et couleurs.',
+      obPresetNone:'Couleur unique',obPresetNoneSub:'Tous pareil.',
+      obSubjPlaceholder:'Matière…',
       btnNext:'Suivant',btnBack:'Retour',btnSkip:'Passer',btnSave:'Enregistrer',btnClose:'Fermer',btnOpen:'Ouvrir le calendrier',btnAdd:'+ Ajouter',btnAddCal:'+ Ajouter un calendrier',
       obSaved:'Enregistr\u00e9\u00a0!',obNoCal2:'Aucun deuxi\u00e8me calendrier configur\u00e9.',obColor:'Couleur :',
       accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
@@ -479,7 +535,8 @@
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico">&#127760;</span>
           <span class="acc-row-lbl" id="acc-lang-lbl">Language</span>
-          <div class="acc-seg" id="acc-lang-seg">
+          <div class="acc-seg acc-seg-pill" id="acc-lang-seg">
+            <div class="acc-seg-slider" id="acc-lang-slider"></div>
             <button class="acc-seg-btn" data-val="en" onclick="accSetLang('en')">EN</button>
             <button class="acc-seg-btn" data-val="fr" onclick="accSetLang('fr')">FR</button>
           </div>
@@ -487,7 +544,8 @@
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico" id="acc-theme-ico">&#10024;</span>
           <span class="acc-row-lbl" id="acc-theme-lbl">Theme</span>
-          <div class="acc-seg" id="acc-theme-seg">
+          <div class="acc-seg acc-seg-pill" id="acc-theme-seg">
+            <div class="acc-seg-slider" id="acc-theme-slider"></div>
             <button class="acc-seg-btn" data-val="auto" onclick="accSetTheme('auto')">Auto</button>
             <button class="acc-seg-btn" data-val="dark"  onclick="accSetTheme('dark')">&#127769;</button>
             <button class="acc-seg-btn" data-val="light" onclick="accSetTheme('light')">&#9728;&#65039;</button>
@@ -1045,6 +1103,7 @@ window.addEventListener('load',function(){
   _applyLang();
   _initPillSwipe();
   setTimeout(_updateSlider,100);
+  setTimeout(function(){_applyLang();_applyProfile();},120);
 });
 
 /* ── SW ── */

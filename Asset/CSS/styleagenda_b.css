@@ -896,11 +896,18 @@ Copyright © 2026 Ogust'1. All rights reserved.
 [data-white="1"] .aw-gev-loc  { color: rgba(60,40,20,0.40) !important; }
 /* White event card: visible on dark bg via border + shadow */
 [data-white="1"] {
-  box-shadow: 0 2px 12px rgba(0,0,0,0.45), 0 0 0 1px rgba(200,184,154,0.5) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.55), 0 0 0 1.5px rgba(180,155,110,0.7) !important;
   opacity: 1 !important;
 }
-/* Past white events: don't let opacity kill visibility */
-[data-white="1"].aw-gev-past { opacity: 0.72 !important; }
+/* Past white events */
+[data-white="1"].aw-gev-past { opacity: 0.78 !important; }
+/* Dark mode: stronger border to pop on dark bg */
+[data-theme="dark"] [data-white="1"] {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.7), 0 0 0 1.5px rgba(210,185,140,0.85) !important;
+}
+@media(prefers-color-scheme:dark){
+  [data-white="1"] { box-shadow: 0 4px 20px rgba(0,0,0,0.7), 0 0 0 1.5px rgba(210,185,140,0.85) !important; }
+}
 [data-theme="dark"] .aw-tcol.we    { background: rgba(255,255,255,0.015) !important; }
 [data-theme="dark"] .awd-col       { background: var(--bg2) !important; }
 [data-theme="dark"] .awd-gutter    { background: var(--bg) !important; }

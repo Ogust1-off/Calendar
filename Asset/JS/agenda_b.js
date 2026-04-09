@@ -1266,13 +1266,13 @@ function awRenderDay(ds, container, preserveScroll) {
   }
   // Scroll to show the relevant time — purely based on hour, no cross-day sync
   var targetH;
+  // Centre the view: current time (today) or first event in the upper third
+  var halfH=Math.round(window.innerHeight*0.38);
   if(isToday){
-    // Show current time with a little space above
-    targetH=Math.max(0, nowH*AW_PX_PER_HOUR - 200);
+    targetH=Math.max(0, nowH*AW_PX_PER_HOUR - halfH);
   } else if(timed.length>0){
-    // Show first event of this day
     var firstH=awClampStartH(timed[0].ev,ds);
-    targetH=Math.max(0, firstH*AW_PX_PER_HOUR - 100);
+    targetH=Math.max(0, firstH*AW_PX_PER_HOUR - halfH);
   } else {
     targetH=Math.max(0, 7*AW_PX_PER_HOUR); // default: 07:00
   }
