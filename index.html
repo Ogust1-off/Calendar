@@ -672,8 +672,37 @@ function wkUpdateHdr(){
 }
 function wkGoToday(){_haptic('medium');_wkCur=_wkToday;window._wkScrollTop=undefined;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 function _initWkDaysSwipe(){
-  // Navigation via boutons < > — swipe supprimé (trop instable)
-  // Les boutons sont dans le HTML : wk-prev-btn, wk-next-btn
+  var hdr=document.getElementById('wk-hdr');
+  if(!hdr||hdr.dataset.swipeInit)return;
+  hdr.dataset.swipeInit='1';
+  var tx0=0, ty0=0, t0=0, moved=false;
+  hdr.addEventListener('touchstart',function(e){
+    var t=e.touches[0];
+    tx0=t.clientX; ty0=t.clientY; t0=Date.now(); moved=false;
+  },{passive:true});
+  hdr.addEventListener('touchmove',function(e){
+    var dx=Math.abs(e.touches[0].clientX-tx0);
+    var dy=Math.abs(e.touches[0].clientY-ty0);
+    if(dx>8&&dx>dy) moved=true;
+  },{passive:true});
+  hdr.addEventListener('touchend',function(e){
+    if(!moved)return;
+    var dx=e.changedTouches[0].clientX-tx0;
+    var dt=Date.now()-t0;
+    var adx=Math.abs(dx);
+    if(adx<20)return; // too small, ignore
+    // velocity px/ms, distance relative to screen
+    var vel=adx/Math.max(1,dt);
+    var far=adx>window.innerWidth*0.45;
+    // 2 weeks if fast (>0.7 px/ms) or far (>45% screen width)
+    var weeks=(vel>0.7||far)?2:1;
+    if(dx<0) { // swipe left → next
+      for(var i=0;i<weeks;i++) wkGoNext();
+    } else {   // swipe right → prev
+      for(var i=0;i<weeks;i++) wkGoPrev();
+    }
+    _haptic('selection');
+  },{passive:true});
 }
 function wkGoPrev(){_haptic('light');window._wkScrollTop=undefined;
   if(!_wkCur)return;

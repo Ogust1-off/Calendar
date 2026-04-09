@@ -1217,9 +1217,14 @@ function awRenderDay(ds, container, preserveScroll) {
   allDayRow.style.height=rowH+'px';
   allDayRow.dataset.rowH=String(rowH);
   // Label
+  // Gutter: full-height div that matches the time-gutter width + border
+  var gutterEl=document.createElement('div');
+  gutterEl.className='awd-allday-gutter';
   var labelEl=document.createElement('div');
   labelEl.className='awd-allday-label';
-  allDayRow.appendChild(labelEl);
+  labelEl.textContent=window._t?window._t('allDayLabel'):'all-day';
+  gutterEl.appendChild(labelEl);
+  allDayRow.appendChild(gutterEl);
   // Pills
   var pillsEl=document.createElement('div');
   pillsEl.className='awd-allday-pills'+(n>4?' awd-pills-scroll':'');
@@ -1256,7 +1261,8 @@ function awRenderDay(ds, container, preserveScroll) {
   if(container.parentElement){
     container.parentElement.appendChild(allDayRow);
     container.style.paddingTop=rowH+'px';
-    // No neighbor sync — each day shows its own allday height independently
+    container.dataset.alldayH=String(rowH);
+    // No neighbor sync — each day is full-screen, one visible at a time
   }
   // Scroll to show the relevant time — purely based on hour, no cross-day sync
   var targetH;
