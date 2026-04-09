@@ -1209,7 +1209,7 @@ function awRenderDay(ds, container, preserveScroll) {
   var pillRows=Math.ceil(n/COLS);
   var visRows=n===0?0:Math.min(pillRows,2); // max 2 rows visible (2.5 if >4)
   var rowH;
-  if(n===0)       rowH=28; // empty: thin strip
+  if(n===0)       rowH=V_PAD+PILL_H+V_PAD; // same as 1 row so grids align
   else if(n<=4)   rowH=V_PAD + visRows*PILL_H + (visRows-1)*PILL_GAP + V_PAD;
   else            rowH=V_PAD + Math.round(2.5*PILL_H) + PILL_GAP + V_PAD; // 2.5 rows hint
   var allDayRow=document.createElement('div');
