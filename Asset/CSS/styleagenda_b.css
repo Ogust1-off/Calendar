@@ -8,6 +8,8 @@
   align-items: flex-start;
   background: var(--bg2);
   border-bottom: .5px solid var(--sep);
+  overflow-x: clip;  /* clip pills horizontally but allow vertical scroll in children */
+  overflow-y: visible;
   overflow: hidden;
   min-height: 28px;
   /* Slight shadow to separate from grid */
@@ -59,7 +61,9 @@
 .awd-allday-pills.awd-pills-scroll {
   overflow-y: auto;
   overflow-x: hidden;
+  max-height: 67px;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 .awd-allday-pills.awd-pills-scroll::-webkit-scrollbar { display: none; }
 .awd-allday-pill {

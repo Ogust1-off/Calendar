@@ -257,7 +257,7 @@
     position:absolute;top:2px;bottom:2px;border-radius:7px;
     background:var(--bg2);box-shadow:0 1px 4px rgba(0,0,0,.18),0 .5px 0 rgba(0,0,0,.1);
     transition:left .22s cubic-bezier(.34,1.15,.64,1),width .22s cubic-bezier(.34,1.15,.64,1);
-    pointer-events:none;z-index:0}
+    pointer-events:none;z-index:0;min-width:20px}
   .acc-seg-btn{padding:5px 13px;border-radius:7px;border:none;background:none;
     color:var(--lbl2);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;
     -webkit-tap-highlight-color:transparent;transition:color .15s;
@@ -780,6 +780,7 @@ var VIDS=['v-agenda','v-week','v-account'],TIDS=['tb-0','tb-1','tb-2'],_tab=0;
 function goTab(i){
   _haptic('light');
   _tab=i;
+  if(i===2){setTimeout(function(){_applyLang();var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};_updateSegSlider('acc-theme-seg',d.theme||'auto');},50);}
   VIDS.forEach(function(id,j){
     var el=document.getElementById(id);if(!el)return;
     if(j===i){el.classList.add('on');el.style.display=(id==='v-week'?'flex':'block');}
@@ -912,6 +913,16 @@ function _applyProfile(){
 }
 
 /* ── i18n apply ── */
+function _updateSegSlider(segId, val){
+  var seg=document.getElementById(segId); if(!seg)return;
+  var sl=seg.querySelector('.acc-seg-slider'); if(!sl)return;
+  var btn=seg.querySelector('[data-val="'+val+'"]'); if(!btn)return;
+  // Use rAF to ensure layout is computed
+  requestAnimationFrame(function(){
+    sl.style.left=btn.offsetLeft+'px';
+    sl.style.width=btn.offsetWidth+'px';
+  });
+}
 function _applyLang(){
   var l=typeof window._getLang==='function'?window._getLang():'en';
   var t=window._t||function(k){return k;};
@@ -949,6 +960,7 @@ function _applyLang(){
 /* ── Account actions ── */
 function accSetLang(lang){_haptic('medium');
   try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};d.lang=lang;localStorage.setItem('shortcut_config',JSON.stringify(d));}catch(e){}
+  _updateSegSlider('acc-lang-seg',lang);
   location.reload();
 }
 function accSetTheme(v){

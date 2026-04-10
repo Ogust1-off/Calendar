@@ -1243,12 +1243,16 @@ function awRenderDay(ds, container, preserveScroll) {
       var pill=document.createElement('button');
       pill.className='awd-allday-pill'+(isWhiteEv?' awd-pill-white':'');
       // Apple-style: subtle tinted background, colored text
-      pill.style.background=adHex+'22';
-      pill.style.borderColor=adHex+'66';
-      pill.style.color=isWhiteEv?'rgba(100,70,20,0.9)':adHex;
+      var _th=document.documentElement.dataset.theme;
+      var _isDark=_th==='dark'?true:_th==='light'?false:window.matchMedia('(prefers-color-scheme:dark)').matches;
+      // White liturgical: in dark mode use warm gold, in light use warm brown
+      var pillColor=isWhiteEv?(_isDark?'#e8c97a':'rgba(100,70,20,0.9)'):adHex;
+      pill.style.background=isWhiteEv?(adHex+'dd'):adHex+'22';
+      pill.style.borderColor=isWhiteEv?'rgba(210,185,130,0.6)':adHex+'66';
+      pill.style.color=pillColor;
       var dot=document.createElement('span');
       dot.className='awd-pill-dot';
-      dot.style.background=adHex;
+      dot.style.background=pillColor;
       var name=document.createElement('span');
       name.className='awd-pill-name';
       name.textContent=ev.summary||'';
@@ -1268,13 +1272,15 @@ function awRenderDay(ds, container, preserveScroll) {
   var targetH;
   // Centre the view: current time (today) or first event in the upper third
   var halfH=Math.round(window.innerHeight*0.38);
+  // paddingTop offsets the grid content — must be included in scroll target
+  var ptop=parseInt(container.style.paddingTop)||0;
   if(isToday){
-    targetH=Math.max(0, nowH*AW_PX_PER_HOUR - halfH);
+    targetH=Math.max(0, ptop + nowH*AW_PX_PER_HOUR - halfH);
   } else if(timed.length>0){
     var firstH=awClampStartH(timed[0].ev,ds);
-    targetH=Math.max(0, firstH*AW_PX_PER_HOUR - halfH);
+    targetH=Math.max(0, ptop + firstH*AW_PX_PER_HOUR - halfH);
   } else {
-    targetH=Math.max(0, 7*AW_PX_PER_HOUR); // default: 07:00
+    targetH=Math.max(0, ptop + 7*AW_PX_PER_HOUR); // default: 07:00
   }
   // Apply scroll: use shared position if available, else compute from time
   var sharedTop=typeof window._wkScrollTop==='number'?window._wkScrollTop:-1;
