@@ -928,11 +928,17 @@ function _updateSegSlider(segId, val){
   var seg=document.getElementById(segId); if(!seg)return;
   var sl=seg.querySelector('.acc-seg-slider'); if(!sl)return;
   var btn=seg.querySelector('[data-val="'+val+'"]'); if(!btn)return;
-  // Use rAF to ensure layout is computed
-  requestAnimationFrame(function(){
-    sl.style.left=btn.offsetLeft+'px';
-    sl.style.width=btn.offsetWidth+'px';
-  });
+  // Mirror exact mechanics of _updateSlider for tab bar
+  sl.style.transition='left .22s cubic-bezier(.34,1.15,.64,1),width .22s cubic-bezier(.34,1.15,.64,1)';
+  sl.style.left=btn.offsetLeft+'px';
+  sl.style.width=btn.offsetWidth+'px';
+  // If width is 0 (not laid out yet), retry after paint
+  if(!btn.offsetWidth){
+    requestAnimationFrame(function(){
+      sl.style.left=btn.offsetLeft+'px';
+      sl.style.width=btn.offsetWidth+'px';
+    });
+  }
 }
 function _applyLang(){
   var l=typeof window._getLang==='function'?window._getLang():'en';

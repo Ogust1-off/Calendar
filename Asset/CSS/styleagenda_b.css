@@ -227,6 +227,14 @@ Copyright © 2026 Ogust'1. All rights reserved.
 .aw-color-dot[data-color="orange"]  { background: #f97316; box-shadow: 0 0 7px rgba(249,115,22,0.6); }
 .aw-color-dot[data-color="grey"]    { background: #94a3b8; box-shadow: 0 0 7px rgba(148,163,184,0.5); }
 .aw-color-dot[data-color="lime"]    { background: #84cc16; box-shadow: 0 0 7px rgba(132,204,22,0.6); }
+.aw-color-dot[data-color="indigo"]  { background: #6366f1; box-shadow: 0 0 7px rgba(99,102,241,0.6); }
+.aw-color-dot[data-color="fuchsia"] { background: #d946ef; box-shadow: 0 0 7px rgba(217,70,239,0.6); }
+.aw-color-dot[data-color="red"]     { background: #ef4444; box-shadow: 0 0 7px rgba(239,68,68,0.6); }
+.aw-color-dot[data-color="yellow"]  { background: #eab308; box-shadow: 0 0 7px rgba(234,179,8,0.6); }
+.aw-color-dot[data-color="teal"]    { background: #14b8a6; box-shadow: 0 0 7px rgba(20,184,166,0.6); }
+.aw-color-dot[data-color="sky"]     { background: #0ea5e9; box-shadow: 0 0 7px rgba(14,165,233,0.6); }
+.aw-color-dot[data-color="slate"]   { background: #64748b; box-shadow: 0 0 7px rgba(100,116,139,0.5); }
+.aw-color-dot[data-color="white"]   { background: #f8f4ec; box-shadow: 0 0 7px rgba(200,184,154,0.6); border: 1px solid rgba(180,160,120,0.3); }
 
 /* Progress bar colored variants */
 .aw-progress-bar--colored[data-color="blue"]    { background: rgba(59,130,246,0.65); }
@@ -238,6 +246,14 @@ Copyright © 2026 Ogust'1. All rights reserved.
 .aw-progress-bar--colored[data-color="orange"]  { background: rgba(249,115,22,0.65); }
 .aw-progress-bar--colored[data-color="grey"]    { background: rgba(148,163,184,0.55); }
 .aw-progress-bar--colored[data-color="lime"]    { background: rgba(132,204,22,0.65); }
+.aw-progress-bar--colored[data-color="indigo"]  { background: rgba(99,102,241,0.65); }
+.aw-progress-bar--colored[data-color="fuchsia"] { background: rgba(217,70,239,0.65); }
+.aw-progress-bar--colored[data-color="red"]     { background: rgba(239,68,68,0.65); }
+.aw-progress-bar--colored[data-color="yellow"]  { background: rgba(234,179,8,0.65); }
+.aw-progress-bar--colored[data-color="teal"]    { background: rgba(20,184,166,0.65); }
+.aw-progress-bar--colored[data-color="sky"]     { background: rgba(14,165,233,0.65); }
+.aw-progress-bar--colored[data-color="slate"]   { background: rgba(100,116,139,0.65); }
+.aw-progress-bar--colored[data-color="white"]   { background: rgba(200,184,154,0.65); }
 
 /* Liquid Glass event row — click feedback */
 .agenda-widget .aw-event {
