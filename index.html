@@ -187,6 +187,71 @@
     -webkit-overflow-scrolling:touch;
     padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 80px)}
 
+
+  /* ── Month overview overlay ── */
+  #mo-overlay{
+    position:absolute;top:0;left:0;right:0;bottom:0;
+    z-index:90;
+    background:var(--bg);
+    display:flex;flex-direction:column;
+    transform:translateY(-100%);
+    transition:transform .32s cubic-bezier(.32,1.2,.45,1);
+    will-change:transform;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  #mo-overlay.mo-open{transform:translateY(0);pointer-events:all;}
+  #mo-hdr{
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px 10px;
+    border-bottom:.5px solid var(--sep);
+    background:var(--bg);
+  }
+  #mo-lbl{font-size:20px;font-weight:700;letter-spacing:-.03em;color:var(--lbl);}
+  #mo-lbl span{font-weight:300;color:var(--lbl2);font-size:18px;}
+  .mo-nav-btn{width:30px;height:30px;border-radius:50%;border:none;
+    background:var(--fill);color:var(--lbl2);cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    -webkit-tap-highlight-color:transparent;font-size:14px;}
+  #mo-grid{
+    flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:0 8px 16px;
+  }
+  .mo-dow-row{
+    display:grid;grid-template-columns:repeat(7,1fr);
+    padding:6px 0 4px;
+    position:sticky;top:0;background:var(--bg);z-index:2;
+  }
+  .mo-dow{font-size:10px;font-weight:600;text-align:center;
+    text-transform:uppercase;letter-spacing:.06em;color:var(--lbl3);}
+  .mo-week{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px;}
+  .mo-day{
+    min-height:62px;padding:4px 3px 2px;cursor:pointer;border-radius:10px;
+    position:relative;
+    -webkit-tap-highlight-color:transparent;
+    transition:background .1s;
+  }
+  .mo-day:active{background:var(--fill);}
+  .mo-day.mo-other{opacity:.3;}
+  .mo-day.mo-today .mo-day-num{
+    background:var(--red);color:#fff;border-radius:50%;
+    width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+    margin:0 auto 2px;
+  }
+  .mo-day-num{
+    font-size:13px;font-weight:500;color:var(--lbl);
+    text-align:center;line-height:22px;
+    width:22px;margin:0 auto 2px;
+  }
+  .mo-dots{display:flex;justify-content:center;gap:2px;flex-wrap:wrap;padding:0 2px;}
+  .mo-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+  /* Close band at top when tapping outside */
+  #mo-close-band{
+    position:fixed;bottom:0;left:0;right:0;
+    height:60px;z-index:89;display:none;cursor:pointer;
+  }
+  #mo-overlay.mo-open ~ #mo-close-band{display:block;}
   /* ── Day grid ── */
   .awd-grid{display:flex;position:relative}
   .awd-gutter{width:52px;flex-shrink:0;position:relative;border-right:.5px solid var(--sep);background:var(--bg)}
@@ -252,19 +317,18 @@
   .acc-select{background:none;border:none;color:var(--tint);font-size:14px;font-family:inherit;
     outline:none;cursor:pointer;flex-shrink:0;font-weight:500;-webkit-appearance:none;padding-right:4px}
   .acc-seg{display:flex;align-items:center;background:var(--fill);border-radius:9px;
-    padding:2px;gap:0;flex-shrink:0;position:relative}
-  .acc-seg-pill .acc-seg-slider{
-    position:absolute;top:2px;bottom:2px;border-radius:7px;
+    padding:2px;gap:0;flex-shrink:0;position:relative;overflow:hidden}
+  .acc-seg-track{
+    position:absolute;top:2px;bottom:2px;left:2px;border-radius:7px;
     background:var(--bg2);box-shadow:0 1px 4px rgba(0,0,0,.18),0 .5px 0 rgba(0,0,0,.1);
-    transition:left .22s cubic-bezier(.34,1.15,.64,1),width .22s cubic-bezier(.34,1.15,.64,1);
-    pointer-events:none;z-index:0;min-width:20px}
+    pointer-events:none;
+    transition:transform .22s cubic-bezier(.34,1.15,.64,1),width .22s cubic-bezier(.34,1.15,.64,1);
+    width:0}
   .acc-seg-btn{padding:5px 13px;border-radius:7px;border:none;background:none;
     color:var(--lbl2);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;
-    -webkit-tap-highlight-color:transparent;transition:color .15s;
+    -webkit-tap-highlight-color:transparent;transition:color .18s;
     line-height:1.3;white-space:nowrap;position:relative;z-index:1}
   .acc-seg-btn.on{color:var(--lbl);}
-  .acc-seg:not(.acc-seg-pill) .acc-seg-btn.on{background:var(--bg2);
-    box-shadow:0 1px 4px rgba(0,0,0,.18),0 .5px 0 rgba(0,0,0,.1)}
   .acc-row-danger .acc-row-lbl{color:var(--red)}
 
   /* ── Tab bar ── */
@@ -499,7 +563,7 @@
   <div id="v-week" class="view">
     <div id="wk-hdr">
       <div id="wk-month-row">
-        <div id="wk-month-lbl">&#8230;</div>
+        <button id="wk-month-lbl" onclick="moToggle()" style="background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;padding:0;-webkit-tap-highlight-color:transparent;">&#8230;</button>
         <div class="wk-nav-btns">
           <button class="wk-nav-btn" id="wk-prev-btn" onclick="wkGoPrev()" aria-label="Previous week">
             <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -513,6 +577,18 @@
       <div id="wk-days"></div>
     </div>
     <div id="wk-strip"></div>
+    <!-- Month overview -->
+    <div id="mo-overlay">
+      <div id="mo-hdr">
+        <button class="mo-nav-btn" onclick="moGoPrev()">&#8249;</button>
+        <div id="mo-lbl">&#8230;</div>
+        <button class="mo-nav-btn" onclick="moGoNext()">&#8250;</button>
+      </div>
+      <div id="mo-grid">
+        <div class="mo-dow-row" id="mo-dows"></div>
+        <div id="mo-weeks"></div>
+      </div>
+    </div>
   </div>
 
   <!-- ACCOUNT -->
@@ -535,8 +611,8 @@
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico">&#127760;</span>
           <span class="acc-row-lbl" id="acc-lang-lbl">Language</span>
-          <div class="acc-seg acc-seg-pill" id="acc-lang-seg">
-            <div class="acc-seg-slider" id="acc-lang-slider"></div>
+          <div class="acc-seg" id="acc-lang-seg">
+            <div class="acc-seg-track" id="acc-lang-track"></div>
             <button class="acc-seg-btn" data-val="en" onclick="accSetLang('en')">EN</button>
             <button class="acc-seg-btn" data-val="fr" onclick="accSetLang('fr')">FR</button>
           </div>
@@ -544,8 +620,8 @@
         <div class="acc-row acc-row-static">
           <span class="acc-row-ico" id="acc-theme-ico">&#10024;</span>
           <span class="acc-row-lbl" id="acc-theme-lbl">Theme</span>
-          <div class="acc-seg acc-seg-pill" id="acc-theme-seg">
-            <div class="acc-seg-slider" id="acc-theme-slider"></div>
+          <div class="acc-seg" id="acc-theme-seg">
+            <div class="acc-seg-track" id="acc-theme-track"></div>
             <button class="acc-seg-btn" data-val="auto" onclick="accSetTheme('auto')">Auto</button>
             <button class="acc-seg-btn" data-val="dark"  onclick="accSetTheme('dark')">&#127769;</button>
             <button class="acc-seg-btn" data-val="light" onclick="accSetTheme('light')">&#9728;&#65039;</button>
@@ -736,7 +812,7 @@ function wkUpdateHdr(){
     days.appendChild(btn);
   });
 }
-function wkGoToday(){_haptic('medium');_wkCur=_wkToday;window._wkScrollTop=undefined;wkSnap(_wkCur,true,true);wkUpdateHdr();}
+function wkGoToday(){_haptic('medium');moClose();_wkCur=_wkToday;window._wkScrollTop=undefined;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 function _initWkDaysSwipe(){
   var hdr=document.getElementById('wk-hdr');
   if(!hdr||hdr.dataset.swipeInit)return;
@@ -770,14 +846,14 @@ function _initWkDaysSwipe(){
     _haptic('selection');
   },{passive:true});
 }
-function wkGoPrev(){_haptic('light');window._wkScrollTop=undefined;
+function wkGoPrev(){_haptic('light');window._wkScrollTop=undefined;moClose();
   if(!_wkCur)return;
   var d=new Date(_wkCur+'T00:00:00');
   d.setDate(d.getDate()-7);
   var ds=_ds(d);
   if(_wkDates.includes(ds)){_wkCur=ds;wkSnap(_wkCur,true,true);wkUpdateHdr();}
 }
-function wkGoNext(){_haptic('light');window._wkScrollTop=undefined;
+function wkGoNext(){_haptic('light');window._wkScrollTop=undefined;moClose();
   if(!_wkCur)return;
   var d=new Date(_wkCur+'T00:00:00');
   d.setDate(d.getDate()+7);
@@ -924,21 +1000,13 @@ function _applyProfile(){
 }
 
 /* ── i18n apply ── */
-function _updateSegSlider(segId, val){
-  var seg=document.getElementById(segId); if(!seg)return;
-  var sl=seg.querySelector('.acc-seg-slider'); if(!sl)return;
-  var btn=seg.querySelector('[data-val="'+val+'"]'); if(!btn)return;
-  // Mirror exact mechanics of _updateSlider for tab bar
-  sl.style.transition='left .22s cubic-bezier(.34,1.15,.64,1),width .22s cubic-bezier(.34,1.15,.64,1)';
-  sl.style.left=btn.offsetLeft+'px';
-  sl.style.width=btn.offsetWidth+'px';
-  // If width is 0 (not laid out yet), retry after paint
-  if(!btn.offsetWidth){
-    requestAnimationFrame(function(){
-      sl.style.left=btn.offsetLeft+'px';
-      sl.style.width=btn.offsetWidth+'px';
-    });
-  }
+function _updateSegSlider(segId,val){
+  var seg=document.getElementById(segId);if(!seg)return;
+  var track=seg.querySelector('.acc-seg-track');if(!track)return;
+  var btn=seg.querySelector('[data-val="'+val+'"]');if(!btn)return;
+  // Position track exactly like tb-slider positions itself on tb-pill
+  track.style.width=btn.offsetWidth+'px';
+  track.style.transform='translateX('+(btn.offsetLeft)+'px)';
 }
 function _applyLang(){
   var l=typeof window._getLang==='function'?window._getLang():'en';
@@ -1126,6 +1194,111 @@ setInterval(function(){
   },true);
 })();
 
+
+/* ── Month overview ── */
+var _moOpen=false, _moYear=0, _moMonth=0;
+
+function moToggle(){
+  _moOpen=!_moOpen;
+  var ov=document.getElementById('mo-overlay');
+  if(!ov)return;
+  if(_moOpen){
+    // Set to current visible month
+    if(_wkCur){var d=new Date(_wkCur+'T00:00:00');_moYear=d.getFullYear();_moMonth=d.getMonth();}
+    else{var now=new Date();_moYear=now.getFullYear();_moMonth=now.getMonth();}
+    moRender();
+    ov.classList.add('mo-open');
+    _haptic('light');
+  } else {
+    ov.classList.remove('mo-open');
+  }
+}
+function moClose(){if(_moOpen){_moOpen=false;document.getElementById('mo-overlay').classList.remove('mo-open');}}
+function moGoPrev(){_moMonth--;if(_moMonth<0){_moMonth=11;_moYear--;}moRender();_haptic('selection');}
+function moGoNext(){_moMonth++;if(_moMonth>11){_moMonth=0;_moYear++;}moRender();_haptic('selection');}
+
+function moRender(){
+  var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var d0=new Date(_moYear,_moMonth,1);
+  var moName=d0.toLocaleDateString(locale,{month:'long'});
+  moName=moName[0].toUpperCase()+moName.slice(1);
+  var lbl=document.getElementById('mo-lbl');
+  if(lbl)lbl.innerHTML='<strong>'+moName+'</strong> <span>'+_moYear+'</span>';
+
+  // DOW headers
+  var dows=document.getElementById('mo-dows');
+  if(dows){
+    var lang=typeof window._getLang==='function'?window._getLang():'en';
+    var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+    dows.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
+  }
+
+  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+  var byDay=window._awByDay||{};
+  var AW_HEX=window.AW_COLOR_HEX||{};
+
+  // First day of month, Monday-aligned
+  var firstDay=new Date(_moYear,_moMonth,1);
+  var startDow=firstDay.getDay(); // 0=Sun
+  var startOffset=(startDow===0)?6:startDow-1; // Mon=0
+  var gridStart=new Date(firstDay);
+  gridStart.setDate(firstDay.getDate()-startOffset);
+
+  var weeks=[];
+  var cur=new Date(gridStart);
+  for(var w=0;w<6;w++){
+    // Stop if we've gone past the month and filled at least 4 weeks
+    if(w>=4&&cur.getMonth()!==_moMonth&&cur.getDay()===1)break; // Mon=1
+    var week=[];
+    for(var dw=0;dw<7;dw++){
+      var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
+      var isThisMonth=cur.getMonth()===_moMonth;
+      var isToday=ds===today;
+      var evs=byDay[ds]||[];
+      // Get up to 3 distinct colors from events
+      var colors=[];
+      evs.forEach(function(item){
+        var ev=item.ev;
+        var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
+        var hex=AW_HEX[col]||'#3b82f6';
+        if(colors.indexOf(hex)<0&&colors.length<3)colors.push(hex);
+      });
+      week.push({ds:ds,num:cur.getDate(),isThisMonth:isThisMonth,isToday:isToday,colors:colors});
+      cur.setDate(cur.getDate()+1);
+    }
+    weeks.push(week);
+  }
+
+  var html='';
+  weeks.forEach(function(week){
+    html+='<div class="mo-week">';
+    week.forEach(function(day){
+      var cls='mo-day'+(day.isThisMonth?'':' mo-other')+(day.isToday?' mo-today':'');
+      var numHtml=day.isToday
+        ?'<div class="mo-day-num">'+day.num+'</div>'
+        :'<div class="mo-day-num">'+day.num+'</div>';
+      var dots=day.colors.map(function(c){return '<div class="mo-dot" style="background:'+c+'"></div>';}).join('');
+      html+='<div class="'+cls+'" data-ds="'+day.ds+'" onclick="moSelectDay(this.dataset.ds)">'+numHtml+'<div class="mo-dots">'+dots+'</div></div>';
+    });
+    html+='</div>';
+  });
+
+  var weeksEl=document.getElementById('mo-weeks');
+  if(weeksEl)weeksEl.innerHTML=html;
+}
+
+function moSelectDay(ds){
+  moClose();
+  if(typeof wkSnap==='function'&&typeof _wkDates!=='undefined'){
+    if(_wkDates.indexOf(ds)>=0){
+      _wkCur=ds;
+      window._wkScrollTop=undefined;
+      wkSnap(_wkCur,true,true);
+      wkUpdateHdr();
+    }
+  }
+  _haptic('selection');
+}
 window.addEventListener('load',function(){
   goTab(0);
   _applyProfile();
@@ -1265,6 +1438,111 @@ function accImportConfig(){
   document.body.appendChild(input);input.click();
   setTimeout(function(){document.body.removeChild(input);},5000);
 }
+
+/* ── Month overview ── */
+var _moOpen=false, _moYear=0, _moMonth=0;
+
+function moToggle(){
+  _moOpen=!_moOpen;
+  var ov=document.getElementById('mo-overlay');
+  if(!ov)return;
+  if(_moOpen){
+    // Set to current visible month
+    if(_wkCur){var d=new Date(_wkCur+'T00:00:00');_moYear=d.getFullYear();_moMonth=d.getMonth();}
+    else{var now=new Date();_moYear=now.getFullYear();_moMonth=now.getMonth();}
+    moRender();
+    ov.classList.add('mo-open');
+    _haptic('light');
+  } else {
+    ov.classList.remove('mo-open');
+  }
+}
+function moClose(){if(_moOpen){_moOpen=false;document.getElementById('mo-overlay').classList.remove('mo-open');}}
+function moGoPrev(){_moMonth--;if(_moMonth<0){_moMonth=11;_moYear--;}moRender();_haptic('selection');}
+function moGoNext(){_moMonth++;if(_moMonth>11){_moMonth=0;_moYear++;}moRender();_haptic('selection');}
+
+function moRender(){
+  var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var d0=new Date(_moYear,_moMonth,1);
+  var moName=d0.toLocaleDateString(locale,{month:'long'});
+  moName=moName[0].toUpperCase()+moName.slice(1);
+  var lbl=document.getElementById('mo-lbl');
+  if(lbl)lbl.innerHTML='<strong>'+moName+'</strong> <span>'+_moYear+'</span>';
+
+  // DOW headers
+  var dows=document.getElementById('mo-dows');
+  if(dows){
+    var lang=typeof window._getLang==='function'?window._getLang():'en';
+    var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+    dows.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
+  }
+
+  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+  var byDay=window._awByDay||{};
+  var AW_HEX=window.AW_COLOR_HEX||{};
+
+  // First day of month, Monday-aligned
+  var firstDay=new Date(_moYear,_moMonth,1);
+  var startDow=firstDay.getDay(); // 0=Sun
+  var startOffset=(startDow===0)?6:startDow-1; // Mon=0
+  var gridStart=new Date(firstDay);
+  gridStart.setDate(firstDay.getDate()-startOffset);
+
+  var weeks=[];
+  var cur=new Date(gridStart);
+  for(var w=0;w<6;w++){
+    // Stop if we've gone past the month and filled at least 4 weeks
+    if(w>=4&&cur.getMonth()!==_moMonth&&cur.getDay()===1)break; // Mon=1
+    var week=[];
+    for(var dw=0;dw<7;dw++){
+      var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
+      var isThisMonth=cur.getMonth()===_moMonth;
+      var isToday=ds===today;
+      var evs=byDay[ds]||[];
+      // Get up to 3 distinct colors from events
+      var colors=[];
+      evs.forEach(function(item){
+        var ev=item.ev;
+        var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
+        var hex=AW_HEX[col]||'#3b82f6';
+        if(colors.indexOf(hex)<0&&colors.length<3)colors.push(hex);
+      });
+      week.push({ds:ds,num:cur.getDate(),isThisMonth:isThisMonth,isToday:isToday,colors:colors});
+      cur.setDate(cur.getDate()+1);
+    }
+    weeks.push(week);
+  }
+
+  var html='';
+  weeks.forEach(function(week){
+    html+='<div class="mo-week">';
+    week.forEach(function(day){
+      var cls='mo-day'+(day.isThisMonth?'':' mo-other')+(day.isToday?' mo-today':'');
+      var numHtml=day.isToday
+        ?'<div class="mo-day-num">'+day.num+'</div>'
+        :'<div class="mo-day-num">'+day.num+'</div>';
+      var dots=day.colors.map(function(c){return '<div class="mo-dot" style="background:'+c+'"></div>';}).join('');
+      html+='<div class="'+cls+'" data-ds="'+day.ds+'" onclick="moSelectDay(this.dataset.ds)">'+numHtml+'<div class="mo-dots">'+dots+'</div></div>';
+    });
+    html+='</div>';
+  });
+
+  var weeksEl=document.getElementById('mo-weeks');
+  if(weeksEl)weeksEl.innerHTML=html;
+}
+
+function moSelectDay(ds){
+  moClose();
+  if(typeof wkSnap==='function'&&typeof _wkDates!=='undefined'){
+    if(_wkDates.indexOf(ds)>=0){
+      _wkCur=ds;
+      window._wkScrollTop=undefined;
+      wkSnap(_wkCur,true,true);
+      wkUpdateHdr();
+    }
+  }
+  _haptic('selection');
+}
 window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
 
 /* ── Install banner ── */
@@ -1333,6 +1611,111 @@ function accImportConfig(){
   };
   document.body.appendChild(input);input.click();
   setTimeout(function(){document.body.removeChild(input);},5000);
+}
+
+/* ── Month overview ── */
+var _moOpen=false, _moYear=0, _moMonth=0;
+
+function moToggle(){
+  _moOpen=!_moOpen;
+  var ov=document.getElementById('mo-overlay');
+  if(!ov)return;
+  if(_moOpen){
+    // Set to current visible month
+    if(_wkCur){var d=new Date(_wkCur+'T00:00:00');_moYear=d.getFullYear();_moMonth=d.getMonth();}
+    else{var now=new Date();_moYear=now.getFullYear();_moMonth=now.getMonth();}
+    moRender();
+    ov.classList.add('mo-open');
+    _haptic('light');
+  } else {
+    ov.classList.remove('mo-open');
+  }
+}
+function moClose(){if(_moOpen){_moOpen=false;document.getElementById('mo-overlay').classList.remove('mo-open');}}
+function moGoPrev(){_moMonth--;if(_moMonth<0){_moMonth=11;_moYear--;}moRender();_haptic('selection');}
+function moGoNext(){_moMonth++;if(_moMonth>11){_moMonth=0;_moYear++;}moRender();_haptic('selection');}
+
+function moRender(){
+  var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var d0=new Date(_moYear,_moMonth,1);
+  var moName=d0.toLocaleDateString(locale,{month:'long'});
+  moName=moName[0].toUpperCase()+moName.slice(1);
+  var lbl=document.getElementById('mo-lbl');
+  if(lbl)lbl.innerHTML='<strong>'+moName+'</strong> <span>'+_moYear+'</span>';
+
+  // DOW headers
+  var dows=document.getElementById('mo-dows');
+  if(dows){
+    var lang=typeof window._getLang==='function'?window._getLang():'en';
+    var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+    dows.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
+  }
+
+  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+  var byDay=window._awByDay||{};
+  var AW_HEX=window.AW_COLOR_HEX||{};
+
+  // First day of month, Monday-aligned
+  var firstDay=new Date(_moYear,_moMonth,1);
+  var startDow=firstDay.getDay(); // 0=Sun
+  var startOffset=(startDow===0)?6:startDow-1; // Mon=0
+  var gridStart=new Date(firstDay);
+  gridStart.setDate(firstDay.getDate()-startOffset);
+
+  var weeks=[];
+  var cur=new Date(gridStart);
+  for(var w=0;w<6;w++){
+    // Stop if we've gone past the month and filled at least 4 weeks
+    if(w>=4&&cur.getMonth()!==_moMonth&&cur.getDay()===1)break; // Mon=1
+    var week=[];
+    for(var dw=0;dw<7;dw++){
+      var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
+      var isThisMonth=cur.getMonth()===_moMonth;
+      var isToday=ds===today;
+      var evs=byDay[ds]||[];
+      // Get up to 3 distinct colors from events
+      var colors=[];
+      evs.forEach(function(item){
+        var ev=item.ev;
+        var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
+        var hex=AW_HEX[col]||'#3b82f6';
+        if(colors.indexOf(hex)<0&&colors.length<3)colors.push(hex);
+      });
+      week.push({ds:ds,num:cur.getDate(),isThisMonth:isThisMonth,isToday:isToday,colors:colors});
+      cur.setDate(cur.getDate()+1);
+    }
+    weeks.push(week);
+  }
+
+  var html='';
+  weeks.forEach(function(week){
+    html+='<div class="mo-week">';
+    week.forEach(function(day){
+      var cls='mo-day'+(day.isThisMonth?'':' mo-other')+(day.isToday?' mo-today':'');
+      var numHtml=day.isToday
+        ?'<div class="mo-day-num">'+day.num+'</div>'
+        :'<div class="mo-day-num">'+day.num+'</div>';
+      var dots=day.colors.map(function(c){return '<div class="mo-dot" style="background:'+c+'"></div>';}).join('');
+      html+='<div class="'+cls+'" data-ds="'+day.ds+'" onclick="moSelectDay(this.dataset.ds)">'+numHtml+'<div class="mo-dots">'+dots+'</div></div>';
+    });
+    html+='</div>';
+  });
+
+  var weeksEl=document.getElementById('mo-weeks');
+  if(weeksEl)weeksEl.innerHTML=html;
+}
+
+function moSelectDay(ds){
+  moClose();
+  if(typeof wkSnap==='function'&&typeof _wkDates!=='undefined'){
+    if(_wkDates.indexOf(ds)>=0){
+      _wkCur=ds;
+      window._wkScrollTop=undefined;
+      wkSnap(_wkCur,true,true);
+      wkUpdateHdr();
+    }
+  }
+  _haptic('selection');
 }
 window.addEventListener('load',function(){
   if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone&&!localStorage.getItem('ib'))

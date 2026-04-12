@@ -661,6 +661,7 @@ function _obFillAdvanced(con,bot){
         '<button class="ob-src-btn'+(cal.type!=='google'?' ob-src-on':'')+'" onclick="_obExtraType('+i+',\'ical\',this)" style="flex:1;padding:8px;font-size:12px;border-radius:10px">&#128241; iCal</button>'+
       '</div>'+
       '<input class="ob-inp ob-mono" placeholder="ID ou webcal://\u2026" value="'+_obEsc(cal.url||'')+'" oninput="_obExtraUrl('+i+',this)" style="font-size:12.5px;padding:9px 12px"/>'+
+      '<div style="margin-top:8px"><input class="ob-inp" placeholder="'+_ot('obCalName','Calendar name (optional)')+'" value="'+_obEsc(cal.name||'')+'" oninput="_obExtraName('+i+',this)" style="font-size:12.5px;padding:9px 12px"/></div>'+
       '<div style="display:flex;align-items:center;gap:8px;margin-top:8px">'+
         '<label class="ob-lbl" style="margin:0;text-transform:none;letter-spacing:0;font-size:12px">'+_ot('obColor','Colour:')+' </label>'+
         '<button class="ob-color-dot-btn" data-color="'+(cal.color||'blue')+'" style="background:'+hex+';" onclick="_obExtraColorPop(this,'+i+')" title="Couleur"></button>'+
@@ -676,6 +677,7 @@ function _obAddExtra(){var d=_obLoad();var e=d.extraCals||[];e.push({type:'googl
 function _obRemoveExtra(i){var d=_obLoad();var e=d.extraCals||[];e.splice(i,1);d.extraCals=e;_obSave(d);var el=document.getElementById('ob-overlay');if(!el)return;var con=el.querySelector('#ob-cal-content'),bot=el.querySelector('#ob-cal-bottom');if(con&&bot)_obFillAdvanced(con,bot);}
 function _obExtraType(i,type,btn){var p=btn.parentElement;if(p)p.querySelectorAll('.ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');});btn.classList.add('ob-src-on');var d=_obLoad();var e=d.extraCals||[];if(e[i])e[i].type=type;d.extraCals=e;_obSave(d);}
 function _obExtraUrl(i,inp){var d=_obLoad();var e=d.extraCals||[];if(e[i])e[i].url=inp.value.trim();d.extraCals=e;_obSave(d);}
+function _obExtraName(i,inp){var d=_obLoad();var e=d.extraCals||[];if(e[i])e[i].name=inp.value.trim();d.extraCals=e;_obSave(d);}
 function _obExtraColorPop(btn,i){
   var existing=document.getElementById('ob-color-pop');if(existing)existing.remove();
   var pop=document.createElement('div');pop.id='ob-color-pop';

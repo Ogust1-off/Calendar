@@ -15,6 +15,8 @@ function _loadCfg() {
   AW_CAL1_COLOR_CFG = c.cal1Color    || 'blue';
   AW_CAL1_SUBJECTS  = c.cal1Subjects || [];
   AW_CAL2_COLOR_CFG = c.cal2Color    || 'lime';
+  AW_CAL1_NAME      = c.cal1Name     || '';
+  AW_CAL2_NAME      = c.cal2Name     || '';
   return !!(AW_API_KEY && AW_CALENDAR_ID) || !!(c.cal1Ical);
 }
 let AW_API_KEY = '', AW_CALENDAR_ID = '', AW_CALENDAR_ID_2 = '', AW_ICAL_URL = '', AW_CAL2_ICAL = '', AW_EXTRA_CALS = [];
@@ -122,6 +124,7 @@ const AW_COLOR_HEX = {
   cyan:'#06b6d4',sky:'#0ea5e9',slate:'#64748b',grey:'#94a3b8',
   white:'#f8f4ec',
 };
+window.AW_COLOR_HEX = AW_COLOR_HEX;
 function awColorFor(name, isCal2) {
   if (!name) return 'blue';
   if (isCal2) return AW_CAL2_COLOR_CFG || 'lime';
@@ -248,7 +251,7 @@ async function awFetch() {
         if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error((e.error && e.error.message) || 'API ' + res.status); }
       }
       const datas = await Promise.all(responses.map(r => r.json()));
-      datas.forEach((data, idx) => events.push(...parseEvents(data, idx === 1)));
+      datas.forEach((data, idx) => events.push(...parseEvents(data, idx === 1, idx === 0 ? AW_CAL1_NAME : AW_CAL2_NAME)));
     } catch(e) {
       if (!AW_ICAL_URL) throw e; // Re-throw only if no iCal fallback
       console.warn('Google API failed, using iCal only:', e);
@@ -260,7 +263,7 @@ async function awFetch() {
   if (AW_CAL2_ICAL) icalSources.push({ url: AW_CAL2_ICAL, cal2: true, color: AW_CAL2_COLOR_CFG });
   if (AW_EXTRA_CALS && AW_EXTRA_CALS.length) {
     AW_EXTRA_CALS.forEach(function(ec) {
-      if (ec.type === 'ical' && ec.url) icalSources.push({ url: ec.url, cal2: true, color: ec.color || 'lime', extraColor: ec.color || 'lime' });
+      if (ec.type === 'ical' && ec.url) icalSources.push({ url: ec.url, cal2: true, color: ec.color || 'lime', extraColor: ec.color || 'lime', extraName: ec.name || '' });
     });
   }
   for (const src of icalSources) {
@@ -268,7 +271,7 @@ async function awFetch() {
       const proxyUrl = src.url.replace(/^webcal:\/\//i,'https://');
       const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(proxyUrl)}`);
       const text = await res.text();
-      const parsed = awParseICal(text).map(ev => ({ ...ev, cal2: src.cal2, _extraColor: src.extraColor || null }));
+      const parsed = awParseICal(text).map(ev => ({ ...ev, cal2: src.cal2, _extraColor: src.extraColor || null, _calName: src.extraName || (src.cal2 ? (AW_CAL2_NAME||'') : (AW_CAL1_NAME||'')) }));
       events.push(...parsed);
     } catch(e) { console.warn('iCal fetch failed:', src.url, e); }
   }
@@ -672,6 +675,7 @@ function awPopOpen(el, idx) {
     </button>
     <div class="aw-pop-body">
       <div class="aw-pop-title">${fullName}</div>
+      ${ev._calName ? `<div class="aw-pop-cal-name"><span class="aw-pop-cal-dot" style="background:${accent}"></span>${ev._calName}</div>` : ''}
       <div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         <span>${ev.start.length === 10 ? (window._t?window._t('allDay'):'All day') : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
