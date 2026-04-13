@@ -572,7 +572,9 @@ function _obOpenCalSettings(){
       '</div>'+
       '<div id="ob-acc-if" style="'+(src==='ical'?'margin-top:14px':'display:none;margin-top:14px')+'">'+
         '<div class="ob-field"><label class="ob-lbl">CAL 1 \u2014 LIEN ICAL</label><input type="url" id="ob-cs-ical0" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal1Ical||'')+'" autocomplete="off"/><div class="ob-err" id="ob-cs-ical0-err"></div></div>'+
+        '<div class="ob-field" style="margin-top:8px"><label class="ob-lbl">'+_ot('obCal1Name','Cal 1 name')+'</label><input type="text" id="ob-cs-cal1name" class="ob-inp" placeholder="'+_ot('obCalName','Calendar name (optional)')+'" value="'+_obEsc(d.cal1Name||'')+'" autocomplete="off"/></div>'+
         '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 \u2014 LIEN ICAL <span class="ob-opt">optionnel</span></label><input type="url" id="ob-cs-ical1" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>'+
+        '<div class="ob-field" style="margin-top:8px"><label class="ob-lbl">'+_ot('obCal2Name','Cal 2 name')+'</label><input type="text" id="ob-cs-cal2name" class="ob-inp" placeholder="'+_ot('obCalName','Calendar name (optional)')+'" value="'+_obEsc(d.cal2Name||'')+'" autocomplete="off"/></div>'+
       '</div>'+
       '<div id="ob-acc-bf" style="'+(src==='both'?'margin-top:10px':'display:none;margin-top:10px')+'">'+
         '<div class="ob-field"><label class="ob-lbl">CAL 2 \u2014 LIEN ICAL <span class="ob-opt">optionnel</span></label><input type="url" id="ob-cs-both-ical" class="ob-inp ob-mono" placeholder="webcal://\u2026" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>'+
@@ -808,7 +810,7 @@ function _obExtraColorPop(btn,i){
 .ob-check-path{stroke-dasharray:60;stroke-dashoffset:60;animation:ob-draw .5s .2s ease forwards}
 @keyframes ob-draw{to{stroke-dashoffset:0}}
 .ob-done-h{font-size:28px;font-weight:800;letter-spacing:-.035em;color:var(--lbl);margin:0 0 6px;font-family:-apple-system,"SF Pro Display",sans-serif}
-.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 20px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);-webkit-tap-highlight-color:transparent;transition:transform .12s;-webkit-appearance:none;appearance:none}
+.ob-btn-p{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:14px 16px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);-webkit-tap-highlight-color:transparent;transition:transform .12s;-webkit-appearance:none;appearance:none}
 .ob-btn-p:active{transform:scale(.97)}
 .ob-btn-p.ob-btn-full{width:100%;display:flex}
 .ob-btn-g{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:14px 16px;border-radius:14px;border:none;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;background:var(--fill);color:var(--lbl2);flex-shrink:0;-webkit-tap-highlight-color:transparent;-webkit-appearance:none;appearance:none}
