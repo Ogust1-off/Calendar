@@ -191,54 +191,65 @@
   /* ── Month overview overlay — Apple Calendar style ── */
   #mo-overlay{
     position:absolute;top:0;left:0;right:0;bottom:0;
-    z-index:90;
-    background:var(--bg);
+    z-index:90;background:var(--bg);
     display:flex;flex-direction:column;
     transform:translateY(-100%);
     transition:transform .3s cubic-bezier(.32,1,.45,1);
-    pointer-events:none;
-    overflow:hidden;
+    pointer-events:none;overflow:hidden;
   }
   #mo-overlay.mo-open{transform:translateY(0);pointer-events:all;}
-  #mo-close-btn{
-    position:absolute;top:12px;right:14px;z-index:10;
-    width:28px;height:28px;border-radius:50%;
-    background:var(--fill);border:none;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    color:var(--lbl2);-webkit-tap-highlight-color:transparent;
-  }
-  #mo-scroll{
-    flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-    padding:0 0 80px;
-  }
   /* Hide wk-hdr 7-day strip when month view open */
   #wk-hdr.mo-hdr-hidden #wk-days{display:none!important;}
-  /* Month block */
-  .mo-month-block{margin-bottom:0;}
-  .mo-month-name{
-    font-size:22px;font-weight:700;letter-spacing:-.035em;
-    color:var(--lbl);padding:14px 16px 2px;
-    position:sticky;top:0;z-index:3;
-    background:var(--bg);
+  /* Top bar: year label + today + close */
+  #mo-top-bar{
+    flex-shrink:0;display:flex;align-items:center;
+    padding:10px 12px 6px;gap:8px;
+    border-bottom:.5px solid var(--sep);background:var(--bg);
   }
-  .mo-month-name span{font-weight:300;color:var(--lbl2);font-size:20px;margin-left:5px;}
-  /* DOW row — sticky just below month name */
-  .mo-dow-row{
-    display:grid;grid-template-columns:repeat(7,1fr);
-    padding:4px 4px 2px;
-    background:var(--bg);
-    position:sticky;top:40px;z-index:3;
+  #mo-year-lbl{
+    font-size:17px;font-weight:700;color:var(--lbl);
+    letter-spacing:-.02em;flex:1;
+  }
+  #mo-today-btn{
+    font-size:12px;font-weight:600;color:var(--tint);
+    background:none;border:none;cursor:pointer;padding:4px 8px;
+    border-radius:8px;-webkit-tap-highlight-color:transparent;
+    -webkit-appearance:none;appearance:none;
+  }
+  #mo-today-btn:active{background:var(--fill);}
+  #mo-close-btn{
+    width:26px;height:26px;border-radius:50%;
+    background:var(--fill);border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--lbl2);-webkit-tap-highlight-color:transparent;flex-shrink:0;
+  }
+  /* Global DOW row — sticky at top */
+  #mo-global-dows{
+    flex-shrink:0;display:grid;grid-template-columns:repeat(7,1fr);
+    padding:4px 4px 3px;background:var(--bg);
     border-bottom:.5px solid var(--sep);
   }
   .mo-dow{font-size:10px;font-weight:600;text-align:center;
     text-transform:uppercase;letter-spacing:.05em;color:var(--lbl3);}
+  #mo-scroll{
+    flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding:0 0 80px;
+  }
+  /* Month block */
+  .mo-month-block{margin-bottom:0;}
+  .mo-month-name{
+    font-size:15px;font-weight:700;letter-spacing:-.02em;
+    color:var(--lbl2);padding:8px 8px 4px;
+  }
+  /* Current month name = red */
+  .mo-month-name.mo-current{color:var(--red);}
   .mo-weeks{padding:0;}
   .mo-week{
     display:grid;grid-template-columns:repeat(7,1fr);
     border-bottom:.5px solid var(--sep);
   }
   .mo-day{
-    min-height:80px;padding:4px 2px 2px;cursor:pointer;
+    min-height:72px;padding:4px 2px 2px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;transition:background .08s;
     overflow:hidden;
     border-right:.5px solid var(--sep);
@@ -246,9 +257,8 @@
   }
   .mo-day:last-child{border-right:none;}
   .mo-day:active{background:var(--fill);}
-  /* Other month days: faded */
-  .mo-day.mo-other .mo-day-num{color:var(--lbl3);opacity:.5;}
-  .mo-day.mo-other .mo-ev,.mo-day.mo-other .mo-dots{opacity:.4;}
+  /* Other-month days: hidden (no trailing padding days) */
+  .mo-day.mo-other{visibility:hidden;pointer-events:none;}
   /* Today */
   .mo-day.mo-today .mo-day-num{
     background:var(--red);color:#fff;border-radius:50%;
@@ -260,7 +270,7 @@
     display:block;text-align:center;line-height:22px;
     margin-bottom:2px;
   }
-  /* Event pill — Apple style: small rounded rect, colored bg, white text */
+  /* Event pill */
   .mo-ev{
     display:flex;align-items:center;gap:2px;
     font-size:9.5px;font-weight:500;color:#fff;
@@ -268,26 +278,18 @@
     white-space:nowrap;overflow:hidden;
     line-height:13px;height:13px;
   }
-  .mo-ev-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.7);}
-  /* All-day pill: coloured bg */
-  .mo-ev-allday{border-left:none;}
-  /* Timed event: white/light bg with colored left accent */
   .mo-ev-timed{
     background:transparent!important;
-    color:var(--lbl);
-    padding-left:0;
+    color:var(--lbl);padding-left:0;
   }
   .mo-ev-timed-bar{width:3px;border-radius:2px;height:13px;flex-shrink:0;}
-  /* +N more */
   .mo-ev-more{
     font-size:9px;font-weight:500;color:var(--lbl3);
-    padding:0 3px;margin-top:1px;
-    line-height:11px;
+    padding:0 3px;margin-top:1px;line-height:11px;
   }
-  /* Dots — only when no events shown */
   .mo-dots{display:flex;justify-content:center;gap:2px;padding:2px 2px 0;flex-wrap:wrap;}
   .mo-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-  
+
 /* ── Day grid ── */
   .awd-grid{display:flex;position:relative}
   .awd-gutter{width:52px;flex-shrink:0;position:relative;border-right:.5px solid var(--sep);background:var(--bg)}
@@ -610,9 +612,16 @@
     <div id="wk-strip"></div>
     <!-- Month overview: continuous vertical scroll -->
     <div id="mo-overlay">
-      <div id="mo-close-btn" onclick="moClose()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="16" height="16"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      <!-- Sticky global header: year + today btn + close -->
+      <div id="mo-top-bar">
+        <span id="mo-year-lbl">2026</span>
+        <button id="mo-today-btn" onclick="moScrollToday()">Today</button>
+        <button id="mo-close-btn" onclick="moClose()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="14" height="14"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
       </div>
+      <!-- Sticky DOW row — single global, always visible -->
+      <div id="mo-global-dows"></div>
       <div id="mo-scroll">
         <div id="mo-months-container"></div>
       </div>
@@ -838,7 +847,16 @@ function wkUpdateHdr(){
     days.appendChild(btn);
   });
 }
-function wkGoToday(){_haptic('medium');moClose();_wkCur=_wkToday;window._wkScrollTop=undefined;wkSnap(_wkCur,true,true);wkUpdateHdr();}
+function wkGoToday(){
+  _haptic('medium');moClose();
+  _wkCur=_wkToday;window._wkScrollTop=undefined;
+  // If today is outside the current strip range, rebuild strip centred on today
+  if(typeof _wkDates!=='undefined'&&_wkDates.indexOf(_wkToday)<0&&typeof wkInit==='function'&&window._awByDay){
+    wkInit(window._awByDay,_wkToday);
+    return; // wkInit calls wkSnap internally
+  }
+  wkSnap(_wkCur,true,true);wkUpdateHdr();
+}
 function _initWkDaysSwipe(){
   var hdr=document.getElementById('wk-hdr');
   if(!hdr||hdr.dataset.swipeInit)return;
@@ -1214,7 +1232,7 @@ setInterval(function(){
 })();
 
 
-/* ── Month overview — continuous vertical scroll ── */
+/* ── Month overview — Apple Calendar style ── */
 var _moOpen=false;
 
 function moToggle(){
@@ -1222,17 +1240,43 @@ function moToggle(){
   _moOpen=true;
   var ov=document.getElementById('mo-overlay');
   if(!ov)return;
+  // Build global DOW row
+  var lang=typeof window._getLang==='function'?window._getLang():'en';
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+  var dowsEl=document.getElementById('mo-global-dows');
+  if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
   ov.classList.add('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.add('mo-hdr-hidden');
-  // Scroll to currently viewed month (not today)
+  // Scroll to current month
   setTimeout(function(){
     var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
     var y=parseInt(refDate.slice(0,4)),m=parseInt(refDate.slice(5,7))-1;
     var id='mo-m-'+y+'-'+m;
     var el=document.getElementById(id);
-    if(el){var sc=document.getElementById('mo-scroll');if(sc)sc.scrollTop=el.offsetTop;}
+    var sc=document.getElementById('mo-scroll');
+    if(el&&sc)sc.scrollTop=el.offsetTop;
+    // Update year label
+    var yl=document.getElementById('mo-year-lbl');
+    if(yl)yl.textContent=y;
+    // Scroll listener to update year label
+    if(sc&&!sc._moYearBound){
+      sc._moYearBound=true;
+      sc.addEventListener('scroll',function(){
+        var blocks=document.querySelectorAll('.mo-month-block');
+        var sc=document.getElementById('mo-scroll');
+        if(!sc)return;
+        var scrollTop=sc.scrollTop;
+        var visible=null;
+        blocks.forEach(function(b){if(b.offsetTop<=scrollTop+60)visible=b;});
+        if(visible){
+          var yr=visible.id.replace('mo-m-','').split('-')[0];
+          var yl=document.getElementById('mo-year-lbl');
+          if(yl&&yl.textContent!==yr)yl.textContent=yr;
+        }
+      },{passive:true});
+    }
   },60);
   _haptic('light');
 }
@@ -1244,6 +1288,14 @@ function moClose(){
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.remove('mo-hdr-hidden');
 }
+function moScrollToday(){
+  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+  var y=parseInt(today.slice(0,4)),m=parseInt(today.slice(5,7))-1;
+  var el=document.getElementById('mo-m-'+y+'-'+m);
+  var sc=document.getElementById('mo-scroll');
+  if(el&&sc)sc.scrollTo({top:el.offsetTop,behavior:'smooth'});
+  _haptic('selection');
+}
 
 function moRenderAll(){
   var container=document.getElementById('mo-months-container');
@@ -1254,74 +1306,63 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
-  var dowRow='<div class="mo-dow-row">'+DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('')+'</div>';
 
-  // Render: currentMonth-4 to currentMonth+12
   var html='';
   for(var delta=-4;delta<=12;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
     var moName=d0.toLocaleDateString(locale,{month:'long'});
     moName=moName[0].toUpperCase()+moName.slice(1);
+    var isCurMo=(yr===refYear&&mo===refMonth);
 
     var startDow=d0.getDay(); var startOffset=(startDow===0)?6:startDow-1;
     var cur=new Date(d0); cur.setDate(1-startOffset);
     var weeksHtml='';
     for(var w=0;w<6;w++){
-      if(w>=4&&cur.getMonth()!==mo&&cur.getDay()===1)break;
+      // Stop when we've passed the last day of this month
+      if(w>=4&&cur.getMonth()!==mo)break;
       var weekHtml='<div class="mo-week">';
       for(var dw=0;dw<7;dw++){
-        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
         var isOther=cur.getMonth()!==mo;
+        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
         var isToday=ds===today;
-        var evs=byDay[ds]||[];
-
-        // Sort: all-day first, then timed by start time
-        var allDayEvs=[], timedEvs=[];
-        evs.forEach(function(item){
-          var ev=item.ev;
-          var isAD=(ev.start&&ev.start.length===10);
-          var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
-          var hex=AW_HEX[col]||'#3b82f6';
-          var name=(ev.summary||'').split(' - ')[0].trim();
-          if(isAD) allDayEvs.push({hex:hex,name:name});
-          else timedEvs.push({hex:hex,name:name});
-        });
-
-        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
-        var numH='<div class="mo-day-num">'+cur.getDate()+'</div>';
         var evHtml='';
-        var shown=0;
-
-        // Show up to 2 all-day events as full colored pills
-        for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
-          evHtml+='<div class="mo-ev mo-ev-allday" style="background:'+allDayEvs[ai].hex+'">'+
-            _moEsc(allDayEvs[ai].name)+'</div>';
-          shown++;
+        if(!isOther){
+          var evs=byDay[ds]||[];
+          var allDayEvs=[], timedEvs=[];
+          evs.forEach(function(item){
+            var ev=item.ev;
+            var isAD=(ev.start&&ev.start.length===10);
+            var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
+            var hex=AW_HEX[col]||'#3b82f6';
+            var name=(ev.summary||'').split(' - ')[0].trim();
+            if(isAD)allDayEvs.push({hex:hex,name:name});
+            else timedEvs.push({hex:hex,name:name});
+          });
+          var shown=0;
+          for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
+            evHtml+='<div class="mo-ev" style="background:'+allDayEvs[ai].hex+'">'+_moEsc(allDayEvs[ai].name)+'</div>';
+            shown++;
+          }
+          for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
+            evHtml+='<div class="mo-ev mo-ev-timed">'+
+              '<div class="mo-ev-timed-bar" style="background:'+timedEvs[ti].hex+'"></div>'+
+              _moEsc(timedEvs[ti].name)+'</div>';
+            shown++;
+          }
+          var remaining=(allDayEvs.length+timedEvs.length)-shown;
+          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
-        // Show up to 2 timed events (small bar + name)
-        for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
-          evHtml+='<div class="mo-ev mo-ev-timed">'+
-            '<div class="mo-ev-timed-bar" style="background:'+timedEvs[ti].hex+'"></div>'+
-            _moEsc(timedEvs[ti].name)+'</div>';
-          shown++;
-        }
-        // +N remaining
-        var total=allDayEvs.length+timedEvs.length;
-        var remaining=total-shown;
-        if(remaining>0) evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
-        // If zero events: nothing extra
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'" onclick="moSelectDay(this.dataset.ds)">'+numH+evHtml+'</div>';
+        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
+        var numH='<div class="mo-day-num">'+(isOther?'':cur.getDate())+'</div>';
+        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'" onclick="'+(isOther?'':'"moSelectDay(this.dataset.ds)"')+'">'+numH+evHtml+'</div>';
         cur.setDate(cur.getDate()+1);
       }
       weekHtml+='</div>';
       weeksHtml+=weekHtml;
     }
     html+='<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
-      '<div class="mo-month-name"><strong>'+moName+'</strong><span>'+yr+'</span></div>'+
-      dowRow+
+      '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
       '</div>';
   }
@@ -1364,7 +1405,7 @@ window.addEventListener('load',function(){
 });
 
 /* ── SW ── */
-/* ── Month overview — continuous vertical scroll ── */
+/* ── Month overview — Apple Calendar style ── */
 var _moOpen=false;
 
 function moToggle(){
@@ -1372,17 +1413,43 @@ function moToggle(){
   _moOpen=true;
   var ov=document.getElementById('mo-overlay');
   if(!ov)return;
+  // Build global DOW row
+  var lang=typeof window._getLang==='function'?window._getLang():'en';
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+  var dowsEl=document.getElementById('mo-global-dows');
+  if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
   ov.classList.add('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.add('mo-hdr-hidden');
-  // Scroll to currently viewed month (not today)
+  // Scroll to current month
   setTimeout(function(){
     var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
     var y=parseInt(refDate.slice(0,4)),m=parseInt(refDate.slice(5,7))-1;
     var id='mo-m-'+y+'-'+m;
     var el=document.getElementById(id);
-    if(el){var sc=document.getElementById('mo-scroll');if(sc)sc.scrollTop=el.offsetTop;}
+    var sc=document.getElementById('mo-scroll');
+    if(el&&sc)sc.scrollTop=el.offsetTop;
+    // Update year label
+    var yl=document.getElementById('mo-year-lbl');
+    if(yl)yl.textContent=y;
+    // Scroll listener to update year label
+    if(sc&&!sc._moYearBound){
+      sc._moYearBound=true;
+      sc.addEventListener('scroll',function(){
+        var blocks=document.querySelectorAll('.mo-month-block');
+        var sc=document.getElementById('mo-scroll');
+        if(!sc)return;
+        var scrollTop=sc.scrollTop;
+        var visible=null;
+        blocks.forEach(function(b){if(b.offsetTop<=scrollTop+60)visible=b;});
+        if(visible){
+          var yr=visible.id.replace('mo-m-','').split('-')[0];
+          var yl=document.getElementById('mo-year-lbl');
+          if(yl&&yl.textContent!==yr)yl.textContent=yr;
+        }
+      },{passive:true});
+    }
   },60);
   _haptic('light');
 }
@@ -1394,6 +1461,14 @@ function moClose(){
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.remove('mo-hdr-hidden');
 }
+function moScrollToday(){
+  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+  var y=parseInt(today.slice(0,4)),m=parseInt(today.slice(5,7))-1;
+  var el=document.getElementById('mo-m-'+y+'-'+m);
+  var sc=document.getElementById('mo-scroll');
+  if(el&&sc)sc.scrollTo({top:el.offsetTop,behavior:'smooth'});
+  _haptic('selection');
+}
 
 function moRenderAll(){
   var container=document.getElementById('mo-months-container');
@@ -1404,74 +1479,63 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
-  var dowRow='<div class="mo-dow-row">'+DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('')+'</div>';
 
-  // Render: currentMonth-4 to currentMonth+12
   var html='';
   for(var delta=-4;delta<=12;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
     var moName=d0.toLocaleDateString(locale,{month:'long'});
     moName=moName[0].toUpperCase()+moName.slice(1);
+    var isCurMo=(yr===refYear&&mo===refMonth);
 
     var startDow=d0.getDay(); var startOffset=(startDow===0)?6:startDow-1;
     var cur=new Date(d0); cur.setDate(1-startOffset);
     var weeksHtml='';
     for(var w=0;w<6;w++){
-      if(w>=4&&cur.getMonth()!==mo&&cur.getDay()===1)break;
+      // Stop when we've passed the last day of this month
+      if(w>=4&&cur.getMonth()!==mo)break;
       var weekHtml='<div class="mo-week">';
       for(var dw=0;dw<7;dw++){
-        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
         var isOther=cur.getMonth()!==mo;
+        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
         var isToday=ds===today;
-        var evs=byDay[ds]||[];
-
-        // Sort: all-day first, then timed by start time
-        var allDayEvs=[], timedEvs=[];
-        evs.forEach(function(item){
-          var ev=item.ev;
-          var isAD=(ev.start&&ev.start.length===10);
-          var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
-          var hex=AW_HEX[col]||'#3b82f6';
-          var name=(ev.summary||'').split(' - ')[0].trim();
-          if(isAD) allDayEvs.push({hex:hex,name:name});
-          else timedEvs.push({hex:hex,name:name});
-        });
-
-        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
-        var numH='<div class="mo-day-num">'+cur.getDate()+'</div>';
         var evHtml='';
-        var shown=0;
-
-        // Show up to 2 all-day events as full colored pills
-        for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
-          evHtml+='<div class="mo-ev mo-ev-allday" style="background:'+allDayEvs[ai].hex+'">'+
-            _moEsc(allDayEvs[ai].name)+'</div>';
-          shown++;
+        if(!isOther){
+          var evs=byDay[ds]||[];
+          var allDayEvs=[], timedEvs=[];
+          evs.forEach(function(item){
+            var ev=item.ev;
+            var isAD=(ev.start&&ev.start.length===10);
+            var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
+            var hex=AW_HEX[col]||'#3b82f6';
+            var name=(ev.summary||'').split(' - ')[0].trim();
+            if(isAD)allDayEvs.push({hex:hex,name:name});
+            else timedEvs.push({hex:hex,name:name});
+          });
+          var shown=0;
+          for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
+            evHtml+='<div class="mo-ev" style="background:'+allDayEvs[ai].hex+'">'+_moEsc(allDayEvs[ai].name)+'</div>';
+            shown++;
+          }
+          for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
+            evHtml+='<div class="mo-ev mo-ev-timed">'+
+              '<div class="mo-ev-timed-bar" style="background:'+timedEvs[ti].hex+'"></div>'+
+              _moEsc(timedEvs[ti].name)+'</div>';
+            shown++;
+          }
+          var remaining=(allDayEvs.length+timedEvs.length)-shown;
+          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
-        // Show up to 2 timed events (small bar + name)
-        for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
-          evHtml+='<div class="mo-ev mo-ev-timed">'+
-            '<div class="mo-ev-timed-bar" style="background:'+timedEvs[ti].hex+'"></div>'+
-            _moEsc(timedEvs[ti].name)+'</div>';
-          shown++;
-        }
-        // +N remaining
-        var total=allDayEvs.length+timedEvs.length;
-        var remaining=total-shown;
-        if(remaining>0) evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
-        // If zero events: nothing extra
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'" onclick="moSelectDay(this.dataset.ds)">'+numH+evHtml+'</div>';
+        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
+        var numH='<div class="mo-day-num">'+(isOther?'':cur.getDate())+'</div>';
+        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'" onclick="'+(isOther?'':'"moSelectDay(this.dataset.ds)"')+'">'+numH+evHtml+'</div>';
         cur.setDate(cur.getDate()+1);
       }
       weekHtml+='</div>';
       weeksHtml+=weekHtml;
     }
     html+='<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
-      '<div class="mo-month-name"><strong>'+moName+'</strong><span>'+yr+'</span></div>'+
-      dowRow+
+      '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
       '</div>';
   }
@@ -1574,7 +1638,7 @@ function accImportConfig(){
   setTimeout(function(){document.body.removeChild(input);},5000);
 }
 
-/* ── Month overview — continuous vertical scroll ── */
+/* ── Month overview — Apple Calendar style ── */
 var _moOpen=false;
 
 function moToggle(){
@@ -1582,17 +1646,43 @@ function moToggle(){
   _moOpen=true;
   var ov=document.getElementById('mo-overlay');
   if(!ov)return;
+  // Build global DOW row
+  var lang=typeof window._getLang==='function'?window._getLang():'en';
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+  var dowsEl=document.getElementById('mo-global-dows');
+  if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
   ov.classList.add('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.add('mo-hdr-hidden');
-  // Scroll to currently viewed month (not today)
+  // Scroll to current month
   setTimeout(function(){
     var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
     var y=parseInt(refDate.slice(0,4)),m=parseInt(refDate.slice(5,7))-1;
     var id='mo-m-'+y+'-'+m;
     var el=document.getElementById(id);
-    if(el){var sc=document.getElementById('mo-scroll');if(sc)sc.scrollTop=el.offsetTop;}
+    var sc=document.getElementById('mo-scroll');
+    if(el&&sc)sc.scrollTop=el.offsetTop;
+    // Update year label
+    var yl=document.getElementById('mo-year-lbl');
+    if(yl)yl.textContent=y;
+    // Scroll listener to update year label
+    if(sc&&!sc._moYearBound){
+      sc._moYearBound=true;
+      sc.addEventListener('scroll',function(){
+        var blocks=document.querySelectorAll('.mo-month-block');
+        var sc=document.getElementById('mo-scroll');
+        if(!sc)return;
+        var scrollTop=sc.scrollTop;
+        var visible=null;
+        blocks.forEach(function(b){if(b.offsetTop<=scrollTop+60)visible=b;});
+        if(visible){
+          var yr=visible.id.replace('mo-m-','').split('-')[0];
+          var yl=document.getElementById('mo-year-lbl');
+          if(yl&&yl.textContent!==yr)yl.textContent=yr;
+        }
+      },{passive:true});
+    }
   },60);
   _haptic('light');
 }
@@ -1604,6 +1694,14 @@ function moClose(){
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.remove('mo-hdr-hidden');
 }
+function moScrollToday(){
+  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
+  var y=parseInt(today.slice(0,4)),m=parseInt(today.slice(5,7))-1;
+  var el=document.getElementById('mo-m-'+y+'-'+m);
+  var sc=document.getElementById('mo-scroll');
+  if(el&&sc)sc.scrollTo({top:el.offsetTop,behavior:'smooth'});
+  _haptic('selection');
+}
 
 function moRenderAll(){
   var container=document.getElementById('mo-months-container');
@@ -1614,74 +1712,63 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
-  var dowRow='<div class="mo-dow-row">'+DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('')+'</div>';
 
-  // Render: currentMonth-4 to currentMonth+12
   var html='';
   for(var delta=-4;delta<=12;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
     var moName=d0.toLocaleDateString(locale,{month:'long'});
     moName=moName[0].toUpperCase()+moName.slice(1);
+    var isCurMo=(yr===refYear&&mo===refMonth);
 
     var startDow=d0.getDay(); var startOffset=(startDow===0)?6:startDow-1;
     var cur=new Date(d0); cur.setDate(1-startOffset);
     var weeksHtml='';
     for(var w=0;w<6;w++){
-      if(w>=4&&cur.getMonth()!==mo&&cur.getDay()===1)break;
+      // Stop when we've passed the last day of this month
+      if(w>=4&&cur.getMonth()!==mo)break;
       var weekHtml='<div class="mo-week">';
       for(var dw=0;dw<7;dw++){
-        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
         var isOther=cur.getMonth()!==mo;
+        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
         var isToday=ds===today;
-        var evs=byDay[ds]||[];
-
-        // Sort: all-day first, then timed by start time
-        var allDayEvs=[], timedEvs=[];
-        evs.forEach(function(item){
-          var ev=item.ev;
-          var isAD=(ev.start&&ev.start.length===10);
-          var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
-          var hex=AW_HEX[col]||'#3b82f6';
-          var name=(ev.summary||'').split(' - ')[0].trim();
-          if(isAD) allDayEvs.push({hex:hex,name:name});
-          else timedEvs.push({hex:hex,name:name});
-        });
-
-        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
-        var numH='<div class="mo-day-num">'+cur.getDate()+'</div>';
         var evHtml='';
-        var shown=0;
-
-        // Show up to 2 all-day events as full colored pills
-        for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
-          evHtml+='<div class="mo-ev mo-ev-allday" style="background:'+allDayEvs[ai].hex+'">'+
-            _moEsc(allDayEvs[ai].name)+'</div>';
-          shown++;
+        if(!isOther){
+          var evs=byDay[ds]||[];
+          var allDayEvs=[], timedEvs=[];
+          evs.forEach(function(item){
+            var ev=item.ev;
+            var isAD=(ev.start&&ev.start.length===10);
+            var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
+            var hex=AW_HEX[col]||'#3b82f6';
+            var name=(ev.summary||'').split(' - ')[0].trim();
+            if(isAD)allDayEvs.push({hex:hex,name:name});
+            else timedEvs.push({hex:hex,name:name});
+          });
+          var shown=0;
+          for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
+            evHtml+='<div class="mo-ev" style="background:'+allDayEvs[ai].hex+'">'+_moEsc(allDayEvs[ai].name)+'</div>';
+            shown++;
+          }
+          for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
+            evHtml+='<div class="mo-ev mo-ev-timed">'+
+              '<div class="mo-ev-timed-bar" style="background:'+timedEvs[ti].hex+'"></div>'+
+              _moEsc(timedEvs[ti].name)+'</div>';
+            shown++;
+          }
+          var remaining=(allDayEvs.length+timedEvs.length)-shown;
+          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
-        // Show up to 2 timed events (small bar + name)
-        for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
-          evHtml+='<div class="mo-ev mo-ev-timed">'+
-            '<div class="mo-ev-timed-bar" style="background:'+timedEvs[ti].hex+'"></div>'+
-            _moEsc(timedEvs[ti].name)+'</div>';
-          shown++;
-        }
-        // +N remaining
-        var total=allDayEvs.length+timedEvs.length;
-        var remaining=total-shown;
-        if(remaining>0) evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
-        // If zero events: nothing extra
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'" onclick="moSelectDay(this.dataset.ds)">'+numH+evHtml+'</div>';
+        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
+        var numH='<div class="mo-day-num">'+(isOther?'':cur.getDate())+'</div>';
+        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'" onclick="'+(isOther?'':'"moSelectDay(this.dataset.ds)"')+'">'+numH+evHtml+'</div>';
         cur.setDate(cur.getDate()+1);
       }
       weekHtml+='</div>';
       weeksHtml+=weekHtml;
     }
     html+='<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
-      '<div class="mo-month-name"><strong>'+moName+'</strong><span>'+yr+'</span></div>'+
-      dowRow+
+      '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
       '</div>';
   }
