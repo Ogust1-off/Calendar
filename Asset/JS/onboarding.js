@@ -559,6 +559,9 @@ function _obOpenCalSettings(){
 }
 
 function _obSrcPage1(con,bot){
+  if(!con)con=document.getElementById('ob-cal-content');
+  if(!bot)bot=document.getElementById('ob-cal-bottom');
+  if(!con||!bot)return;
   var d=_obLoad(),src=d.calSource||'google';
   con.innerHTML='<div class="ob-form">'+
     '<h2 class="ob-h2">'+_ot('obSrcTitle','Source')+'</h2>'+
@@ -568,10 +571,13 @@ function _obSrcPage1(con,bot){
       _srcBtn('ical',src==='ical','📱',_ot('obSrcIcal','iCal Link'),_ot('obSrcIcalSub','From iPhone or Google. No API key.'))+
       _srcBtn('both',src==='both','🔗',_ot('obSrcBoth','Both'),_ot('obSrcBothSub','Cal 1 Google + Cal 2 iCal.'))+
     '</div></div>';
-  bot.innerHTML='<button class="ob-btn-p ob-btn-full" onclick="_obSrcPage2(document.querySelector(\'#ob-sheet .ob-content\'),document.querySelector(\'#ob-sheet .ob-bottom\'))">'+_ot('btnNext','Next')+' <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
+  bot.innerHTML='<button class="ob-btn-p ob-btn-full" onclick="_obSrcPage2()">'+_ot('btnNext','Next')+' <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>';
 }
 
 function _obSrcPage2(con,bot){
+  if(!con)con=document.getElementById('ob-cal-content');
+  if(!bot)bot=document.getElementById('ob-cal-bottom');
+  if(!con||!bot)return;
   var d=_obLoad(),src=d.calSource||'google';
   var f1n='<div class="ob-field" style="margin-top:8px"><label class="ob-lbl">'+_ot('obCal1Name','Cal 1 name')+'</label><input type="text" id="ob-cs-cal1n" class="ob-inp" placeholder="'+_ot('obCalName','Calendar name (optional)')+'" value="'+_obEsc(d.cal1Name||'')+'" autocomplete="off"/></div>';
   var f2n='<div class="ob-field" style="margin-top:8px"><label class="ob-lbl">'+_ot('obCal2Name','Cal 2 name')+'</label><input type="text" id="ob-cs-cal2n" class="ob-inp" placeholder="'+_ot('obCalName','Calendar name (optional)')+'" value="'+_obEsc(d.cal2Name||'')+'" autocomplete="off"/></div>';
@@ -597,7 +603,7 @@ function _obSrcPage2(con,bot){
     '<div class="ob-field" style="margin-top:10px"><label class="ob-lbl">CAL 2 — LIEN ICAL <span class="ob-opt">'+_ot('obOpt','optional')+'</span></label>'+
     '<input type="url" id="ob-cs-both-ical" class="ob-inp ob-mono" placeholder="webcal://…" value="'+_obEsc(d.cal2Ical||'')+'" autocomplete="off"/></div>'+f2n;
   con.innerHTML='<div class="ob-form">'+'<h2 class="ob-h2">'+_ot('obSrcApiTitle','Source & API')+'</h2>'+'<p class="ob-p2">'+_ot('obSrcApiSub','Connect to your calendar.')+'</p>'+(src==='google'?gF:src==='ical'?iF:bF)+'</div>';
-  bot.innerHTML='<div class="ob-row">'+'<button class="ob-btn-p" onclick="_obSrcPage1(document.querySelector(\'#ob-sheet .ob-content\'),document.querySelector(\'#ob-sheet .ob-bottom\'))"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+'<button class="ob-btn-p ob-btn-full" onclick="_obAccSaveSrc()">'+_ot('btnSave','Save')+' <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>';
+  bot.innerHTML='<div class="ob-row"><button class="ob-btn-p" onclick="_obSrcPage1()"><svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button class="ob-btn-p ob-btn-full" onclick="_obAccSaveSrc()">'+_ot('btnSave','Save')+' <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 8l4 4 6-7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>';
 }
 function _obAccSaveSrc(){
   var d=_obLoad(),src=d.calSource||'google';
