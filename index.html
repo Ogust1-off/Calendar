@@ -188,49 +188,38 @@
     padding-bottom:calc(var(--tb) + env(safe-area-inset-bottom,0px) + 80px)}
 
 
-  /* ── Month overview — Apple Calendar inspired ── */
+  /* ── Month overview — Apple Calendar style ── */
   #mo-overlay{
     position:absolute;top:0;left:0;right:0;bottom:0;
     z-index:90;background:var(--bg);
     display:flex;flex-direction:column;
     transform:translateY(-100%);
-    transition:transform .32s cubic-bezier(.32,1.05,.45,1);
+    transition:transform .3s cubic-bezier(.32,1.05,.45,1);
     pointer-events:none;overflow:hidden;
   }
   #mo-overlay.mo-open{transform:translateY(0);pointer-events:all;}
-  /* Hide 7-day strip in wk-hdr when month open */
   #wk-hdr.mo-hdr-hidden #wk-days{display:none!important;}
-  /* Sticky header block */
-  #mo-header{
-    flex-shrink:0;background:var(--bg);
-    border-bottom:.5px solid var(--sep);
-  }
+  /* Sticky header — month name large + DOW */
+  #mo-header{flex-shrink:0;background:var(--bg);}
   #mo-header-top{
-    display:flex;align-items:center;
-    padding:12px 14px 4px;
+    display:flex;align-items:flex-end;gap:10px;
+    padding:10px 14px 0;
   }
+  /* BIG month name like Apple Calendar */
   #mo-cur-month-lbl{
-    font-size:20px;font-weight:700;color:var(--lbl);
-    letter-spacing:-.03em;flex:1;line-height:1;
-  }
-  /* Year separator block */
-  .mo-year-sep{
     font-size:34px;font-weight:700;color:var(--lbl);
-    letter-spacing:-.04em;padding:18px 8px 4px;
-    line-height:1;
+    letter-spacing:-.04em;flex:1;line-height:1.05;
   }
-  #mo-header-btns{display:flex;align-items:center;gap:6px;}
+  #mo-header-btns{display:flex;align-items:center;gap:6px;padding-bottom:4px;}
   #mo-today-btn{
     font-size:12px;font-weight:600;color:var(--tint);
-    background:none;border:none;cursor:pointer;
+    background:rgba(10,132,255,.12);border:none;cursor:pointer;
     padding:5px 10px;border-radius:99px;
-    -webkit-tap-highlight-color:transparent;
-    -webkit-appearance:none;appearance:none;
-    background:rgba(var(--tint-rgb,10,132,255),.1);
+    -webkit-tap-highlight-color:transparent;-webkit-appearance:none;
   }
   #mo-today-btn:active{opacity:.7;}
   #mo-close-btn{
-    width:27px;height:27px;border-radius:50%;
+    width:28px;height:28px;border-radius:50%;
     background:var(--fill);border:none;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
     color:var(--lbl3);-webkit-tap-highlight-color:transparent;
@@ -238,70 +227,89 @@
   /* DOW row */
   #mo-global-dows{
     display:grid;grid-template-columns:repeat(7,1fr);
-    padding:2px 0 5px;
+    padding:8px 0 4px;
+    border-bottom:.5px solid var(--sep);
   }
   .mo-dow{
     font-size:11px;font-weight:600;text-align:center;
-    letter-spacing:.03em;color:var(--lbl3);
+    letter-spacing:.04em;color:var(--lbl3);
   }
-  /* Scroll area */
+  /* Scroll */
   #mo-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
   /* Month block */
   .mo-month-block{padding:0;}
+  /* Year separator — big like Apple */
+  .mo-year-sep{
+    font-size:34px;font-weight:700;color:var(--lbl);
+    letter-spacing:-.04em;padding:20px 0 4px 4px;line-height:1;
+  }
+  /* Month name — shown inline in scroll (small, above weeks) */
   .mo-month-name{
-    font-size:16px;font-weight:700;letter-spacing:-.015em;
-    color:var(--lbl3);padding:12px 0 3px 8px;
+    font-size:17px;font-weight:700;letter-spacing:-.02em;
+    color:var(--lbl3);padding:12px 0 2px 4px;
   }
   .mo-month-name.mo-current{color:var(--red);}
-  /* Week row */
-  .mo-weeks{padding:0 4px 6px;}
-  .mo-week{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:1px;}
-  /* Day cell — clean, no borders */
+  /* Grid */
+  .mo-weeks{padding:0;}
+  .mo-week{display:grid;grid-template-columns:repeat(7,1fr);}
+  /* Day cell — airy, no borders */
   .mo-day{
-    min-height:72px;padding:3px 2px 2px;cursor:pointer;
+    min-height:80px;padding:4px 1px 3px;
     -webkit-tap-highlight-color:transparent;
-    transition:background .08s;border-radius:8px;
-    overflow:hidden;box-sizing:border-box;
+    transition:background .08s;overflow:hidden;
+    box-sizing:border-box;
   }
   .mo-day:active{background:var(--fill);}
   .mo-day.mo-other{visibility:hidden;pointer-events:none;}
-  /* Today circle */
+  /* Today */
   .mo-day.mo-today .mo-day-num{
     background:var(--red);color:#fff;border-radius:50%;
-    width:24px;height:24px;
-    display:inline-flex;align-items:center;justify-content:center;
-    font-weight:600;
+    width:26px;height:26px;margin:0 auto 3px;
+    display:flex;align-items:center;justify-content:center;font-weight:600;
   }
+  /* Day number */
   .mo-day-num{
-    font-size:15px;cursor:pointer;font-weight:400;color:var(--lbl);
-    display:block;text-align:center;line-height:24px;
-    margin-bottom:2px;
+    font-size:16px;font-weight:400;color:var(--lbl);
+    text-align:center;line-height:26px;
+    display:block;margin-bottom:2px;cursor:pointer;
+    width:26px;margin-left:auto;margin-right:auto;
   }
-  /* Event pills */
+  /* Apple Calendar event pill style:
+     - All-day: small colored dot + text on very light tinted bg */
   .mo-ev{
-    display:flex;align-items:center;gap:2px;
-    font-size:9.5px;font-weight:500;color:#fff;
-    border-radius:3px;padding:1px 4px;margin:0 1px 1px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    line-height:13px;height:14px;
+    display:flex;align-items:center;gap:3px;
+    font-size:10px;font-weight:500;
+    border-radius:4px;padding:1px 4px 1px 3px;
+    margin:0 2px 1px;height:15px;
+    white-space:nowrap;overflow:hidden;
+    line-height:15px;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
   }
-  /* Timed event: transparent bg, colored left bar */
+  /* All-day event: dot + label on tinted bg */
+  .mo-ev-allday-dot{
+    width:6px;height:6px;border-radius:50%;flex-shrink:0;
+  }
+  /* Timed event: colored left bar, transparent bg */
   .mo-ev-timed{
-    background:transparent!important;color:var(--lbl);padding-left:0;
+    background:transparent!important;padding-left:0;
   }
-  .mo-ev-timed-bar{width:3px;min-height:12px;border-radius:2px;flex-shrink:0;align-self:stretch;}
+  .mo-ev-timed-bar{
+    width:3px;min-height:13px;border-radius:2px;
+    flex-shrink:0;align-self:stretch;
+  }
+  .mo-ev-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
   /* Multi-day band */
   .mo-ev-band{
-    border-radius:0!important;margin-left:-3px;margin-right:-3px;
-    padding-left:3px;padding-right:3px;
+    border-radius:0!important;
+    margin-left:-2px;margin-right:-2px;
+    padding-left:4px;padding-right:4px;
   }
-  .mo-ev-band-start{border-radius:4px 0 0 4px!important;margin-left:0;}
-  .mo-ev-band-end{border-radius:0 4px 4px 0!important;margin-right:0;}
-  .mo-ev-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  /* +N more */
+  .mo-ev-band-start{border-radius:4px 0 0 4px!important;margin-left:2px;}
+  .mo-ev-band-end{border-radius:0 4px 4px 0!important;margin-right:2px;}
+  /* +N */
   .mo-ev-more{
-    font-size:9px;font-weight:500;color:var(--lbl3);
-    padding:0 4px;line-height:11px;margin-top:1px;
+    font-size:10px;font-weight:400;color:var(--lbl3);
+    padding:0 4px;line-height:12px;margin-top:1px;
   }
 
 /* ── Day grid ── */
@@ -1280,7 +1288,8 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=d0.toLocaleDateString(locale,{month:'long'});
       mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
+      var thisYear=new Date().getFullYear();
+      lbl.textContent=mn+(y!==thisYear?' '+y:'');
     }
     // Scroll listener to update year label
     if(sc&&!sc._moYearBound){
@@ -1301,7 +1310,9 @@ function moToggle(){
             var d=new Date(yr,mo,1);
             var mn=d.toLocaleDateString(locale,{month:'long'});
             mn=mn[0].toUpperCase()+mn.slice(1);
-            lbl.textContent=mn+' '+yr;
+            // Show year only if different from current year
+            var thisYear=new Date().getFullYear();
+            lbl.textContent=mn+(parseInt(yr)!==thisYear?' '+yr:'');
           }
         }
       },{passive:true});
@@ -1382,23 +1393,34 @@ function moRenderAll(){
               allDayEvs.push({hex:hex,name:name,idx:evIdx,isStart:isStart,isEnd:isEnd,isMulti:isMulti});
             } else timedEvs.push({hex:hex,name:name,idx:evIdx});
           });
+          var total=allDayEvs.length+timedEvs.length;
+          // Show 3 if total==3, else show 2 + "+N remaining"
+          var maxShow=(total<=3)?3:2;
           var shown=0;
-          for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
+          for(var ai=0;ai<allDayEvs.length&&shown<maxShow;ai++){
             var ev2=allDayEvs[ai];
-            var bandCls='mo-ev'+(ev2.isMulti?' mo-ev-band':'')+
-              (ev2.isMulti&&ev2.isStart?' mo-ev-band-start':'')+(ev2.isMulti&&ev2.isEnd?' mo-ev-band-end':'');
-            var txt=(!ev2.isMulti||ev2.isStart)?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'&nbsp;';
-            evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+ txt+'</div>';
+            if(ev2.isMulti){
+              // Band: full color bg
+              var bandCls='mo-ev mo-ev-band'+(ev2.isStart?' mo-ev-band-start':'')+(ev2.isEnd?' mo-ev-band-end':'');
+              var txt=ev2.isStart?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'';
+              evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:#fff" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+txt+'</div>';
+            } else {
+              // Single all-day: dot + text on light tinted bg (Apple style)
+              var bgLight=ev2.hex+'22';
+              evHtml+='<div class="mo-ev" style="background:'+bgLight+';color:'+ev2.hex+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+                +'<span class="mo-ev-allday-dot" style="background:'+ev2.hex+'"></span>'
+                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
+            }
             shown++;
           }
-          for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
+          for(var ti=0;ti<timedEvs.length&&shown<maxShow;ti++){
             var ev3=timedEvs[ti];
             evHtml+='<div class="mo-ev mo-ev-timed" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt">'+_moEsc(ev3.name)+'</span></div>';
+              +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
             shown++;
           }
-          var remaining=(allDayEvs.length+timedEvs.length)-shown;
+          var remaining=total-shown;
           if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
@@ -1488,7 +1510,8 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=d0.toLocaleDateString(locale,{month:'long'});
       mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
+      var thisYear=new Date().getFullYear();
+      lbl.textContent=mn+(y!==thisYear?' '+y:'');
     }
     // Scroll listener to update year label
     if(sc&&!sc._moYearBound){
@@ -1509,7 +1532,9 @@ function moToggle(){
             var d=new Date(yr,mo,1);
             var mn=d.toLocaleDateString(locale,{month:'long'});
             mn=mn[0].toUpperCase()+mn.slice(1);
-            lbl.textContent=mn+' '+yr;
+            // Show year only if different from current year
+            var thisYear=new Date().getFullYear();
+            lbl.textContent=mn+(parseInt(yr)!==thisYear?' '+yr:'');
           }
         }
       },{passive:true});
@@ -1590,23 +1615,34 @@ function moRenderAll(){
               allDayEvs.push({hex:hex,name:name,idx:evIdx,isStart:isStart,isEnd:isEnd,isMulti:isMulti});
             } else timedEvs.push({hex:hex,name:name,idx:evIdx});
           });
+          var total=allDayEvs.length+timedEvs.length;
+          // Show 3 if total==3, else show 2 + "+N remaining"
+          var maxShow=(total<=3)?3:2;
           var shown=0;
-          for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
+          for(var ai=0;ai<allDayEvs.length&&shown<maxShow;ai++){
             var ev2=allDayEvs[ai];
-            var bandCls='mo-ev'+(ev2.isMulti?' mo-ev-band':'')+
-              (ev2.isMulti&&ev2.isStart?' mo-ev-band-start':'')+(ev2.isMulti&&ev2.isEnd?' mo-ev-band-end':'');
-            var txt=(!ev2.isMulti||ev2.isStart)?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'&nbsp;';
-            evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+ txt+'</div>';
+            if(ev2.isMulti){
+              // Band: full color bg
+              var bandCls='mo-ev mo-ev-band'+(ev2.isStart?' mo-ev-band-start':'')+(ev2.isEnd?' mo-ev-band-end':'');
+              var txt=ev2.isStart?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'';
+              evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:#fff" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+txt+'</div>';
+            } else {
+              // Single all-day: dot + text on light tinted bg (Apple style)
+              var bgLight=ev2.hex+'22';
+              evHtml+='<div class="mo-ev" style="background:'+bgLight+';color:'+ev2.hex+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+                +'<span class="mo-ev-allday-dot" style="background:'+ev2.hex+'"></span>'
+                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
+            }
             shown++;
           }
-          for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
+          for(var ti=0;ti<timedEvs.length&&shown<maxShow;ti++){
             var ev3=timedEvs[ti];
             evHtml+='<div class="mo-ev mo-ev-timed" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt">'+_moEsc(ev3.name)+'</span></div>';
+              +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
             shown++;
           }
-          var remaining=(allDayEvs.length+timedEvs.length)-shown;
+          var remaining=total-shown;
           if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
@@ -1756,7 +1792,8 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=d0.toLocaleDateString(locale,{month:'long'});
       mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
+      var thisYear=new Date().getFullYear();
+      lbl.textContent=mn+(y!==thisYear?' '+y:'');
     }
     // Scroll listener to update year label
     if(sc&&!sc._moYearBound){
@@ -1777,7 +1814,9 @@ function moToggle(){
             var d=new Date(yr,mo,1);
             var mn=d.toLocaleDateString(locale,{month:'long'});
             mn=mn[0].toUpperCase()+mn.slice(1);
-            lbl.textContent=mn+' '+yr;
+            // Show year only if different from current year
+            var thisYear=new Date().getFullYear();
+            lbl.textContent=mn+(parseInt(yr)!==thisYear?' '+yr:'');
           }
         }
       },{passive:true});
@@ -1858,23 +1897,34 @@ function moRenderAll(){
               allDayEvs.push({hex:hex,name:name,idx:evIdx,isStart:isStart,isEnd:isEnd,isMulti:isMulti});
             } else timedEvs.push({hex:hex,name:name,idx:evIdx});
           });
+          var total=allDayEvs.length+timedEvs.length;
+          // Show 3 if total==3, else show 2 + "+N remaining"
+          var maxShow=(total<=3)?3:2;
           var shown=0;
-          for(var ai=0;ai<allDayEvs.length&&shown<2;ai++){
+          for(var ai=0;ai<allDayEvs.length&&shown<maxShow;ai++){
             var ev2=allDayEvs[ai];
-            var bandCls='mo-ev'+(ev2.isMulti?' mo-ev-band':'')+
-              (ev2.isMulti&&ev2.isStart?' mo-ev-band-start':'')+(ev2.isMulti&&ev2.isEnd?' mo-ev-band-end':'');
-            var txt=(!ev2.isMulti||ev2.isStart)?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'&nbsp;';
-            evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+ txt+'</div>';
+            if(ev2.isMulti){
+              // Band: full color bg
+              var bandCls='mo-ev mo-ev-band'+(ev2.isStart?' mo-ev-band-start':'')+(ev2.isEnd?' mo-ev-band-end':'');
+              var txt=ev2.isStart?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'';
+              evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:#fff" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+txt+'</div>';
+            } else {
+              // Single all-day: dot + text on light tinted bg (Apple style)
+              var bgLight=ev2.hex+'22';
+              evHtml+='<div class="mo-ev" style="background:'+bgLight+';color:'+ev2.hex+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+                +'<span class="mo-ev-allday-dot" style="background:'+ev2.hex+'"></span>'
+                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
+            }
             shown++;
           }
-          for(var ti=0;ti<timedEvs.length&&shown<2;ti++){
+          for(var ti=0;ti<timedEvs.length&&shown<maxShow;ti++){
             var ev3=timedEvs[ti];
             evHtml+='<div class="mo-ev mo-ev-timed" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt">'+_moEsc(ev3.name)+'</span></div>';
+              +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
             shown++;
           }
-          var remaining=(allDayEvs.length+timedEvs.length)-shown;
+          var remaining=total-shown;
           if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
