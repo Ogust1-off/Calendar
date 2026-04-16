@@ -231,13 +231,14 @@ async function awFetch() {
     + `?key=${AW_API_KEY}&timeMin=${encodeURIComponent(tMin)}&timeMax=${encodeURIComponent(tMax)}`
     + `&singleEvents=true&orderBy=startTime&maxResults=250`;
 
-  const parseEvents = (data, cal2 = false) => (data.items || []).map(ev => ({
+  const parseEvents = (data, cal2 = false, calName = '') => (data.items || []).map(ev => ({
     summary:     ev.summary     || ev.title || '',
     location:    ev.location    || ev.place || '',
     description: ev.description || '',
     start:       ev.start?.dateTime || ev.start?.date || ev.start || '',
     end:         ev.end?.dateTime   || ev.end?.date   || ev.end   || '',
     cal2,
+    _calName: calName || '',
   }));
 
   const events = [];
@@ -1043,12 +1044,29 @@ function awRender(events) {
   awUpdateTimer();
   events.forEach((ev, i) => {
     const startD = ev.start.slice(0, 10);
-    // For timed events that span multiple days (e.g. 21:00→01:00 next day)
-    // add the event to every day it covers
+    const isAllDay = ev.start.length === 10;
+    if (isAllDay) {
+      // All-day event: end date in iCal is exclusive (day after last day)
+      const rawEnd = ev.end ? ev.end.slice(0, 10) : startD;
+      // Exclusive end: the event covers [startD, rawEnd)
+      let cur = new Date(startD + 'T00:00:00');
+      const endEx = new Date(rawEnd + 'T00:00:00');
+      // If end <= start (malformed), just add to start
+      if (endEx <= cur) {
+        (byDay[startD] = byDay[startD] || []).push({ ev, i });
+      } else {
+        while (cur < endEx) {
+          const ds = awDateStr(cur);
+          (byDay[ds] = byDay[ds] || []).push({ ev, i });
+          cur.setDate(cur.getDate() + 1);
+        }
+      }
+      return;
+    }
+    // Timed events that span multiple days
     if (ev.start.length > 10 && ev.end.length > 10) {
       const endD = ev.end.slice(0, 10);
       if (endD !== startD) {
-        // Spans at least 2 days — add to each day
         let cur = new Date(startD + 'T00:00:00');
         const endDate = new Date(endD + 'T00:00:00');
         while (cur <= endDate) {
@@ -1056,7 +1074,7 @@ function awRender(events) {
           (byDay[ds] = byDay[ds] || []).push({ ev, i });
           cur.setDate(cur.getDate() + 1);
         }
-        return; // skip the default push below
+        return;
       }
     }
     (byDay[startD] = byDay[startD] || []).push({ ev, i });
