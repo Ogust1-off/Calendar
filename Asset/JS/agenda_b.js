@@ -421,7 +421,20 @@ function awRowHtml(ev, idx = -1) {
     </div>
     <div class="aw-time">
       ${allDay
-        ? `<span class="aw-time-single">${window._t?window._t('allDay'):'All day'}</span>`
+        ? `<span class="aw-time-single">${(()=>{
+            const locale=window._currentLocale||'en-GB';
+            const sd=new Date(ev.start+'T00:00:00');
+            const rawEnd=ev.end||ev.start;
+            // iCal all-day end is exclusive — subtract 1 day
+            const ed=new Date(rawEnd+'T00:00:00');
+            const isMulti=(ed-sd)>86400000-1;
+            if(!isMulti){return sd.toLocaleDateString(locale,{day:'numeric',month:'long'});}
+            const edDisp=new Date(ed);edDisp.setDate(edDisp.getDate()-1);
+            const days=Math.round((ed-sd)/86400000);
+            const fmt=(d)=>d.toLocaleDateString(locale,{day:'numeric',month:'long'});
+            const dayWord=(window._getLang&&window._getLang()==='fr')?( days===1?'jour':'jours'):(days===1?'day':'days');
+            return fmt(sd)+' – '+fmt(edDisp)+' ('+days+' '+dayWord+')';
+          })()}</span>`
         : `<span class="aw-time-start">${awFmtTime(ev.start)}</span><span class="aw-time-end">${awFmtTime(ev.end)}${dur?` <span style="opacity:.4;font-size:9px">(${dur})</span>`:''}</span>`}
       ${startsSoon ? `<div class="aw-dur" data-timer="soon" data-ev="${idx}" style="color:${accent}">${window._t?window._t('in'):'in '}${awFmtRemaining(ev.start)}</div>` : ''}
       ${now        ? `<div class="aw-dur" data-timer="left" data-ev="${idx}" style="color:${accent}">${awFmtRemaining(ev.end)} ${window._t?window._t('left'):'left'}</div>` : ''}
