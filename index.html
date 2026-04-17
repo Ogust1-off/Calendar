@@ -191,7 +191,7 @@
   /* ── Month overview — Apple Calendar style ── */
   #mo-overlay{
     position:absolute;top:0;left:0;right:0;bottom:0;
-    z-index:90;background:var(--bg);
+    z-index:110;background:var(--bg);
     display:flex;flex-direction:column;
     transform:translateY(-100%);
     transition:transform .3s cubic-bezier(.32,1.05,.45,1);
@@ -199,6 +199,13 @@
   }
   #mo-overlay.mo-open{transform:translateY(0);pointer-events:all;}
   #wk-hdr.mo-hdr-hidden #wk-days{display:none!important;}
+  /* When month view open: hide nav arrows, show only Today btn */
+  #wk-month-row[data-mo-mode] #wk-prev-btn,
+  #wk-month-row[data-mo-mode] #wk-next-btn{display:none!important;}
+  #wk-month-row[data-mo-mode] #wk-today-btn{
+    background:rgba(10,132,255,.12);border-radius:99px;
+    padding:5px 12px;font-size:12px;
+  }
   /* Header */
   #mo-header{flex-shrink:0;background:var(--bg);}
   #mo-header-top{display:flex;align-items:flex-end;gap:10px;padding:12px 14px 0;}
@@ -266,36 +273,40 @@
     display:block;cursor:pointer;
     width:30px;margin:0 auto 2px;
   }
-  /* Event pill — Apple style */
+  /* Event pill — week-view style: solid bg, rounded, white text */
   .mo-ev{
     display:flex;align-items:center;gap:3px;
-    font-size:10.5px;font-weight:500;
-    border-radius:99px;padding:1px 6px 1px 4px;
+    font-size:10px;font-weight:600;color:#fff;
+    border-radius:5px;padding:1px 5px 1px 5px;
     margin:0 2px 2px;height:16px;
     white-space:nowrap;overflow:hidden;
     line-height:16px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     box-sizing:border-box;
   }
-  .mo-ev-allday-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
-  .mo-ev-timed{background:transparent!important;padding-left:2px;}
+  .mo-ev-timed{
+    background:transparent!important;
+    padding-left:0;
+  }
   .mo-ev-timed-bar{width:3px;min-height:14px;border-radius:2px;flex-shrink:0;align-self:stretch;}
   .mo-ev-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
-  /* Multi-day band — fully rounded at start/end, flush in middle */
+  /* Multi-day band — NO gap between cells */
   .mo-ev-band{
     border-radius:0!important;
     margin-left:0;margin-right:0;
-    padding-left:5px;padding-right:5px;
-    height:17px;line-height:17px;
+    padding-left:5px;padding-right:3px;
+    height:16px;line-height:16px;
   }
-  .mo-ev-band-start{border-radius:99px 0 0 99px!important;margin-left:2px;padding-left:6px;}
-  .mo-ev-band-end{border-radius:0 99px 99px 0!important;margin-right:2px;padding-right:6px;}
-  /* Single band (start+end same cell) */
-  .mo-ev-band-start.mo-ev-band-end{border-radius:99px!important;margin:0 2px;}
+  .mo-ev-band-start{border-radius:5px 0 0 5px!important;margin-left:2px;}
+  .mo-ev-band-end{border-radius:0 5px 5px 0!important;margin-right:2px;}
+  .mo-ev-band-start.mo-ev-band-end{border-radius:5px!important;margin:0 2px;}
+  .mo-ev-allday-dot{display:none;} /* no dot needed with solid bg */
+  /* Timed: text uses event color */
+  .mo-ev-timed .mo-ev-txt{color:var(--lbl);}
   /* +N */
   .mo-ev-more{
     font-size:10px;font-weight:400;color:var(--lbl3);
-    padding:0 6px;line-height:12px;margin-top:1px;
+    padding:0 5px;line-height:12px;margin-top:1px;
   }
 
 /* ── Day grid ── */
@@ -1259,6 +1270,17 @@ function moToggle(){
   ov.classList.add('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.add('mo-hdr-hidden');
+  // Transform wk-month-row into month-view header
+  var mrow=document.getElementById('wk-month-row');
+  if(mrow){
+    mrow.dataset.moMode='1';
+    // Override Today button to scroll month view to today
+    var todayBtn=document.getElementById('wk-today-btn');
+    if(todayBtn){
+      todayBtn._origOnclick=todayBtn.onclick;
+      todayBtn.onclick=function(){moScrollToday();};
+    }
+  }
   // Scroll to current month
   setTimeout(function(){
     var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
@@ -1274,8 +1296,10 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=d0.toLocaleDateString(locale,{month:'long'});
       mn=mn[0].toUpperCase()+mn.slice(1);
-      var thisYear=new Date().getFullYear();
-      lbl.textContent=mn+(y!==thisYear?' '+y:'');
+      lbl.textContent=mn+' '+y;
+      // Sync week view header label
+      var wml=document.getElementById('wk-month-lbl');
+      if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
     }
     // Scroll listener to update year label
     if(sc&&!sc._moYearBound){
@@ -1296,9 +1320,14 @@ function moToggle(){
             var d=new Date(yr,mo,1);
             var mn=d.toLocaleDateString(locale,{month:'long'});
             mn=mn[0].toUpperCase()+mn.slice(1);
-            // Show year only if different from current year
             var thisYear=new Date().getFullYear();
-            lbl.textContent=mn+(parseInt(yr)!==thisYear?' '+yr:'');
+            var labelTxt=mn+' '+yr; // always show year in header
+            lbl.textContent=labelTxt;
+            // Sync wk-month-lbl when month view is open
+            var wml=document.getElementById('wk-month-lbl');
+            if(wml&&document.getElementById('mo-overlay')&&document.getElementById('mo-overlay').classList.contains('mo-open')){
+              wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
+            }
           }
         }
       },{passive:true});
@@ -1313,6 +1342,16 @@ function moClose(){
   if(ov)ov.classList.remove('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.remove('mo-hdr-hidden');
+  var mrow=document.getElementById('wk-month-row');
+  if(mrow){
+    delete mrow.dataset.moMode;
+    // Restore Today button
+    var todayBtn=document.getElementById('wk-today-btn');
+    if(todayBtn&&todayBtn._origOnclick){
+      todayBtn.onclick=todayBtn._origOnclick;
+      delete todayBtn._origOnclick;
+    }
+  }
 }
 function moScrollToday(){
   var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
@@ -1399,20 +1438,19 @@ function moRenderAll(){
               var txt=ev2.isStart?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'<span style="opacity:0">&nbsp;</span>';
               evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:'+textC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+txt+'</div>';
             } else {
-              // Single all-day: dot + text on light tinted bg
-              var isLiturgical2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var bgLight=isLiturgical2?'rgba(200,184,154,0.18)':ev2.hex+'22';
-              var txtC2=isLiturgical2?'rgba(100,70,20,0.9)':ev2.hex;
-              var dotC2=isLiturgical2?'rgba(180,155,110,0.9)':ev2.hex;
-              evHtml+='<div class="mo-ev" style="background:'+bgLight+';color:'+txtC2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-allday-dot" style="background:'+dotC2+'"></span>'
+              // Single all-day: solid color bg like week view
+              var isLit2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
+              var bgC=isLit2?'rgba(200,184,154,0.6)':ev2.hex;
+              var txtC2=isLit2?'rgba(60,40,20,0.9)':'#fff';
+              evHtml+='<div class="mo-ev" style="background:'+bgC+';color:'+txtC2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             }
             shown++;
           }
           for(var ti=0;ti<timedEvs.length&&shown<maxShow;ti++){
             var ev3=timedEvs[ti];
-            evHtml+='<div class="mo-ev mo-ev-timed" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
+            var bgT=ev3.hex+'18';
+            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bgT+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
               +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
             shown++;
@@ -1492,6 +1530,17 @@ function moToggle(){
   ov.classList.add('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.add('mo-hdr-hidden');
+  // Transform wk-month-row into month-view header
+  var mrow=document.getElementById('wk-month-row');
+  if(mrow){
+    mrow.dataset.moMode='1';
+    // Override Today button to scroll month view to today
+    var todayBtn=document.getElementById('wk-today-btn');
+    if(todayBtn){
+      todayBtn._origOnclick=todayBtn.onclick;
+      todayBtn.onclick=function(){moScrollToday();};
+    }
+  }
   // Scroll to current month
   setTimeout(function(){
     var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
@@ -1507,8 +1556,10 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=d0.toLocaleDateString(locale,{month:'long'});
       mn=mn[0].toUpperCase()+mn.slice(1);
-      var thisYear=new Date().getFullYear();
-      lbl.textContent=mn+(y!==thisYear?' '+y:'');
+      lbl.textContent=mn+' '+y;
+      // Sync week view header label
+      var wml=document.getElementById('wk-month-lbl');
+      if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
     }
     // Scroll listener to update year label
     if(sc&&!sc._moYearBound){
@@ -1529,9 +1580,14 @@ function moToggle(){
             var d=new Date(yr,mo,1);
             var mn=d.toLocaleDateString(locale,{month:'long'});
             mn=mn[0].toUpperCase()+mn.slice(1);
-            // Show year only if different from current year
             var thisYear=new Date().getFullYear();
-            lbl.textContent=mn+(parseInt(yr)!==thisYear?' '+yr:'');
+            var labelTxt=mn+' '+yr; // always show year in header
+            lbl.textContent=labelTxt;
+            // Sync wk-month-lbl when month view is open
+            var wml=document.getElementById('wk-month-lbl');
+            if(wml&&document.getElementById('mo-overlay')&&document.getElementById('mo-overlay').classList.contains('mo-open')){
+              wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
+            }
           }
         }
       },{passive:true});
@@ -1546,6 +1602,16 @@ function moClose(){
   if(ov)ov.classList.remove('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.remove('mo-hdr-hidden');
+  var mrow=document.getElementById('wk-month-row');
+  if(mrow){
+    delete mrow.dataset.moMode;
+    // Restore Today button
+    var todayBtn=document.getElementById('wk-today-btn');
+    if(todayBtn&&todayBtn._origOnclick){
+      todayBtn.onclick=todayBtn._origOnclick;
+      delete todayBtn._origOnclick;
+    }
+  }
 }
 function moScrollToday(){
   var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
@@ -1632,20 +1698,19 @@ function moRenderAll(){
               var txt=ev2.isStart?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'<span style="opacity:0">&nbsp;</span>';
               evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:'+textC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+txt+'</div>';
             } else {
-              // Single all-day: dot + text on light tinted bg
-              var isLiturgical2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var bgLight=isLiturgical2?'rgba(200,184,154,0.18)':ev2.hex+'22';
-              var txtC2=isLiturgical2?'rgba(100,70,20,0.9)':ev2.hex;
-              var dotC2=isLiturgical2?'rgba(180,155,110,0.9)':ev2.hex;
-              evHtml+='<div class="mo-ev" style="background:'+bgLight+';color:'+txtC2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-allday-dot" style="background:'+dotC2+'"></span>'
+              // Single all-day: solid color bg like week view
+              var isLit2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
+              var bgC=isLit2?'rgba(200,184,154,0.6)':ev2.hex;
+              var txtC2=isLit2?'rgba(60,40,20,0.9)':'#fff';
+              evHtml+='<div class="mo-ev" style="background:'+bgC+';color:'+txtC2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             }
             shown++;
           }
           for(var ti=0;ti<timedEvs.length&&shown<maxShow;ti++){
             var ev3=timedEvs[ti];
-            evHtml+='<div class="mo-ev mo-ev-timed" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
+            var bgT=ev3.hex+'18';
+            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bgT+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
               +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
             shown++;
@@ -1785,6 +1850,17 @@ function moToggle(){
   ov.classList.add('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.add('mo-hdr-hidden');
+  // Transform wk-month-row into month-view header
+  var mrow=document.getElementById('wk-month-row');
+  if(mrow){
+    mrow.dataset.moMode='1';
+    // Override Today button to scroll month view to today
+    var todayBtn=document.getElementById('wk-today-btn');
+    if(todayBtn){
+      todayBtn._origOnclick=todayBtn.onclick;
+      todayBtn.onclick=function(){moScrollToday();};
+    }
+  }
   // Scroll to current month
   setTimeout(function(){
     var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
@@ -1800,8 +1876,10 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=d0.toLocaleDateString(locale,{month:'long'});
       mn=mn[0].toUpperCase()+mn.slice(1);
-      var thisYear=new Date().getFullYear();
-      lbl.textContent=mn+(y!==thisYear?' '+y:'');
+      lbl.textContent=mn+' '+y;
+      // Sync week view header label
+      var wml=document.getElementById('wk-month-lbl');
+      if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
     }
     // Scroll listener to update year label
     if(sc&&!sc._moYearBound){
@@ -1822,9 +1900,14 @@ function moToggle(){
             var d=new Date(yr,mo,1);
             var mn=d.toLocaleDateString(locale,{month:'long'});
             mn=mn[0].toUpperCase()+mn.slice(1);
-            // Show year only if different from current year
             var thisYear=new Date().getFullYear();
-            lbl.textContent=mn+(parseInt(yr)!==thisYear?' '+yr:'');
+            var labelTxt=mn+' '+yr; // always show year in header
+            lbl.textContent=labelTxt;
+            // Sync wk-month-lbl when month view is open
+            var wml=document.getElementById('wk-month-lbl');
+            if(wml&&document.getElementById('mo-overlay')&&document.getElementById('mo-overlay').classList.contains('mo-open')){
+              wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
+            }
           }
         }
       },{passive:true});
@@ -1839,6 +1922,16 @@ function moClose(){
   if(ov)ov.classList.remove('mo-open');
   var hdr=document.getElementById('wk-hdr');
   if(hdr)hdr.classList.remove('mo-hdr-hidden');
+  var mrow=document.getElementById('wk-month-row');
+  if(mrow){
+    delete mrow.dataset.moMode;
+    // Restore Today button
+    var todayBtn=document.getElementById('wk-today-btn');
+    if(todayBtn&&todayBtn._origOnclick){
+      todayBtn.onclick=todayBtn._origOnclick;
+      delete todayBtn._origOnclick;
+    }
+  }
 }
 function moScrollToday(){
   var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
@@ -1925,20 +2018,19 @@ function moRenderAll(){
               var txt=ev2.isStart?'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span>':'<span style="opacity:0">&nbsp;</span>';
               evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:'+textC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+txt+'</div>';
             } else {
-              // Single all-day: dot + text on light tinted bg
-              var isLiturgical2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var bgLight=isLiturgical2?'rgba(200,184,154,0.18)':ev2.hex+'22';
-              var txtC2=isLiturgical2?'rgba(100,70,20,0.9)':ev2.hex;
-              var dotC2=isLiturgical2?'rgba(180,155,110,0.9)':ev2.hex;
-              evHtml+='<div class="mo-ev" style="background:'+bgLight+';color:'+txtC2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-allday-dot" style="background:'+dotC2+'"></span>'
+              // Single all-day: solid color bg like week view
+              var isLit2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
+              var bgC=isLit2?'rgba(200,184,154,0.6)':ev2.hex;
+              var txtC2=isLit2?'rgba(60,40,20,0.9)':'#fff';
+              evHtml+='<div class="mo-ev" style="background:'+bgC+';color:'+txtC2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             }
             shown++;
           }
           for(var ti=0;ti<timedEvs.length&&shown<maxShow;ti++){
             var ev3=timedEvs[ti];
-            evHtml+='<div class="mo-ev mo-ev-timed" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
+            var bgT=ev3.hex+'18';
+            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bgT+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
               +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
             shown++;
