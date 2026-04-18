@@ -199,6 +199,12 @@
   }
   #mo-overlay.mo-open{transform:translateY(0);pointer-events:all;}
   #wk-hdr.mo-hdr-hidden #wk-days{display:none!important;}
+  /* Remove backdrop-filter stacking context so mo-overlay can cover wk-hdr */
+  #wk-hdr.mo-hdr-hidden{
+    backdrop-filter:none!important;
+    -webkit-backdrop-filter:none!important;
+    background:var(--bg)!important;
+  }
   /* When month view open: hide nav arrows, show only Today btn */
   #wk-month-row[data-mo-mode] #wk-prev-btn,
   #wk-month-row[data-mo-mode] #wk-next-btn{display:none!important;}
@@ -276,11 +282,11 @@
   /* Event pill — week-view style: solid bg, rounded, white text */
   .mo-ev{
     display:flex;align-items:center;gap:3px;
-    font-size:10px;font-weight:600;
-    border-radius:99px;padding:1px 6px 1px 5px;
-    margin:0 2px 2px;height:16px;
+    font-size:10px;font-weight:600;color:#fff;
+    border-radius:99px;padding:0 6px 0 4px;
+    margin:0 2px 2px;height:15px;
     white-space:nowrap;overflow:hidden;
-    line-height:16px;cursor:pointer;
+    line-height:15px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     box-sizing:border-box;border:.5px solid transparent;
   }
@@ -300,7 +306,7 @@
   .mo-ev-band-start{border-radius:5px 0 0 5px!important;margin-left:1px;}
   .mo-ev-band-end{border-radius:0 5px 5px 0!important;margin-right:1px;}
   .mo-ev-band-start.mo-ev-band-end{border-radius:5px!important;margin:0 1px;}
-  .mo-ev-allday-dot{display:none;} /* no dot needed with solid bg */
+  .mo-ev-allday-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
   /* Timed: text uses event color */
   .mo-ev-timed .mo-ev-txt{color:var(--lbl);}
   /* +N */
@@ -1421,51 +1427,52 @@ function moRenderAll(){
           });
           // For maxShow: don't count continuation-band cells (non-start multi-day)
           // Real events = allday starts + timed (continuation bands are invisible backgrounds)
-          var realCount=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;}).length+timedEvs.length;
-          var maxShow=(realCount<=3)?3:2;
-          var realShown=0; // tracks REAL events shown (not continuation bands)
-          var shown=0;     // tracks total rendered slots
-          // First: render ALL band continuations (they don't use a slot)
-          for(var ai=0;ai<allDayEvs.length;ai++){
-            var ev2=allDayEvs[ai];
-            if(ev2.isMulti&&!ev2.isStart){
-              // Continuation band — always render, no slot cost
-              var bSE2=(ev2.isStart&&ev2.isEnd);
-              var bandCls2='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'')+(bSE2?' mo-ev-band-single':'');
-              var isLit3=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var textC3=isLit3?'rgba(100,70,20,0.9)':'rgba(255,255,255,0)'; // transparent text on continuation
-              evHtml+='<div class="'+bandCls2+'" style="background:'+ev2.hex+';color:'+textC3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"><span class="mo-ev-txt">&nbsp;</span></div>';
-            }
-          }
-          // Then: render real events (all-day starts + timed) up to maxShow
-          for(var ai=0;ai<allDayEvs.length&&realShown<maxShow;ai++){
-            var ev2=allDayEvs[ai];
-            if(ev2.isMulti&&!ev2.isStart) continue; // already rendered above
+          var allDayStarts=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;});
+          var allDayCont=allDayEvs.filter(function(e){return e.isMulti&&!e.isStart;});
+          var realCount=allDayStarts.length+timedEvs.length;
+          // Rule: ≤3 real events → show all; >3 → show 2 + "+N"
+          var maxReal=(realCount<=3)?3:2;
+          var realShown=0;
+          // PASS 1: continuation bands — always render, no vertical slot cost
+          // They overlay in the same row position as their start-day counterpart
+          allDayCont.forEach(function(ev2){
+            var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
+            var isLit=(ev2.hex==='#f8f4ec');
+            evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"></div>';
+          });
+          // PASS 2: real events up to maxReal
+          for(var ai=0;ai<allDayStarts.length&&realShown<maxReal;ai++){
+            var ev2=allDayStarts[ai];
             if(ev2.isMulti){
-              var bSE=(ev2.isStart&&ev2.isEnd);
-              var bandCls='mo-ev mo-ev-band mo-ev-band-start'+(ev2.isEnd?' mo-ev-band-end':'')+(bSE?' mo-ev-band-single':'');
-              var isLiturgical=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var textC=isLiturgical?'rgba(100,70,20,0.9)':'#fff';
-              evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:'+textC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+              // Band start
+              var isLit=(ev2.hex==='#f8f4ec');
+              var bSE=ev2.isEnd;
+              var bCls='mo-ev mo-ev-band mo-ev-band-start'+(bSE?' mo-ev-band-end mo-ev-band-single':'');
+              var bgB=isLit?'rgba(200,184,154,0.5)':ev2.hex;
+              var txB=isLit?'rgba(60,40,20,0.9)':'#fff';
+              evHtml+='<div class="'+bCls+'" style="background:'+bgB+';color:'+txB+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             } else {
-              // Single all-day — Apple pill style: light tinted bg + colored text + border
-              var isLit2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var bgC=isLit2?'rgba(200,184,154,0.2)':ev2.hex+'22';
-              var txtC2=isLit2?'rgba(100,70,20,0.9)':ev2.hex;
-              var bdrC=isLit2?'rgba(180,155,110,0.5)':ev2.hex+'66';
-              evHtml+='<div class="mo-ev" style="background:'+bgC+';color:'+txtC2+';border:.5px solid '+bdrC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+              // Single all-day — pill style matching day view (light bg + colored border + colored text)
+              var isLit2=(ev2.hex==='#f8f4ec');
+              var bg2=isLit2?'rgba(200,184,154,0.15)':ev2.hex+'20';
+              var tx2=isLit2?'rgba(100,70,20,0.9)':ev2.hex;
+              var bd2=isLit2?'rgba(180,155,110,0.5)':ev2.hex+'88';
+              evHtml+='<div class="mo-ev" style="background:'+bg2+';color:'+tx2+';border:.5px solid '+bd2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+                +'<span class="mo-ev-allday-dot" style="background:'+tx2+'"></span>'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             }
-            realShown++;shown++;
+            realShown++;
           }
-          for(var ti=0;ti<timedEvs.length&&realShown<maxShow;ti++){
+          for(var ti=0;ti<timedEvs.length&&realShown<maxReal;ti++){
             var ev3=timedEvs[ti];
-            var bgT=ev3.hex+'18';
-            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bgT+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
+            var isLit3=(ev3.hex==='#f8f4ec');
+            var bg3=isLit3?'rgba(200,184,154,0.12)':ev3.hex+'15';
+            var tx3=isLit3?'rgba(100,70,20,0.9)':ev3.hex;
+            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bg3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
-            realShown++;shown++;
+              +'<span class="mo-ev-txt" style="color:'+tx3+'">'+_moEsc(ev3.name)+'</span></div>';
+            realShown++;
           }
           var remaining=realCount-realShown;
           if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
@@ -1693,51 +1700,52 @@ function moRenderAll(){
           });
           // For maxShow: don't count continuation-band cells (non-start multi-day)
           // Real events = allday starts + timed (continuation bands are invisible backgrounds)
-          var realCount=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;}).length+timedEvs.length;
-          var maxShow=(realCount<=3)?3:2;
-          var realShown=0; // tracks REAL events shown (not continuation bands)
-          var shown=0;     // tracks total rendered slots
-          // First: render ALL band continuations (they don't use a slot)
-          for(var ai=0;ai<allDayEvs.length;ai++){
-            var ev2=allDayEvs[ai];
-            if(ev2.isMulti&&!ev2.isStart){
-              // Continuation band — always render, no slot cost
-              var bSE2=(ev2.isStart&&ev2.isEnd);
-              var bandCls2='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'')+(bSE2?' mo-ev-band-single':'');
-              var isLit3=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var textC3=isLit3?'rgba(100,70,20,0.9)':'rgba(255,255,255,0)'; // transparent text on continuation
-              evHtml+='<div class="'+bandCls2+'" style="background:'+ev2.hex+';color:'+textC3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"><span class="mo-ev-txt">&nbsp;</span></div>';
-            }
-          }
-          // Then: render real events (all-day starts + timed) up to maxShow
-          for(var ai=0;ai<allDayEvs.length&&realShown<maxShow;ai++){
-            var ev2=allDayEvs[ai];
-            if(ev2.isMulti&&!ev2.isStart) continue; // already rendered above
+          var allDayStarts=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;});
+          var allDayCont=allDayEvs.filter(function(e){return e.isMulti&&!e.isStart;});
+          var realCount=allDayStarts.length+timedEvs.length;
+          // Rule: ≤3 real events → show all; >3 → show 2 + "+N"
+          var maxReal=(realCount<=3)?3:2;
+          var realShown=0;
+          // PASS 1: continuation bands — always render, no vertical slot cost
+          // They overlay in the same row position as their start-day counterpart
+          allDayCont.forEach(function(ev2){
+            var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
+            var isLit=(ev2.hex==='#f8f4ec');
+            evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"></div>';
+          });
+          // PASS 2: real events up to maxReal
+          for(var ai=0;ai<allDayStarts.length&&realShown<maxReal;ai++){
+            var ev2=allDayStarts[ai];
             if(ev2.isMulti){
-              var bSE=(ev2.isStart&&ev2.isEnd);
-              var bandCls='mo-ev mo-ev-band mo-ev-band-start'+(ev2.isEnd?' mo-ev-band-end':'')+(bSE?' mo-ev-band-single':'');
-              var isLiturgical=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var textC=isLiturgical?'rgba(100,70,20,0.9)':'#fff';
-              evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:'+textC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+              // Band start
+              var isLit=(ev2.hex==='#f8f4ec');
+              var bSE=ev2.isEnd;
+              var bCls='mo-ev mo-ev-band mo-ev-band-start'+(bSE?' mo-ev-band-end mo-ev-band-single':'');
+              var bgB=isLit?'rgba(200,184,154,0.5)':ev2.hex;
+              var txB=isLit?'rgba(60,40,20,0.9)':'#fff';
+              evHtml+='<div class="'+bCls+'" style="background:'+bgB+';color:'+txB+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             } else {
-              // Single all-day — Apple pill style: light tinted bg + colored text + border
-              var isLit2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var bgC=isLit2?'rgba(200,184,154,0.2)':ev2.hex+'22';
-              var txtC2=isLit2?'rgba(100,70,20,0.9)':ev2.hex;
-              var bdrC=isLit2?'rgba(180,155,110,0.5)':ev2.hex+'66';
-              evHtml+='<div class="mo-ev" style="background:'+bgC+';color:'+txtC2+';border:.5px solid '+bdrC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+              // Single all-day — pill style matching day view (light bg + colored border + colored text)
+              var isLit2=(ev2.hex==='#f8f4ec');
+              var bg2=isLit2?'rgba(200,184,154,0.15)':ev2.hex+'20';
+              var tx2=isLit2?'rgba(100,70,20,0.9)':ev2.hex;
+              var bd2=isLit2?'rgba(180,155,110,0.5)':ev2.hex+'88';
+              evHtml+='<div class="mo-ev" style="background:'+bg2+';color:'+tx2+';border:.5px solid '+bd2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+                +'<span class="mo-ev-allday-dot" style="background:'+tx2+'"></span>'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             }
-            realShown++;shown++;
+            realShown++;
           }
-          for(var ti=0;ti<timedEvs.length&&realShown<maxShow;ti++){
+          for(var ti=0;ti<timedEvs.length&&realShown<maxReal;ti++){
             var ev3=timedEvs[ti];
-            var bgT=ev3.hex+'18';
-            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bgT+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
+            var isLit3=(ev3.hex==='#f8f4ec');
+            var bg3=isLit3?'rgba(200,184,154,0.12)':ev3.hex+'15';
+            var tx3=isLit3?'rgba(100,70,20,0.9)':ev3.hex;
+            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bg3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
-            realShown++;shown++;
+              +'<span class="mo-ev-txt" style="color:'+tx3+'">'+_moEsc(ev3.name)+'</span></div>';
+            realShown++;
           }
           var remaining=realCount-realShown;
           if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
@@ -2025,51 +2033,52 @@ function moRenderAll(){
           });
           // For maxShow: don't count continuation-band cells (non-start multi-day)
           // Real events = allday starts + timed (continuation bands are invisible backgrounds)
-          var realCount=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;}).length+timedEvs.length;
-          var maxShow=(realCount<=3)?3:2;
-          var realShown=0; // tracks REAL events shown (not continuation bands)
-          var shown=0;     // tracks total rendered slots
-          // First: render ALL band continuations (they don't use a slot)
-          for(var ai=0;ai<allDayEvs.length;ai++){
-            var ev2=allDayEvs[ai];
-            if(ev2.isMulti&&!ev2.isStart){
-              // Continuation band — always render, no slot cost
-              var bSE2=(ev2.isStart&&ev2.isEnd);
-              var bandCls2='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'')+(bSE2?' mo-ev-band-single':'');
-              var isLit3=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var textC3=isLit3?'rgba(100,70,20,0.9)':'rgba(255,255,255,0)'; // transparent text on continuation
-              evHtml+='<div class="'+bandCls2+'" style="background:'+ev2.hex+';color:'+textC3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"><span class="mo-ev-txt">&nbsp;</span></div>';
-            }
-          }
-          // Then: render real events (all-day starts + timed) up to maxShow
-          for(var ai=0;ai<allDayEvs.length&&realShown<maxShow;ai++){
-            var ev2=allDayEvs[ai];
-            if(ev2.isMulti&&!ev2.isStart) continue; // already rendered above
+          var allDayStarts=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;});
+          var allDayCont=allDayEvs.filter(function(e){return e.isMulti&&!e.isStart;});
+          var realCount=allDayStarts.length+timedEvs.length;
+          // Rule: ≤3 real events → show all; >3 → show 2 + "+N"
+          var maxReal=(realCount<=3)?3:2;
+          var realShown=0;
+          // PASS 1: continuation bands — always render, no vertical slot cost
+          // They overlay in the same row position as their start-day counterpart
+          allDayCont.forEach(function(ev2){
+            var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
+            var isLit=(ev2.hex==='#f8f4ec');
+            evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"></div>';
+          });
+          // PASS 2: real events up to maxReal
+          for(var ai=0;ai<allDayStarts.length&&realShown<maxReal;ai++){
+            var ev2=allDayStarts[ai];
             if(ev2.isMulti){
-              var bSE=(ev2.isStart&&ev2.isEnd);
-              var bandCls='mo-ev mo-ev-band mo-ev-band-start'+(ev2.isEnd?' mo-ev-band-end':'')+(bSE?' mo-ev-band-single':'');
-              var isLiturgical=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var textC=isLiturgical?'rgba(100,70,20,0.9)':'#fff';
-              evHtml+='<div class="'+bandCls+'" style="background:'+ev2.hex+';color:'+textC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+              // Band start
+              var isLit=(ev2.hex==='#f8f4ec');
+              var bSE=ev2.isEnd;
+              var bCls='mo-ev mo-ev-band mo-ev-band-start'+(bSE?' mo-ev-band-end mo-ev-band-single':'');
+              var bgB=isLit?'rgba(200,184,154,0.5)':ev2.hex;
+              var txB=isLit?'rgba(60,40,20,0.9)':'#fff';
+              evHtml+='<div class="'+bCls+'" style="background:'+bgB+';color:'+txB+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             } else {
-              // Single all-day — Apple pill style: light tinted bg + colored text + border
-              var isLit2=(ev2.hex==='#f8f4ec'||ev2.hex.toLowerCase()==='#f8f4ec');
-              var bgC=isLit2?'rgba(200,184,154,0.2)':ev2.hex+'22';
-              var txtC2=isLit2?'rgba(100,70,20,0.9)':ev2.hex;
-              var bdrC=isLit2?'rgba(180,155,110,0.5)':ev2.hex+'66';
-              evHtml+='<div class="mo-ev" style="background:'+bgC+';color:'+txtC2+';border:.5px solid '+bdrC+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+              // Single all-day — pill style matching day view (light bg + colored border + colored text)
+              var isLit2=(ev2.hex==='#f8f4ec');
+              var bg2=isLit2?'rgba(200,184,154,0.15)':ev2.hex+'20';
+              var tx2=isLit2?'rgba(100,70,20,0.9)':ev2.hex;
+              var bd2=isLit2?'rgba(180,155,110,0.5)':ev2.hex+'88';
+              evHtml+='<div class="mo-ev" style="background:'+bg2+';color:'+tx2+';border:.5px solid '+bd2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
+                +'<span class="mo-ev-allday-dot" style="background:'+tx2+'"></span>'
                 +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
             }
-            realShown++;shown++;
+            realShown++;
           }
-          for(var ti=0;ti<timedEvs.length&&realShown<maxShow;ti++){
+          for(var ti=0;ti<timedEvs.length&&realShown<maxReal;ti++){
             var ev3=timedEvs[ti];
-            var bgT=ev3.hex+'18';
-            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bgT+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
+            var isLit3=(ev3.hex==='#f8f4ec');
+            var bg3=isLit3?'rgba(200,184,154,0.12)':ev3.hex+'15';
+            var tx3=isLit3?'rgba(100,70,20,0.9)':ev3.hex;
+            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bg3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt" style="color:'+ev3.hex+'">'+_moEsc(ev3.name)+'</span></div>';
-            realShown++;shown++;
+              +'<span class="mo-ev-txt" style="color:'+tx3+'">'+_moEsc(ev3.name)+'</span></div>';
+            realShown++;
           }
           var remaining=realCount-realShown;
           if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';

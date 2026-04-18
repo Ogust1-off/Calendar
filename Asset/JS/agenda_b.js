@@ -692,7 +692,20 @@ function awPopOpen(el, idx) {
       ${ev._calName ? `<div class="aw-pop-cal-name"><span class="aw-pop-cal-dot" style="background:${accent}"></span>${ev._calName}</div>` : ''}
       <div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3.5l2 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span>${ev.start.length === 10 ? (window._t?window._t('allDay'):'All day') : awFmtTime(ev.start) + ' \u2013 ' + awFmtTime(ev.end)}${dur ? ` <span class="aw-pop-muted">(${dur})</span>` : ''}</span>
+        <span>${(()=>{
+          if(ev.start.length!==10)return awFmtTime(ev.start)+' \u2013 '+awFmtTime(ev.end)+(dur?' <span class=\"aw-pop-muted\">('+dur+')</span>':'');
+          const locale2=window._currentLocale||'en-GB';
+          const sd2=new Date(ev.start+'T00:00:00');
+          const rawEnd2=ev.end||ev.start;
+          const ed2=new Date(rawEnd2+'T00:00:00');
+          const isM=(ed2-sd2)>86400000-1;
+          if(!isM)return sd2.toLocaleDateString(locale2,{weekday:'long',day:'numeric',month:'long'});
+          const edD=new Date(ed2);edD.setDate(edD.getDate()-1);
+          const days2=Math.round((ed2-sd2)/86400000);
+          const fmt2=(d)=>d.toLocaleDateString(locale2,{day:'numeric',month:'long'});
+          const dw=(window._getLang&&window._getLang()==='fr')?(days2===1?'jour':'jours'):(days2===1?'day':'days');
+          return fmt2(sd2)+' \u2013 '+fmt2(edD)+' ('+days2+'\u00a0'+dw+')';
+        })()}</span>
       </div>
       ${ev.location ? `<div class="aw-pop-row">
         <svg class="aw-pop-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" stroke-width="1.3"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.3"/></svg>
