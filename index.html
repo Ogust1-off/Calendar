@@ -198,7 +198,13 @@
     pointer-events:none;overflow:hidden;
   }
   #mo-overlay.mo-open{transform:translateY(0) !important;pointer-events:all;}
-  #wk-hdr.mo-hdr-hidden #wk-days{display:none!important;}
+  /* Month view: DOW row shown (not hidden) */
+  #wk-hdr.mo-hdr-hidden #wk-days{display:grid!important;}
+  .mo-hdr-dow{
+    font-size:11px;font-weight:600;text-align:center;
+    text-transform:uppercase;letter-spacing:.04em;
+    color:var(--lbl3);line-height:1;padding-bottom:6px;
+  }
   /* Remove backdrop-filter stacking context so mo-overlay can cover wk-hdr */
   #wk-hdr.mo-hdr-hidden{
     backdrop-filter:none!important;
@@ -258,7 +264,7 @@
   .mo-week{display:grid;grid-template-columns:repeat(7,1fr);}
   /* Day cell */
   .mo-day{
-    min-height:82px;padding:4px 1px 3px;
+    min-height:90px;padding:4px 1px 3px;
     -webkit-tap-highlight-color:transparent;
     transition:background .08s;overflow:hidden;
     box-sizing:border-box;
@@ -281,32 +287,33 @@
   }
   /* Event pill — week-view style: solid bg, rounded, white text */
   .mo-ev{
-    display:flex;align-items:center;gap:3px;
-    font-size:10px;font-weight:600;color:#fff;
-    border-radius:99px;padding:0 6px 0 4px;
-    margin:0 2px 2px;height:15px;
+    display:flex;align-items:center;gap:4px;
+    font-size:11px;font-weight:600;
+    border-radius:99px;padding:0 7px 0 5px;
+    margin:0 2px 2px;height:22px;
     white-space:nowrap;overflow:hidden;
-    line-height:15px;cursor:pointer;
+    line-height:22px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
     box-sizing:border-box;border:.5px solid transparent;
+    transition:opacity .12s;
   }
   .mo-ev-timed{
     background:transparent!important;
     padding-left:0;
   }
-  .mo-ev-timed-bar{width:3px;min-height:14px;border-radius:2px;flex-shrink:0;align-self:stretch;}
+  .mo-ev-timed-bar{width:3px;min-height:18px;border-radius:2px;flex-shrink:0;align-self:center;height:14px;}
   .mo-ev-txt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
   /* Multi-day band — NO gap between cells */
   .mo-ev-band{
     border-radius:0!important;
     margin-left:-1px;margin-right:-1px;margin-bottom:2px;
-    padding-left:4px;padding-right:4px;
-    height:16px;line-height:16px;
+    padding-left:5px;padding-right:5px;
+    height:22px;line-height:22px;
   }
-  .mo-ev-band-start{border-radius:5px 0 0 5px!important;margin-left:1px;}
-  .mo-ev-band-end{border-radius:0 5px 5px 0!important;margin-right:1px;}
-  .mo-ev-band-start.mo-ev-band-end{border-radius:5px!important;margin:0 1px;}
-  .mo-ev-allday-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+  .mo-ev-band-start{border-radius:99px 0 0 99px!important;margin-left:1px;}
+  .mo-ev-band-end{border-radius:0 99px 99px 0!important;margin-right:1px;}
+  .mo-ev-band-start.mo-ev-band-end{border-radius:99px!important;margin:0 1px;}
+  .mo-ev-allday-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
   /* Timed: text uses event color */
   .mo-ev-timed .mo-ev-txt{color:var(--lbl);}
   /* +N */
@@ -1271,12 +1278,20 @@ function moToggle(){
   var mrow=document.getElementById('wk-month-row');
   if(mrow){
     mrow.dataset.moMode='1';
-    // Override Today button to scroll month view to today
     var todayBtn=document.getElementById('wk-today-btn');
     if(todayBtn){
       todayBtn._origOnclick=todayBtn.onclick;
       todayBtn.onclick=function(){moScrollToday();};
     }
+  }
+  // Inject DOW labels into wk-days for month view
+  var wkDays=document.getElementById('wk-days');
+  if(wkDays){
+    wkDays._origHTML=wkDays.innerHTML;
+    var lang2=typeof window._getLang==='function'?window._getLang():'en';
+    var DOWS2=lang2==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+    wkDays.innerHTML=DOWS2.map(function(d){return '<div class="mo-hdr-dow">'+d+'</div>';}).join('');
+    wkDays.style.display='grid';
   }
   // Scroll to current month
   setTimeout(function(){
@@ -1334,12 +1349,17 @@ function moClose(){
   var mrow=document.getElementById('wk-month-row');
   if(mrow){
     delete mrow.dataset.moMode;
-    // Restore Today button
     var todayBtn=document.getElementById('wk-today-btn');
     if(todayBtn&&todayBtn._origOnclick){
       todayBtn.onclick=todayBtn._origOnclick;
       delete todayBtn._origOnclick;
     }
+  }
+  // Restore wk-days
+  var wkDays=document.getElementById('wk-days');
+  if(wkDays&&wkDays._origHTML!==undefined){
+    wkDays.innerHTML=wkDays._origHTML;
+    delete wkDays._origHTML;
   }
 }
 function moScrollToday(){
