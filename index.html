@@ -154,7 +154,8 @@
     -webkit-backdrop-filter:var(--gblur);border-bottom:.5px solid var(--gbdr);z-index:100;padding:12px 16px 0}
   #wk-month-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
   #wk-month-lbl{font-size:22px;font-weight:700;letter-spacing:-.035em;color:var(--lbl);line-height:1}
-  #wk-month-lbl span{font-weight:300;color:var(--lbl2);font-size:20px}
+  #wk-hdr.mo-hdr-hidden #wk-month-lbl{font-size:26px;letter-spacing:-.04em;}
+  #wk-month-lbl span{font-weight:300;color:var(--lbl2);font-size:22px}
   .wk-nav-btns{display:flex;align-items:center;gap:4px}
   .wk-nav-btn{width:30px;height:30px;border-radius:50%;border:none;background:var(--fill);
     color:var(--lbl2);cursor:pointer;display:flex;align-items:center;justify-content:center;
@@ -325,7 +326,7 @@
   /* +N */
   .mo-ev-more{
     font-size:10px;font-weight:400;color:var(--lbl3);
-    padding:0 5px;line-height:12px;margin-top:1px;
+    padding:0 5px;line-height:12px;margin:2px 2px 0;
   }
 
 /* ── Day grid ── */
@@ -1269,29 +1270,8 @@ function moToggle(){
   _moOpen=true;
   var ov=document.getElementById('mo-overlay');
   if(!ov)return;
-  // Build global DOW row
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
-  var dowsEl=document.getElementById('mo-global-dows');
-  if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
-  moRenderAll();
-  // Position overlay to start right below wk-hdr
   var hdr=document.getElementById('wk-hdr');
-  var hdrH=hdr?hdr.offsetHeight:0;
-  ov.style.top=hdrH+'px';
-  ov.classList.add('mo-open');
-  if(hdr)hdr.classList.add('mo-hdr-hidden');
-  // Transform wk-month-row into month-view header
-  var mrow=document.getElementById('wk-month-row');
-  if(mrow){
-    mrow.dataset.moMode='1';
-    var todayBtn=document.getElementById('wk-today-btn');
-    if(todayBtn){
-      todayBtn._origOnclick=todayBtn.onclick;
-      todayBtn.onclick=function(){moScrollToday();};
-    }
-  }
-  // Build DOW row for month view
+  // Build DOW row once
   var mDowRow=document.getElementById('mo-dow-row');
   if(mDowRow&&!mDowRow._built){
     var lang2=typeof window._getLang==='function'?window._getLang():'en';
@@ -1299,333 +1279,55 @@ function moToggle(){
     mDowRow.innerHTML=DOWS2.map(function(d){return '<div class="mo-hdr-dow">'+d+'</div>';}).join('');
     mDowRow._built=true;
   }
-  // Scroll to current month
-  setTimeout(function(){
-    var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
-    var y=parseInt(refDate.slice(0,4)),m=parseInt(refDate.slice(5,7))-1;
-    var id='mo-m-'+y+'-'+m;
-    var el=document.getElementById(id);
-    var sc=document.getElementById('mo-scroll');
-    if(el&&sc)sc.scrollTop=el.offsetTop;
-    // Update year label
-    var lbl=document.getElementById('mo-cur-month-lbl');
-    if(lbl){
-      var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-      var d0=new Date(y,m,1);
-      var mn=d0.toLocaleDateString(locale,{month:'long'});
-      mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
-      // Sync week view header label
-      var wml=document.getElementById('wk-month-lbl');
-      if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
-    }
-    // Scroll listener to update year label
-    if(sc&&!sc._moYearBound){
-      sc._moYearBound=true;
-      sc.addEventListener('scroll',function(){
-        var blocks=document.querySelectorAll('.mo-month-block');
-        var sc=document.getElementById('mo-scroll');
-        if(!sc)return;
-        var scrollTop=sc.scrollTop;
-        var visible=null;
-        blocks.forEach(function(b){if(b.offsetTop<=scrollTop+60)visible=b;});
-        if(visible){
-          var parts=visible.id.replace('mo-m-','').split('-');
-          var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
-          var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-          var d=new Date(yr,mo,1);
-          var mn=d.toLocaleDateString(locale,{month:'long'});
-          mn=mn[0].toUpperCase()+mn.slice(1);
-          // Update wk-month-lbl in real time while scrolling
-          var wml=document.getElementById('wk-month-lbl');
-          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
-        }
-      },{passive:true});
-    }
-  },60);
-  _haptic('light');
-}
-function moClose(){
-  if(!_moOpen)return;
-  _moOpen=false;
-  var ov=document.getElementById('mo-overlay');
-  if(ov){ov.classList.remove('mo-open');ov.style.top='';}
-  var hdr=document.getElementById('wk-hdr');
-  if(hdr)hdr.classList.remove('mo-hdr-hidden');
-  var mrow=document.getElementById('wk-month-row');
-  if(mrow){
-    delete mrow.dataset.moMode;
-    var todayBtn=document.getElementById('wk-today-btn');
-    if(todayBtn&&todayBtn._origOnclick){
-      todayBtn.onclick=todayBtn._origOnclick;
-      delete todayBtn._origOnclick;
-    }
-  }
-  // mo-dow-row visibility handled by CSS (mo-hdr-hidden class)
-}
-function moScrollToday(){
-  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
-  var y=parseInt(today.slice(0,4)),m=parseInt(today.slice(5,7))-1;
-  var el=document.getElementById('mo-m-'+y+'-'+m);
-  var sc=document.getElementById('mo-scroll');
-  if(el&&sc)sc.scrollTo({top:el.offsetTop,behavior:'smooth'});
-  _haptic('selection');
-}
-
-
-function _moHexRgba(hex,a){
-  if(!hex||hex.length<7)return 'rgba(128,128,128,'+a+')';
-  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
-  return 'rgba('+r+','+g+','+b+','+a+')';
-}
-function moRenderAll(){
-  var container=document.getElementById('mo-months-container');
-  if(!container)return;
-  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
-  // Always center range on TODAY — scroll position handles where we are
-  var refDate=today;
-  var refYear=parseInt(refDate.slice(0,4)), refMonth=parseInt(refDate.slice(5,7))-1;
-  var byDay=window._awByDay||{};
-  var AW_HEX=window.AW_COLOR_HEX||{};
-  var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-
-  var html='';
-  for(var delta=-6;delta<=13;delta++){
-    var d0=new Date(refYear,refMonth+delta,1);
-    var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=d0.toLocaleDateString(locale,{month:'long'});
-    moName=moName[0].toUpperCase()+moName.slice(1);
-    var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
-    var isCurMo=(yr===todayYear&&mo===todayMonth);
-
-    var startDow=d0.getDay(); var startOffset=(startDow===0)?6:startDow-1;
-    var cur=new Date(d0); cur.setDate(1-startOffset);
-    var weeksHtml='';
-    for(var w=0;w<6;w++){
-      // Stop when we've passed the last day of this month
-      if(w>=4&&cur.getMonth()!==mo)break;
-      var weekHtml='<div class="mo-week">';
-      for(var dw=0;dw<7;dw++){
-        var isOther=cur.getMonth()!==mo;
-        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
-        var isToday=ds===today;
-        var evHtml='';
-        if(!isOther){
-          var evs=byDay[ds]||[];
-          var allDayEvs=[], timedEvs=[];
-          evs.forEach(function(item){
-            var ev=item.ev;
-            var evIdx=item.i;
-            var isAD=(ev.start&&ev.start.length===10);
-            var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
-            var hex=AW_HEX[col]||'#3b82f6';
-            var name=(ev.summary||'').split(' - ')[0].trim();
-            if(isAD){
-              // Band style: detect position in multi-day span
-              var evStartD=ev.start.slice(0,10);
-              var evEndExD=ev.end?ev.end.slice(0,10):evStartD;
-              // iCal all-day end is exclusive
-              var endInclD=evEndExD>evStartD?(new Date(evEndExD+'T00:00:00').getDate()-1<1?evEndExD:'')||evEndExD:evStartD;
-              // Simpler: just check day of week/month boundaries
-              var isStart=(ds===evStartD);
-              var endDate=new Date(evEndExD+'T00:00:00');endDate.setDate(endDate.getDate()-1);
-              var endDs=endDate.getFullYear()+'-'+String(endDate.getMonth()+1).padStart(2,'0')+'-'+String(endDate.getDate()).padStart(2,'0');
-              var isEnd=(ds===endDs||ds===evEndExD);
-              var isMulti=(evEndExD>evStartD&&(new Date(evEndExD)-new Date(evStartD))>86400000-1);
-              allDayEvs.push({hex:hex,name:name,idx:evIdx,isStart:isStart,isEnd:isEnd,isMulti:isMulti});
-            } else timedEvs.push({hex:hex,name:name,idx:evIdx});
-          });
-          // For maxShow: don't count continuation-band cells (non-start multi-day)
-          // Real events = allday starts + timed (continuation bands are invisible backgrounds)
-          var allDayStarts=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;});
-          var allDayCont=allDayEvs.filter(function(e){return e.isMulti&&!e.isStart;});
-          // Total visible items = ALL allday (incl continuations) + timed
-          var realCount=allDayEvs.length+timedEvs.length;
-          // Rule: ≤3 → show all; >3 → show 2 real + "+N"
-          // (continuations always render as bands, real shown = starts + timed)
-          var maxReal=(realCount<=3)?3:2;
-          var realShown=0;
-          // PASS 1: continuation bands — always render, no vertical slot cost
-          // They overlay in the same row position as their start-day counterpart
-          allDayCont.forEach(function(ev2){
-            var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
-            var isLit=(ev2.hex==='#f8f4ec');
-            evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"></div>';
-          });
-          // PASS 2: real events up to maxReal
-          for(var ai=0;ai<allDayStarts.length&&realShown<maxReal;ai++){
-            var ev2=allDayStarts[ai];
-            if(ev2.isMulti){
-              // Band start
-              var isLit=(ev2.hex==='#f8f4ec');
-              var bSE=ev2.isEnd;
-              var bCls='mo-ev mo-ev-band mo-ev-band-start'+(bSE?' mo-ev-band-end mo-ev-band-single':'');
-              var bgB=isLit?'rgba(200,184,154,0.7)':ev2.hex;
-              var txB=isLit?'rgba(60,40,20,0.9)':'rgba(255,255,255,0.95)';
-              evHtml+='<div class="'+bCls+'" style="background:'+bgB+';color:'+txB+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
-            } else {
-              // Single all-day — exact day view pill style
-              var _mth=document.documentElement.dataset.theme;
-              var _mDark=_mth==='dark'?true:_mth==='light'?false:window.matchMedia('(prefers-color-scheme:dark)').matches;
-              var isWh2=(ev2.hex==='#f8f4ec');
-              // Exact same logic as awd-allday-pill in day view
-              var bg2=isWh2?_moHexRgba('#f8f4ec',0.85):_moHexRgba(ev2.hex,0.10);
-              var bd2=isWh2?'rgba(210,185,130,0.5)':_moHexRgba(ev2.hex,0.30);
-              var tx2=isWh2?(_mDark?'#e8c97a':'rgba(100,70,20,0.9)'):ev2.hex;
-              evHtml+='<div class="mo-ev" style="background:'+bg2+';color:'+tx2+';border:.5px solid '+bd2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-allday-dot" style="background:'+tx2+'"></span>'
-                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
-            }
-            realShown++;
-          }
-          for(var ti=0;ti<timedEvs.length&&realShown<maxReal;ti++){
-            var ev3=timedEvs[ti];
-            var _mth2=document.documentElement.dataset.theme;
-            var _mDark2=_mth2==='dark'?true:_mth2==='light'?false:window.matchMedia('(prefers-color-scheme:dark)').matches;
-            var isWh3=(ev3.hex==='#f8f4ec');
-            var bg3=isWh3?_moHexRgba('#f8f4ec',0.3):_moHexRgba(ev3.hex,0.10);
-            var bd3=isWh3?'rgba(210,185,130,0.4)':_moHexRgba(ev3.hex,0.30);
-            var tx3=isWh3?(_mDark2?'#e8c97a':'rgba(100,70,20,0.9)'):ev3.hex;
-            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bg3+';border:.5px solid '+bd3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
-              +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt" style="color:'+tx3+'">'+_moEsc(ev3.name)+'</span></div>';
-            realShown++;
-          }
-          var remaining=realCount-realShown;
-          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
-        }
-        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
-        // Day number: onclick navigates; event pills handle their own click
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+evHtml+'</div>';
-        cur.setDate(cur.getDate()+1);
-      }
-      weekHtml+='</div>';
-      weeksHtml+=weekHtml;
-    }
-    // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
-    html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
-      '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
-      '<div class="mo-weeks">'+weeksHtml+'</div>'+
-      '</div>';
-  }
-  container.innerHTML=html;
-}
-
-function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-
-function moSelectDay(ds){
-  moClose();
-  _haptic('selection');
-  if(typeof _wkDates==='undefined')return;
-  if(_wkDates.indexOf(ds)>=0){
-    // Date in current range — just snap
-    _wkCur=ds;window._wkScrollTop=undefined;
-    wkSnap(_wkCur,true,true);wkUpdateHdr();
-  } else {
-    // Date outside range — rebuild strip centred on selected date
-    // Temporarily shift "today" anchor so the strip covers the selected date
-    _wkCur=ds;window._wkScrollTop=undefined;
-    if(typeof wkInit==='function'&&window._awByDay){
-      // Rebuild using ds as the new centre date
-      var saved_today=_wkToday;
-      wkInit(window._awByDay, ds);
-      _wkToday=saved_today; // restore real today
-      // Re-mark real today in the header
-      wkUpdateHdr();
-    }
-  }
-}
-
-window.addEventListener('load',function(){
-  goTab(0);
-  _applyProfile();
-  _applyLang();
-  _initPillSwipe();
-  setTimeout(_updateSlider,100);
-  setTimeout(function(){_applyLang();_applyProfile();},120);
-});
-
-/* ── SW ── */
-/* ── Month overview — Apple Calendar style ── */
-var _moOpen=false;
-
-function moToggle(){
-  if(_moOpen){moClose();return;}
-  _moOpen=true;
-  var ov=document.getElementById('mo-overlay');
-  if(!ov)return;
-  // Build global DOW row
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
-  var dowsEl=document.getElementById('mo-global-dows');
-  if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
   // Position overlay to start right below wk-hdr
-  var hdr=document.getElementById('wk-hdr');
   var hdrH=hdr?hdr.offsetHeight:0;
   ov.style.top=hdrH+'px';
   ov.classList.add('mo-open');
   if(hdr)hdr.classList.add('mo-hdr-hidden');
-  // Transform wk-month-row into month-view header
+  // Transform wk-month-row: hide < > show Today
   var mrow=document.getElementById('wk-month-row');
   if(mrow){
     mrow.dataset.moMode='1';
-    // Override Today button to scroll month view to today
     var todayBtn=document.getElementById('wk-today-btn');
-    if(todayBtn){
+    if(todayBtn&&!todayBtn._origOnclick){
       todayBtn._origOnclick=todayBtn.onclick;
       todayBtn.onclick=function(){moScrollToday();};
     }
   }
-  // Scroll to current month
+  // Scroll to current month and update header label
   setTimeout(function(){
     var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
     var y=parseInt(refDate.slice(0,4)),m=parseInt(refDate.slice(5,7))-1;
-    var id='mo-m-'+y+'-'+m;
-    var el=document.getElementById(id);
+    var el=document.getElementById('mo-m-'+y+'-'+m);
     var sc=document.getElementById('mo-scroll');
     if(el&&sc)sc.scrollTop=el.offsetTop;
-    // Update year label
-    var lbl=document.getElementById('mo-cur-month-lbl');
-    if(lbl){
-      var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-      var d0=new Date(y,m,1);
-      var mn=d0.toLocaleDateString(locale,{month:'long'});
-      mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
-      // Sync week view header label
-      var wml=document.getElementById('wk-month-lbl');
-      if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
-    }
-    // Scroll listener to update year label
+    // Init header label
+    _moUpdateHdrLabel(y,m);
+    // Scroll spy
     if(sc&&!sc._moYearBound){
       sc._moYearBound=true;
       sc.addEventListener('scroll',function(){
         var blocks=document.querySelectorAll('.mo-month-block');
-        var sc=document.getElementById('mo-scroll');
-        if(!sc)return;
-        var scrollTop=sc.scrollTop;
+        var sc2=document.getElementById('mo-scroll');if(!sc2)return;
         var visible=null;
-        blocks.forEach(function(b){if(b.offsetTop<=scrollTop+60)visible=b;});
+        blocks.forEach(function(b){if(b.offsetTop<=sc2.scrollTop+60)visible=b;});
         if(visible){
-          var parts=visible.id.replace('mo-m-','').split('-');
-          var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
-          var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-          var d=new Date(yr,mo,1);
-          var mn=d.toLocaleDateString(locale,{month:'long'});
-          mn=mn[0].toUpperCase()+mn.slice(1);
-          // Update wk-month-lbl in real time while scrolling
-          var wml=document.getElementById('wk-month-lbl');
-          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
+          var p=visible.id.replace('mo-m-','').split('-');
+          _moUpdateHdrLabel(parseInt(p[0]),parseInt(p[1]));
         }
       },{passive:true});
     }
   },60);
   _haptic('light');
+}
+function _moUpdateHdrLabel(yr,mo){
+  var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var d=new Date(yr,mo,1);
+  var mn=d.toLocaleDateString(locale,{month:'long'});
+  mn=mn[0].toUpperCase()+mn.slice(1);
+  var wml=document.getElementById('wk-month-lbl');
+  if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
 }
 function moClose(){
   if(!_moOpen)return;
@@ -1637,7 +1339,6 @@ function moClose(){
   var mrow=document.getElementById('wk-month-row');
   if(mrow){
     delete mrow.dataset.moMode;
-    // Restore Today button
     var todayBtn=document.getElementById('wk-today-btn');
     if(todayBtn&&todayBtn._origOnclick){
       todayBtn.onclick=todayBtn._origOnclick;
@@ -1645,6 +1346,8 @@ function moClose(){
     }
   }
 }
+
+
 function moScrollToday(){
   var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
   var y=parseInt(today.slice(0,4)),m=parseInt(today.slice(5,7))-1;
@@ -1695,343 +1398,8 @@ function moRenderAll(){
             var isAD=(ev.start&&ev.start.length===10);
             var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
             var hex=AW_HEX[col]||'#3b82f6';
-            var name=(ev.summary||'').split(' - ')[0].trim();
-            if(isAD){
-              // Band style: detect position in multi-day span
-              var evStartD=ev.start.slice(0,10);
-              var evEndExD=ev.end?ev.end.slice(0,10):evStartD;
-              // iCal all-day end is exclusive
-              var endInclD=evEndExD>evStartD?(new Date(evEndExD+'T00:00:00').getDate()-1<1?evEndExD:'')||evEndExD:evStartD;
-              // Simpler: just check day of week/month boundaries
-              var isStart=(ds===evStartD);
-              var endDate=new Date(evEndExD+'T00:00:00');endDate.setDate(endDate.getDate()-1);
-              var endDs=endDate.getFullYear()+'-'+String(endDate.getMonth()+1).padStart(2,'0')+'-'+String(endDate.getDate()).padStart(2,'0');
-              var isEnd=(ds===endDs||ds===evEndExD);
-              var isMulti=(evEndExD>evStartD&&(new Date(evEndExD)-new Date(evStartD))>86400000-1);
-              allDayEvs.push({hex:hex,name:name,idx:evIdx,isStart:isStart,isEnd:isEnd,isMulti:isMulti});
-            } else timedEvs.push({hex:hex,name:name,idx:evIdx});
-          });
-          // For maxShow: don't count continuation-band cells (non-start multi-day)
-          // Real events = allday starts + timed (continuation bands are invisible backgrounds)
-          var allDayStarts=allDayEvs.filter(function(e){return !e.isMulti||e.isStart;});
-          var allDayCont=allDayEvs.filter(function(e){return e.isMulti&&!e.isStart;});
-          // Total visible items = ALL allday (incl continuations) + timed
-          var realCount=allDayEvs.length+timedEvs.length;
-          // Rule: ≤3 → show all; >3 → show 2 real + "+N"
-          // (continuations always render as bands, real shown = starts + timed)
-          var maxReal=(realCount<=3)?3:2;
-          var realShown=0;
-          // PASS 1: continuation bands — always render, no vertical slot cost
-          // They overlay in the same row position as their start-day counterpart
-          allDayCont.forEach(function(ev2){
-            var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
-            var isLit=(ev2.hex==='#f8f4ec');
-            evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"></div>';
-          });
-          // PASS 2: real events up to maxReal
-          for(var ai=0;ai<allDayStarts.length&&realShown<maxReal;ai++){
-            var ev2=allDayStarts[ai];
-            if(ev2.isMulti){
-              // Band start
-              var isLit=(ev2.hex==='#f8f4ec');
-              var bSE=ev2.isEnd;
-              var bCls='mo-ev mo-ev-band mo-ev-band-start'+(bSE?' mo-ev-band-end mo-ev-band-single':'');
-              var bgB=isLit?'rgba(200,184,154,0.7)':ev2.hex;
-              var txB=isLit?'rgba(60,40,20,0.9)':'rgba(255,255,255,0.95)';
-              evHtml+='<div class="'+bCls+'" style="background:'+bgB+';color:'+txB+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
-            } else {
-              // Single all-day — exact day view pill style
-              var _mth=document.documentElement.dataset.theme;
-              var _mDark=_mth==='dark'?true:_mth==='light'?false:window.matchMedia('(prefers-color-scheme:dark)').matches;
-              var isWh2=(ev2.hex==='#f8f4ec');
-              // Exact same logic as awd-allday-pill in day view
-              var bg2=isWh2?_moHexRgba('#f8f4ec',0.85):_moHexRgba(ev2.hex,0.10);
-              var bd2=isWh2?'rgba(210,185,130,0.5)':_moHexRgba(ev2.hex,0.30);
-              var tx2=isWh2?(_mDark?'#e8c97a':'rgba(100,70,20,0.9)'):ev2.hex;
-              evHtml+='<div class="mo-ev" style="background:'+bg2+';color:'+tx2+';border:.5px solid '+bd2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-allday-dot" style="background:'+tx2+'"></span>'
-                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
-            }
-            realShown++;
-          }
-          for(var ti=0;ti<timedEvs.length&&realShown<maxReal;ti++){
-            var ev3=timedEvs[ti];
-            var _mth2=document.documentElement.dataset.theme;
-            var _mDark2=_mth2==='dark'?true:_mth2==='light'?false:window.matchMedia('(prefers-color-scheme:dark)').matches;
-            var isWh3=(ev3.hex==='#f8f4ec');
-            var bg3=isWh3?_moHexRgba('#f8f4ec',0.3):_moHexRgba(ev3.hex,0.10);
-            var bd3=isWh3?'rgba(210,185,130,0.4)':_moHexRgba(ev3.hex,0.30);
-            var tx3=isWh3?(_mDark2?'#e8c97a':'rgba(100,70,20,0.9)'):ev3.hex;
-            evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bg3+';border:.5px solid '+bd3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
-              +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
-              +'<span class="mo-ev-txt" style="color:'+tx3+'">'+_moEsc(ev3.name)+'</span></div>';
-            realShown++;
-          }
-          var remaining=realCount-realShown;
-          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
-        }
-        var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
-        // Day number: onclick navigates; event pills handle their own click
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+evHtml+'</div>';
-        cur.setDate(cur.getDate()+1);
-      }
-      weekHtml+='</div>';
-      weeksHtml+=weekHtml;
-    }
-    // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
-    html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
-      '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
-      '<div class="mo-weeks">'+weeksHtml+'</div>'+
-      '</div>';
-  }
-  container.innerHTML=html;
-}
-
-function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-
-
-function moSelectDay(ds){
-  moClose();
-  _haptic('selection');
-  if(typeof _wkDates==='undefined')return;
-  if(_wkDates.indexOf(ds)>=0){
-    // Date in current range — just snap
-    _wkCur=ds;window._wkScrollTop=undefined;
-    wkSnap(_wkCur,true,true);wkUpdateHdr();
-  } else {
-    // Date outside range — rebuild strip centred on selected date
-    // Temporarily shift "today" anchor so the strip covers the selected date
-    _wkCur=ds;window._wkScrollTop=undefined;
-    if(typeof wkInit==='function'&&window._awByDay){
-      // Rebuild using ds as the new centre date
-      var saved_today=_wkToday;
-      wkInit(window._awByDay, ds);
-      _wkToday=saved_today; // restore real today
-      // Re-mark real today in the header
-      wkUpdateHdr();
-    }
-  }
-}
-
-window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
-
-/* ── Install banner ── */
-function dismissBanner(){document.getElementById('ib').classList.remove('on');localStorage.setItem('ib','1');}
-
-function accExportConfig(){
-  try{
-    var raw=localStorage.getItem('shortcut_config');
-    if(!raw){alert('No configuration to export.');return;}
-    var cfg=JSON.parse(raw);
-    // Export: keep all fields EXCEPT photo (blob/url can be large)
-    var exp={
-      apiKey:cfg.apiKey||'',
-      calSource:cfg.calSource||'',
-      calendars:cfg.calendars||[],
-      cal2Ical:cfg.cal2Ical||'',
-      cal1Ical:cfg.cal1Ical||'',
-      cal1Preset:cfg.cal1Preset||'',
-      cal1Color:cfg.cal1Color||'',
-      cal2Color:cfg.cal2Color||'',
-      cal1Subjects:cfg.cal1Subjects||[],
-      extraCals:cfg.extraCals||[],
-      displayName:cfg.displayName||'',
-      lang:cfg.lang||'en',
-      theme:cfg.theme||'auto',
-      exportedAt:new Date().toISOString()
-    };
-    var json=JSON.stringify(exp,null,2);
-    var blob=new Blob([json],{type:'application/json'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    var now=new Date();
-    var dateStr=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
-    a.href=url;a.download='Calendar_config_'+dateStr+'.json';
-    document.body.appendChild(a);a.click();
-    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},1000);
-    _haptic('success');
-  }catch(e){alert('Export failed: '+e.message);}
-}
-function accImportConfig(){
-  var input=document.createElement('input');
-  input.type='file';input.accept='.json,application/json';
-  input.onchange=function(e){
-    var file=e.target.files[0];if(!file)return;
-    var reader=new FileReader();
-    reader.onload=function(ev){
-      try{
-        var imp=JSON.parse(ev.target.result);
-        // Validate it looks like a config
-        if(typeof imp!=='object'||!imp.calSource&&!imp.apiKey&&!imp.cal1Ical){
-          alert('Invalid configuration file.');return;
-        }
-        var existing=JSON.parse(localStorage.getItem('shortcut_config')||'{}');
-        // Merge imported (don't overwrite photo if exists)
-        var merged=Object.assign({},existing,imp);
-        delete merged.exportedAt;
-        localStorage.setItem('shortcut_config',JSON.stringify(merged));
-        _haptic('success');
-        var msg=window._t?window._t('obSaved'):'Saved!';
-        var el=document.getElementById('acc-upd');
-        if(el)el.textContent='\u2713 '+msg;
-        setTimeout(function(){location.reload();},800);
-      }catch(e){alert('Import failed: '+e.message);}
-    };
-    reader.readAsText(file);
-  };
-  document.body.appendChild(input);input.click();
-  setTimeout(function(){document.body.removeChild(input);},5000);
-}
-
-/* ── Month overview — Apple Calendar style ── */
-var _moOpen=false;
-
-function moToggle(){
-  if(_moOpen){moClose();return;}
-  _moOpen=true;
-  var ov=document.getElementById('mo-overlay');
-  if(!ov)return;
-  // Build global DOW row
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
-  var dowsEl=document.getElementById('mo-global-dows');
-  if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
-  moRenderAll();
-  // Position overlay to start right below wk-hdr
-  var hdr=document.getElementById('wk-hdr');
-  var hdrH=hdr?hdr.offsetHeight:0;
-  ov.style.top=hdrH+'px';
-  ov.classList.add('mo-open');
-  if(hdr)hdr.classList.add('mo-hdr-hidden');
-  // Transform wk-month-row into month-view header
-  var mrow=document.getElementById('wk-month-row');
-  if(mrow){
-    mrow.dataset.moMode='1';
-    // Override Today button to scroll month view to today
-    var todayBtn=document.getElementById('wk-today-btn');
-    if(todayBtn){
-      todayBtn._origOnclick=todayBtn.onclick;
-      todayBtn.onclick=function(){moScrollToday();};
-    }
-  }
-  // Scroll to current month
-  setTimeout(function(){
-    var refDate=_wkCur||(typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10));
-    var y=parseInt(refDate.slice(0,4)),m=parseInt(refDate.slice(5,7))-1;
-    var id='mo-m-'+y+'-'+m;
-    var el=document.getElementById(id);
-    var sc=document.getElementById('mo-scroll');
-    if(el&&sc)sc.scrollTop=el.offsetTop;
-    // Update year label
-    var lbl=document.getElementById('mo-cur-month-lbl');
-    if(lbl){
-      var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-      var d0=new Date(y,m,1);
-      var mn=d0.toLocaleDateString(locale,{month:'long'});
-      mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
-      // Sync week view header label
-      var wml=document.getElementById('wk-month-lbl');
-      if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
-    }
-    // Scroll listener to update year label
-    if(sc&&!sc._moYearBound){
-      sc._moYearBound=true;
-      sc.addEventListener('scroll',function(){
-        var blocks=document.querySelectorAll('.mo-month-block');
-        var sc=document.getElementById('mo-scroll');
-        if(!sc)return;
-        var scrollTop=sc.scrollTop;
-        var visible=null;
-        blocks.forEach(function(b){if(b.offsetTop<=scrollTop+60)visible=b;});
-        if(visible){
-          var parts=visible.id.replace('mo-m-','').split('-');
-          var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
-          var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-          var d=new Date(yr,mo,1);
-          var mn=d.toLocaleDateString(locale,{month:'long'});
-          mn=mn[0].toUpperCase()+mn.slice(1);
-          // Update wk-month-lbl in real time while scrolling
-          var wml=document.getElementById('wk-month-lbl');
-          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
-        }
-      },{passive:true});
-    }
-  },60);
-  _haptic('light');
-}
-function moClose(){
-  if(!_moOpen)return;
-  _moOpen=false;
-  var ov=document.getElementById('mo-overlay');
-  if(ov){ov.classList.remove('mo-open');ov.style.top='';}
-  var hdr=document.getElementById('wk-hdr');
-  if(hdr)hdr.classList.remove('mo-hdr-hidden');
-  var mrow=document.getElementById('wk-month-row');
-  if(mrow){
-    delete mrow.dataset.moMode;
-    // Restore Today button
-    var todayBtn=document.getElementById('wk-today-btn');
-    if(todayBtn&&todayBtn._origOnclick){
-      todayBtn.onclick=todayBtn._origOnclick;
-      delete todayBtn._origOnclick;
-    }
-  }
-}
-function moScrollToday(){
-  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
-  var y=parseInt(today.slice(0,4)),m=parseInt(today.slice(5,7))-1;
-  var el=document.getElementById('mo-m-'+y+'-'+m);
-  var sc=document.getElementById('mo-scroll');
-  if(el&&sc)sc.scrollTo({top:el.offsetTop,behavior:'smooth'});
-  _haptic('selection');
-}
-
-function moRenderAll(){
-  var container=document.getElementById('mo-months-container');
-  if(!container)return;
-  var today=typeof awToday==='function'?awToday():new Date().toISOString().slice(0,10);
-  // Always center range on TODAY — scroll position handles where we are
-  var refDate=today;
-  var refYear=parseInt(refDate.slice(0,4)), refMonth=parseInt(refDate.slice(5,7))-1;
-  var byDay=window._awByDay||{};
-  var AW_HEX=window.AW_COLOR_HEX||{};
-  var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-
-  var html='';
-  for(var delta=-6;delta<=13;delta++){
-    var d0=new Date(refYear,refMonth+delta,1);
-    var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=d0.toLocaleDateString(locale,{month:'long'});
-    moName=moName[0].toUpperCase()+moName.slice(1);
-    var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
-    var isCurMo=(yr===todayYear&&mo===todayMonth);
-
-    var startDow=d0.getDay(); var startOffset=(startDow===0)?6:startDow-1;
-    var cur=new Date(d0); cur.setDate(1-startOffset);
-    var weeksHtml='';
-    for(var w=0;w<6;w++){
-      // Stop when we've passed the last day of this month
-      if(w>=4&&cur.getMonth()!==mo)break;
-      var weekHtml='<div class="mo-week">';
-      for(var dw=0;dw<7;dw++){
-        var isOther=cur.getMonth()!==mo;
-        var ds=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');
-        var isToday=ds===today;
-        var evHtml='';
-        if(!isOther){
-          var evs=byDay[ds]||[];
-          var allDayEvs=[], timedEvs=[];
-          evs.forEach(function(item){
-            var ev=item.ev;
-            var evIdx=item.i;
-            var isAD=(ev.start&&ev.start.length===10);
-            var col=ev._extraColor||(typeof awColorFor==='function'?awColorFor((ev.summary||'').split(' - ')[0].trim(),ev.cal2):'blue');
-            var hex=AW_HEX[col]||'#3b82f6';
-            var name=(ev.summary||'').split(' - ')[0].trim();
+            var name=(ev.summary||'').split(' - ')[0].trim()
+              .replace(/\bSainte\b/g,'Ste').replace(/\bSaint\b/g,'St');
             if(isAD){
               // Band style: detect position in multi-day span
               var evStartD=ev.start.slice(0,10);
