@@ -154,7 +154,7 @@
     -webkit-backdrop-filter:var(--gblur);border-bottom:.5px solid var(--gbdr);z-index:100;padding:12px 16px 0}
   #wk-month-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px}
   #wk-month-lbl{font-size:22px;font-weight:700;letter-spacing:-.035em;color:var(--lbl);line-height:1}
-  #wk-hdr.mo-hdr-hidden #wk-month-lbl{font-size:26px;letter-spacing:-.04em;}
+  #wk-hdr.mo-hdr-hidden #wk-month-lbl{font-size:30px!important;letter-spacing:-.04em;}
   #wk-month-lbl span{font-weight:300;color:var(--lbl2);font-size:22px}
   .wk-nav-btns{display:flex;align-items:center;gap:4px}
   .wk-nav-btn{width:30px;height:30px;border-radius:50%;border:none;background:var(--fill);
@@ -263,8 +263,8 @@
     letter-spacing:-.035em;padding:14px 0 2px 8px;line-height:1;
   }
   .mo-month-name{
-    font-size:17px;font-weight:700;letter-spacing:-.02em;
-    color:var(--lbl3);padding:12px 0 2px 8px;
+    font-size:20px;font-weight:700;letter-spacing:-.03em;
+    color:var(--lbl3);padding:14px 0 3px 6px;
   }
   .mo-month-name.mo-current{color:var(--red);}
   /* Grid */
@@ -298,7 +298,7 @@
     display:flex;align-items:center;gap:4px;
     font-size:10.5px;font-weight:600;
     border-radius:99px;padding:0 6px 0 5px;
-    margin:0 2px 4px;height:16px;
+    margin:0 2px 5px;height:16px;
     white-space:nowrap;overflow:hidden;
     line-height:17px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
@@ -1273,11 +1273,15 @@ function moToggle(){
   var hdr=document.getElementById('wk-hdr');
   // Build DOW row once
   var mDowRow=document.getElementById('mo-dow-row');
-  if(mDowRow&&!mDowRow._built){
+  if(mDowRow){
     var lang2=typeof window._getLang==='function'?window._getLang():'en';
     var DOWS2=lang2==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
     mDowRow.innerHTML=DOWS2.map(function(d){return '<div class="mo-hdr-dow">'+d+'</div>';}).join('');
-    mDowRow._built=true;
+    mDowRow.style.display='grid';
+    mDowRow.style.gridTemplateColumns='repeat(7,1fr)';
+    mDowRow.style.padding='5px 0 7px';
+    mDowRow.style.borderTop='.5px solid var(--sep)';
+    mDowRow.style.marginTop='4px';
   }
   moRenderAll();
   // Position overlay to start right below wk-hdr
@@ -1357,6 +1361,17 @@ function moScrollToday(){
   _haptic('selection');
 }
 
+
+function _moAbbrev(name){
+  if(!name)return name;
+  return name
+    .replace(/\bSainte-/g,'Ste-')
+    .replace(/\bSainte /g,'Ste ')
+    .replace(/\bSainte$/g,'Ste')
+    .replace(/\bSaint-/g,'St-')
+    .replace(/\bSaint /g,'St ')
+    .replace(/\bSaint$/g,'St');
+}
 function _moHexRgba(hex,a){
   if(!hex||hex.length<7)return 'rgba(128,128,128,'+a+')';
   var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
@@ -1448,19 +1463,19 @@ function moRenderAll(){
               var bgB=isLit?'rgba(200,184,154,0.7)':ev2.hex;
               var txB=isLit?'rgba(60,40,20,0.9)':'rgba(255,255,255,0.95)';
               evHtml+='<div class="'+bCls+'" style="background:'+bgB+';color:'+txB+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
+                +'<span class="mo-ev-txt">'+_moEsc(_moAbbrev(ev2.name))+'</span></div>';
             } else {
               // Single all-day — exact day view pill style
               var _mth=document.documentElement.dataset.theme;
               var _mDark=_mth==='dark'?true:_mth==='light'?false:window.matchMedia('(prefers-color-scheme:dark)').matches;
               var isWh2=(ev2.hex==='#f8f4ec');
               // Exact same logic as awd-allday-pill in day view
-              var bg2=isWh2?_moHexRgba('#f8f4ec',0.85):_moHexRgba(ev2.hex,0.10);
-              var bd2=isWh2?'rgba(210,185,130,0.5)':_moHexRgba(ev2.hex,0.30);
+              var bg2=isWh2?(ev2.hex+'dd'):(ev2.hex+'22');
+              var bd2=isWh2?'rgba(210,185,130,0.6)':(ev2.hex+'66');
               var tx2=isWh2?(_mDark?'#e8c97a':'rgba(100,70,20,0.9)'):ev2.hex;
               evHtml+='<div class="mo-ev" style="background:'+bg2+';color:'+tx2+';border:.5px solid '+bd2+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
                 +'<span class="mo-ev-allday-dot" style="background:'+tx2+'"></span>'
-                +'<span class="mo-ev-txt">'+_moEsc(ev2.name)+'</span></div>';
+                +'<span class="mo-ev-txt">'+_moEsc(_moAbbrev(ev2.name))+'</span></div>';
             }
             realShown++;
           }
@@ -1469,8 +1484,8 @@ function moRenderAll(){
             var _mth2=document.documentElement.dataset.theme;
             var _mDark2=_mth2==='dark'?true:_mth2==='light'?false:window.matchMedia('(prefers-color-scheme:dark)').matches;
             var isWh3=(ev3.hex==='#f8f4ec');
-            var bg3=isWh3?_moHexRgba('#f8f4ec',0.3):_moHexRgba(ev3.hex,0.10);
-            var bd3=isWh3?'rgba(210,185,130,0.4)':_moHexRgba(ev3.hex,0.30);
+            var bg3=isWh3?(ev3.hex+'cc'):(ev3.hex+'22');
+            var bd3=isWh3?'rgba(210,185,130,0.5)':(ev3.hex+'55');
             var tx3=isWh3?(_mDark2?'#e8c97a':'rgba(100,70,20,0.9)'):ev3.hex;
             evHtml+='<div class="mo-ev mo-ev-timed" style="background:'+bg3+';border:.5px solid '+bd3+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev3.idx+')">'
               +'<div class="mo-ev-timed-bar" style="background:'+ev3.hex+'"></div>'
