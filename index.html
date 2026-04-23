@@ -201,13 +201,14 @@
   #mo-overlay.mo-open{transform:translateY(0) !important;pointer-events:all;}
   /* Month view header: hide mini-day buttons, show DOW labels */
   #wk-hdr.mo-hdr-hidden #wk-days{display:none!important;}
-  #mo-dow-row{display:none;}
-  #wk-hdr.mo-hdr-hidden #mo-dow-row{
+  /* DOW row inside mo-overlay */
+  #mo-dow-row{
     display:grid;
     grid-template-columns:repeat(7,1fr);
-    padding:4px 0 8px;
-    border-top:.5px solid var(--sep);
-    margin-top:4px;
+    flex-shrink:0;
+    padding:6px 0 6px;
+    border-bottom:.5px solid var(--sep);
+    background:var(--bg);
   }
   .mo-hdr-dow{
     font-size:11px;font-weight:600;text-align:center;
@@ -263,8 +264,11 @@
     letter-spacing:-.035em;padding:14px 0 2px 8px;line-height:1;
   }
   .mo-month-name{
-    font-size:20px;font-weight:700;letter-spacing:-.03em;
-    color:var(--lbl3);padding:14px 0 3px 6px;
+    font-size:22px;font-weight:700;letter-spacing:-.035em;
+    color:var(--lbl2);padding:16px 0 4px 6px;
+  }
+  .mo-month-name .mo-month-year{
+    font-weight:300;font-size:20px;color:var(--lbl3);margin-left:5px;
   }
   .mo-month-name.mo-current{color:var(--red);}
   /* Grid */
@@ -272,9 +276,9 @@
   .mo-week{display:grid;grid-template-columns:repeat(7,1fr);}
   /* Day cell */
   .mo-day{
-    min-height:80px;padding:4px 1px 4px;
+    min-height:88px;padding:4px 1px 6px;
     -webkit-tap-highlight-color:transparent;
-    transition:background .08s;overflow:hidden;
+    transition:background .08s;
     box-sizing:border-box;
   }
   .mo-day:active{background:var(--fill);}
@@ -647,11 +651,11 @@
         </div>
       </div>
       <div id="wk-days"></div>
-      <div id="mo-dow-row"></div>
     </div>
     <div id="wk-strip"></div>
     <!-- Month overview -->
     <div id="mo-overlay">
+      <div id="mo-dow-row"></div>
       <div id="mo-scroll">
         <div id="mo-months-container"></div>
       </div>
@@ -1043,7 +1047,8 @@ function _applyProfile(){
     var nw=document.getElementById('nb-avatar-wrap'),ai=document.getElementById('acc-avatar-wrap');
     if(cfg.photo){
       var ni=document.getElementById('nb-avatar-img'),aim=document.getElementById('acc-avatar-img');
-      if(ni)ni.src=cfg.photo;if(aim)aim.src=cfg.photo;
+      if(ni&&ni.src!==cfg.photo)ni.src=cfg.photo;
+      if(aim&&aim.src!==cfg.photo)aim.src=cfg.photo;
       if(nw){nw.classList.add('has-photo');nw.classList.remove('no-photo');nw.style.borderRadius='50%';}
       if(ai)ai.classList.remove('no-photo');
     } else {
@@ -1273,15 +1278,11 @@ function moToggle(){
   var hdr=document.getElementById('wk-hdr');
   // Build DOW row once
   var mDowRow=document.getElementById('mo-dow-row');
-  if(mDowRow){
+  if(mDowRow&&!mDowRow._built){
     var lang2=typeof window._getLang==='function'?window._getLang():'en';
     var DOWS2=lang2==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
     mDowRow.innerHTML=DOWS2.map(function(d){return '<div class="mo-hdr-dow">'+d+'</div>';}).join('');
-    mDowRow.style.display='grid';
-    mDowRow.style.gridTemplateColumns='repeat(7,1fr)';
-    mDowRow.style.padding='5px 0 7px';
-    mDowRow.style.borderTop='.5px solid var(--sep)';
-    mDowRow.style.marginTop='4px';
+    mDowRow._built=true;
   }
   moRenderAll();
   // Position overlay to start right below wk-hdr
@@ -1365,9 +1366,19 @@ function moScrollToday(){
 function _moAbbrev(name){
   if(!name)return name;
   return name
+    .replace(/\bBienheureuses?\b/g,function(m){return m.slice(-1)==='s'?'Bse':'Bse';})
+    .replace(/\bBienheureux\b/g,'Bx')
+    .replace(/\bBienheureuse\b/g,'Bse')
+    .replace(/\bNotre-Dame\b/g,'ND')
+    .replace(/\bSaintes-/g,'Stes-')
+    .replace(/\bSaintes /g,'Stes ')
+    .replace(/\bSaintes$/g,'Stes')
     .replace(/\bSainte-/g,'Ste-')
     .replace(/\bSainte /g,'Ste ')
     .replace(/\bSainte$/g,'Ste')
+    .replace(/\bSaints-/g,'Sts-')
+    .replace(/\bSaints /g,'Sts ')
+    .replace(/\bSaints$/g,'Sts')
     .replace(/\bSaint-/g,'St-')
     .replace(/\bSaint /g,'St ')
     .replace(/\bSaint$/g,'St');
@@ -1507,7 +1518,7 @@ function moRenderAll(){
     // Year separator: show big year label before January
     var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
-      '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
+      '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'<span class="mo-month-year">'+yr+'</span></div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
       '</div>';
   }
