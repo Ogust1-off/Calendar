@@ -77,71 +77,48 @@
     position:fixed;inset:0;z-index:9000;
     display:flex;align-items:center;justify-content:center;
     background:var(--bg);
-    transition:opacity .55s cubic-bezier(.4,0,.2,1),transform .55s cubic-bezier(.4,0,.2,1);
-    pointer-events:none;overflow:hidden;
+    transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);
+    pointer-events:none;
   }
-  #splash.hide{opacity:0;transform:scale(1.06);}
+  #splash.hide{opacity:0;transform:scale(1.05);}
   #splash-inner{
-    display:flex;flex-direction:column;align-items:center;gap:16px;
-    position:relative;z-index:1;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
   }
-  /* Glowing background orbs */
-  #splash-orb1,#splash-orb2{
-    position:absolute;border-radius:50%;filter:blur(60px);
-    animation:sp-orb 2s ease both;
-  }
-  #splash-orb1{
-    width:240px;height:240px;
-    background:radial-gradient(circle,rgba(99,102,241,.25),transparent 70%);
-    top:-60px;left:-80px;animation-delay:.05s;
-  }
-  #splash-orb2{
-    width:180px;height:180px;
-    background:radial-gradient(circle,rgba(59,130,246,.2),transparent 70%);
-    bottom:-40px;right:-60px;animation-delay:.15s;
-  }
-  @keyframes sp-orb{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
-  /* Logo */
   #splash-logo{
-    animation:sp-logo .6s cubic-bezier(.34,1.56,.64,1) both;
-    filter:drop-shadow(0 12px 32px rgba(99,102,241,.45));
+    animation:sp-logo .55s cubic-bezier(.34,1.56,.64,1) both;
+    filter:drop-shadow(0 10px 28px rgba(99,102,241,.4));
   }
   #splash-logo svg{border-radius:22px;}
   @keyframes sp-logo{
-    0%{opacity:0;transform:scale(.5) translateY(20px);}
-    60%{opacity:1;transform:scale(1.08) translateY(-4px);}
+    0%{opacity:0;transform:scale(.55) translateY(18px);}
+    65%{opacity:1;transform:scale(1.07) translateY(-3px);}
     100%{opacity:1;transform:scale(1) translateY(0);}
   }
-  /* Name */
   #splash-name{
     font-size:30px;font-weight:800;letter-spacing:-.05em;color:var(--lbl);
     font-family:-apple-system,"SF Pro Display",sans-serif;
-    animation:sp-slide .45s .22s cubic-bezier(.34,1.3,.64,1) both;
+    animation:sp-up .42s .2s cubic-bezier(.34,1.3,.64,1) both;
   }
-  /* Sub */
   #splash-sub{
     font-size:14px;font-weight:500;color:var(--lbl3);
-    letter-spacing:.01em;
-    animation:sp-slide .4s .35s ease both;
+    animation:sp-up .38s .32s ease both;
   }
-  @keyframes sp-slide{
-    from{opacity:0;transform:translateY(14px);}
+  @keyframes sp-up{
+    from{opacity:0;transform:translateY(12px);}
     to{opacity:1;transform:translateY(0);}
   }
-  /* Progress bar */
   #splash-bar{
-    width:52px;height:3px;border-radius:99px;
-    background:var(--fill);overflow:hidden;margin-top:4px;
-    animation:sp-slide .4s .45s ease both;
+    width:60px;height:3px;border-radius:99px;
+    background:var(--fill);overflow:hidden;margin-top:2px;
+    animation:sp-up .35s .42s ease both;
   }
   #splash-bar-fill{
-    height:100%;width:0%;border-radius:99px;
+    height:100%;width:0;border-radius:99px;
     background:linear-gradient(90deg,#3b82f6,#6366f1);
-    animation:sp-bar 1.1s .5s cubic-bezier(.4,0,.2,1) forwards;
+    animation:sp-bar 1s .48s ease-out forwards;
   }
-  @keyframes sp-bar{from{width:0%}to{width:100%}}
-
-  /* ── Shell ── */
+  @keyframes sp-bar{to{width:100%;}}
+/* ── Shell ── */
   #app{position:fixed;inset:0;display:flex;flex-direction:column;height:100dvh}
 
   /* ── Navbar ── */
@@ -526,8 +503,6 @@
 
 <!-- SPLASH -->
 <div id="splash">
-  <div id="splash-orb1"></div>
-  <div id="splash-orb2"></div>
   <div id="splash-inner">
     <div id="splash-logo">
       <svg viewBox="0 0 48 48" fill="none" width="96" height="96">
@@ -723,6 +698,21 @@
     if(typeof v==='function')return v(a); return v!==undefined?v:k;
   };
   window._appLocale=function(){var l=window._getLang();return l==='fr'?'fr-FR':l==='la'?'la':l==='en'?'en-GB':'en-GB';};
+
+var _LA_MONTHS=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii',
+  'Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
+var _LA_MONTHS_NOM=['Ianuarius','Februarius','Martius','Aprilis','Maius','Iunius',
+  'Iulius','Augustus','September','October','November','December'];
+var _LA_DAYS=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
+function _fmtDateLa(ds,opts){
+  // ds = 'YYYY-MM-DD' or Date object
+  var d=(ds instanceof Date)?ds:new Date((ds+'T00:00:00'));
+  var day=d.getDate(), mon=d.getMonth(), yr=d.getFullYear();
+  var dayR=_toRoman(day), yrR=_toRoman(yr);
+  if(opts&&opts.weekday)return _LA_DAYS[d.getDay()]+', '+dayR+' '+_LA_MONTHS[mon]+' '+yrR;
+  if(opts&&opts.year===undefined)return dayR+' '+_LA_MONTHS[mon];
+  return dayR+' '+_LA_MONTHS[mon]+' '+yrR;
+}
   function _toRoman(n){
   if(!n||n<1||n>3999)return String(n);
   var val=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
@@ -875,6 +865,11 @@
           <span class="acc-row-lbl" id="acc-import-lbl">Import configuration</span>
           <span class="acc-row-arrow">›</span>
         </button>
+        <button class="acc-row" onclick="accOpenAbbrevs()">
+          <span class="acc-row-ico">&#9000;&#65039;</span>
+          <span class="acc-row-lbl" id="acc-abbrevs-lbl">Month abbreviations</span>
+          <span class="acc-row-arrow">›</span>
+        </button>
         <button class="acc-row acc-row-danger" onclick="accLogout()">
           <span class="acc-row-ico">&#128682;</span>
           <span class="acc-row-lbl" id="acc-logout-lbl">Sign out &amp; reset</span>
@@ -988,10 +983,11 @@ function wkUpdateHdr(){
   var byDay=window._awByDay||{};
   var d=new Date(_wkCur+'T00:00:00');
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var mo=d.toLocaleDateString(locale,{month:'long'});mo=mo[0].toUpperCase()+mo.slice(1);
+  var mo=(locale==='la')?_LA_MONTHS_NOM[d.getMonth()]:d.toLocaleDateString(locale,{month:'long'});
+  if(locale!=='la')mo=mo[0].toUpperCase()+mo.slice(1);
   var ml=document.getElementById('wk-month-lbl');
   var _yr=d.getFullYear();
-  var _yrDisp=(typeof _toRoman==='function'&&window._getLang()==='la')?_toRoman(_yr):_yr;
+  var _yrDisp=window._getLang()==='la'?_toRoman(_yr):_yr;
   if(ml)ml.innerHTML='<strong>'+mo+'</strong> <span>'+_yrDisp+'</span>';
   var tb=document.getElementById('wk-today-btn');
   if(tb){tb.textContent=window._t?window._t('today2'):'Today';tb.classList.toggle('active',_wkCur===_wkToday);}
@@ -1298,11 +1294,11 @@ function accUpdateApp(){
         return Promise.all(regs.map(function(reg){return reg.unregister();}));
       }).then(function(){
         if(st)st.innerHTML='&#9989; Done!';
-        setTimeout(function(){location.replace(location.href.split('?')[0]+'?v='+Date.now());},600);
+        setTimeout(function(){window.location.href=location.href.split('?')[0];},600);
       });
     } else {
       if(st)st.innerHTML='&#9989; Done!';
-      setTimeout(function(){location.replace(location.href.split('?')[0]+'?v='+Date.now());},600);
+      setTimeout(function(){window.location.href=location.href.split('?')[0];},600);
     }
   });
 }
@@ -1545,8 +1541,8 @@ function moRenderAll(){
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=d0.toLocaleDateString(locale,{month:'long'});
-    moName=moName[0].toUpperCase()+moName.slice(1);
+    var moName=(locale==='la')?_LA_MONTHS_NOM[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
 
@@ -1877,8 +1873,8 @@ function moRenderAll(){
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=d0.toLocaleDateString(locale,{month:'long'});
-    moName=moName[0].toUpperCase()+moName.slice(1);
+    var moName=(locale==='la')?_LA_MONTHS_NOM[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
 
@@ -2213,8 +2209,8 @@ function moRenderAll(){
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=d0.toLocaleDateString(locale,{month:'long'});
-    moName=moName[0].toUpperCase()+moName.slice(1);
+    var moName=(locale==='la')?_LA_MONTHS_NOM[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
 
