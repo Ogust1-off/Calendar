@@ -257,8 +257,15 @@
   /* Month block */
   .mo-month-block{padding:0;}
   .mo-year-sep{
-    font-size:32px;font-weight:700;color:var(--lbl);
-    letter-spacing:-.04em;padding:20px 0 4px 6px;line-height:1;
+    display:flex;align-items:center;gap:12px;
+    padding:22px 8px 6px;
+  }
+  .mo-year-sep-num{
+    font-size:36px;font-weight:700;color:var(--lbl);
+    letter-spacing:-.05em;line-height:1;flex-shrink:0;
+  }
+  .mo-year-sep-line{
+    flex:1;height:1px;background:var(--sep);margin-top:4px;
   }
   .mo-month-name{
     font-size:24px;font-weight:700;letter-spacing:-.04em;
@@ -296,7 +303,7 @@
     display:flex;align-items:center;gap:4px;
     font-size:10.5px;font-weight:600;
     border-radius:99px;padding:0 6px 0 5px;
-    margin:0 2px 5px;height:17px;
+    margin:0 2px 0;height:17px;
     white-space:nowrap;overflow:hidden;
     line-height:17px;cursor:pointer;
     -webkit-tap-highlight-color:transparent;
@@ -312,7 +319,7 @@
   /* Multi-day band — NO gap between cells */
   .mo-ev-band{
     border-radius:0!important;
-    margin-left:-1px;margin-right:-1px;margin-bottom:5px;
+    margin-left:-1px;margin-right:-1px;
     padding-left:5px;padding-right:5px;
     height:17px;line-height:17px;
   }
@@ -322,6 +329,7 @@
   .mo-ev-allday-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
   /* Timed: text uses event color */
   .mo-ev-timed .mo-ev-txt{color:var(--lbl);}
+  .mo-ev-wrap{display:flex;flex-direction:column;gap:5px;}
   /* +N */
   .mo-ev-more{
     font-size:10px;font-weight:400;color:var(--lbl3);
@@ -1147,12 +1155,27 @@ function accRefresh(){_haptic('medium');
   }
 }
 function accUpdateApp(){
-  var st=document.getElementById('acc-update-status');if(st)st.innerHTML='&#8987; Clearing…';
-  var p='caches' in window?caches.keys().then(function(k){return Promise.all(k.map(function(c){return caches.delete(c);}));}):Promise.resolve();
-  p.then(function(){
+  var st=document.getElementById('acc-update-status');
+  if(st)st.innerHTML='&#8987; Clearing…';
+  var clearP='caches' in window
+    ?caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));})
+    :Promise.resolve();
+  clearP.then(function(){
     if('serviceWorker' in navigator){
-      navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister();}));}).then(function(){if(st)st.innerHTML='&#9989; Done!';setTimeout(function(){location.reload(true);},800);});
-    }else{if(st)st.innerHTML='&#9989; Done!';setTimeout(function(){location.reload(true);},800);}
+      navigator.serviceWorker.getRegistrations().then(function(regs){
+        regs.forEach(function(reg){
+          if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
+          if(reg.installing)reg.installing.postMessage({type:'SKIP_WAITING'});
+        });
+        return Promise.all(regs.map(function(reg){return reg.unregister();}));
+      }).then(function(){
+        if(st)st.innerHTML='&#9989; Done!';
+        setTimeout(function(){location.replace(location.href.split('?')[0]+'?v='+Date.now());},600);
+      });
+    } else {
+      if(st)st.innerHTML='&#9989; Done!';
+      setTimeout(function(){location.replace(location.href.split('?')[0]+'?v='+Date.now());},600);
+    }
   });
 }
 function accLogout(){_haptic('warning');
@@ -1499,14 +1522,14 @@ function moRenderAll(){
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
         var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+evHtml+'</div>';
+        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
       weekHtml+='</div>';
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yr+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
@@ -1787,14 +1810,14 @@ function moRenderAll(){
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
         var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+evHtml+'</div>';
+        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
       weekHtml+='</div>';
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yr+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
@@ -2123,14 +2146,14 @@ function moRenderAll(){
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
         var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
-        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+evHtml+'</div>';
+        weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
       weekHtml+='</div>';
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yr+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+

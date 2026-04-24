@@ -698,7 +698,7 @@ function awPopOpen(el, idx) {
           const sd2=new Date(ev.start+'T00:00:00');
           const rawEnd2=ev.end||ev.start;
           const ed2=new Date(rawEnd2+'T00:00:00');
-          const isM=(ed2-sd2)>86400000-1;
+          const isM=(ed2-sd2)>86400000;
           if(!isM)return sd2.toLocaleDateString(locale2,{weekday:'long',day:'numeric',month:'long'});
           const edD=new Date(ed2);edD.setDate(edD.getDate()-1);
           const days2=Math.round((ed2-sd2)/86400000);
