@@ -65,7 +65,7 @@
     -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;
     overscroll-behavior:none;overflow:hidden;touch-action:pan-y}
   @media(orientation:landscape){body::after{
-    content:'Please rotate your iPhone';
+    content:'Veuillez tourner votre iPhone';
     position:fixed;inset:0;z-index:99999;
     background:var(--bg);color:var(--lbl2);
     display:flex;align-items:center;justify-content:center;
@@ -81,9 +81,7 @@
     pointer-events:none;
   }
   #splash.hide{opacity:0;transform:scale(1.05);}
-  #splash-inner{
-    display:flex;flex-direction:column;align-items:center;gap:14px;
-  }
+  #splash-inner{display:flex;flex-direction:column;align-items:center;gap:14px;}
   #splash-logo{
     animation:sp-logo .55s cubic-bezier(.34,1.56,.64,1) both;
     filter:drop-shadow(0 10px 28px rgba(99,102,241,.4));
@@ -103,10 +101,7 @@
     font-size:14px;font-weight:500;color:var(--lbl3);
     animation:sp-up .38s .32s ease both;
   }
-  @keyframes sp-up{
-    from{opacity:0;transform:translateY(12px);}
-    to{opacity:1;transform:translateY(0);}
-  }
+  @keyframes sp-up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
   #splash-bar{
     width:60px;height:3px;border-radius:99px;
     background:var(--fill);overflow:hidden;margin-top:2px;
@@ -287,17 +282,9 @@
   #mo-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
   /* Month block */
   .mo-month-block{padding:0;}
-  .mo-year-sep{
-    display:flex;align-items:center;gap:12px;
-    padding:22px 8px 6px;
-  }
-  .mo-year-sep-num{
-    font-size:36px;font-weight:700;color:var(--lbl);
-    letter-spacing:-.05em;line-height:1;flex-shrink:0;
-  }
-  .mo-year-sep-line{
-    flex:1;height:1px;background:var(--sep);margin-top:4px;
-  }
+  .mo-year-sep{display:flex;align-items:center;gap:12px;padding:22px 8px 6px;}
+  .mo-year-sep-num{font-size:32px;font-weight:700;color:var(--lbl);letter-spacing:-.05em;line-height:1;flex-shrink:0;}
+  .mo-year-sep-line{flex:1;height:1px;background:var(--sep);margin-top:4px;}
   .mo-month-name{
     font-size:24px;font-weight:700;letter-spacing:-.04em;
     color:var(--lbl);padding:16px 0 4px 6px;
@@ -506,7 +493,7 @@
   <div id="splash-inner">
     <div id="splash-logo">
       <svg viewBox="0 0 48 48" fill="none" width="96" height="96">
-        <rect width="48" height="48" rx="14" fill="url(#sg)"/>
+        <rect width="48" height="48" rx="13" fill="url(#sg)"/>
         <path d="M28 9L17 26h11L19 39l15-19H23L28 9z" fill="white" opacity=".95"/>
         <defs><linearGradient id="sg" x1="0" y1="0" x2="48" y2="48">
           <stop stop-color="#3b82f6"/><stop offset="1" stop-color="#6366f1"/>
@@ -631,7 +618,7 @@
       obSrcGoogle:'Google Calendar',obSrcGoogleSub:'Clé API + ID. Recommandé.',
       obSrcIcal:'Lien iCal',obSrcIcalSub:'Depuis iPhone ou Google. Sans clé API.',
       obSrcBoth:'Les deux',obSrcBothSub:'Cal 1 Google + Cal 2 iCal.',
-      obPresetEcam:'Prédéfini ECAM',obPresetEcamSub:'Détecte les matières automatiquement.',
+      obPresetEcam:'Prédéfini ECAM',obPresetEcamSub:'Détecte auto les matières.',
       obPresetCustom:'Personnalisé',obPresetCustomSub:'Vos matières et couleurs.',
       obPresetNone:'Couleur unique',obPresetNoneSub:'Tous pareil.',
       obSubjPlaceholder:'Matière…',
@@ -640,8 +627,6 @@
       accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
       accCal2Color:'Couleur Cal\u00a02',accExtraCals:'Calendriers suppl\u00e9mentaires',
       sAdvanced:'Avanc\u00e9',sApp:'Application',sDisplay:'Affichage',
-      accAbbrevs:'Abréviations (mois)',accAbbrevsTitle:'Abréviations personnalisées',
-      accAbbrevsDesc:'Raccourcir les mots dans la vue mois.',accAbbrevFrom:'Mot complet',accAbbrevTo:'Abréviation',accAbbrevAdd:'+ Ajouter',accAbbrevEmpty:'Aucune règle personnalisée.',
     },
     la:{today:'Hodie',allDay:'Totus dies',allDayLabel:'dies',inProgress:'In progressu',
       completed:'COMPLETUM',startingSoon:'MOX INCIPIT',left:'reliquum',in:'in ',inLabel:'In',elapsed:'transivit',
@@ -649,47 +634,44 @@
       noMoreToday:'Nulla iam eventa hodie',noUpcoming:'Nulla eventa futura',
       enjoyBreak:'Otio fruere!',haveGreatWe:'Bonum finem hebdomadis!',
       nextClass:'Schola proxima',tabAgenda:'Agenda',tabWeek:'Hebdomas',tabAccount:'Ratio',
-      today2:'Hodie',locale:'la',
-      refreshBtn:'Calendarium renovare',settingsTitle:'API et Calendaria',
+      today2:'Hodie',locale:'la',refreshBtn:'Renovare',settingsTitle:'API et Calendaria',
       updateAppBtn:'Applicationem renovare',langLabel:'Lingua',themeLabel:'Aspectus',
       themeDark:'Obscurus',themeLight:'Clarus',themeAuto:'Automaticus',
-      logoutBtn:'Exire et reinitializare',byShortcut:'ab Shortcut™',
-      sCalendars:'Calendaria',
+      logoutBtn:'Exire',byShortcut:'ab Shortcut™',sCalendars:'Calendaria',
       obWelcomeSub:'Agenda tuum, semper tecum.',
       obFeat1:'Agenda et horologium',obFeat2:'Cursus realis',obFeat3:'Claves in machina',obFeat4:'Sine rete',
       obStartBtn:'Incipe',obLegal:'Data tua hic manent.',
       obSrcTitle:'Fons',obSrcSub:'Quomodo calendarium accedis?',
-      obApiTitle:'Clavis API Googlis',obApiSub:'Ad calendaria accedenda.',
+      obApiTitle:'Clavis API',obApiSub:'Ad calendaria accedenda.',
       obGCalTitle:'Calendaria Googlis',obGCalSub:'IDs calendariorum.',
       obIcalTitle:'Nexus iCal',obIcalSub:'Ex iPhone vel Googli.',
-      obBothTitle:'Calendaria tua',obBothSub:'Cal I per Google, Cal II per iCal.',
-      obColTitle:'Color calendarii',obColSub:'Elige colorem.',obCal1Lbl:'CALENDARIUM I',obCal2Lbl:'CALENDARIUM II',
-      obColsTitle:'Colores',obStyleCal1Lbl:'STILUS I',obColorLbl:'COLOR',obSubjsLbl:'SUBJECTA & COLORES',obCal2ColorLbl:'COLOR II',
-      obProfileTitle:'Imago tua',obProfileSub:'Imago et nomen.',obFirstNameLbl:'PRAENOMEN',
+      obBothTitle:'Ambo',obBothSub:'Cal I Google + Cal II iCal.',
+      obColTitle:'Color',obColSub:'Elige colorem.',obCal1Lbl:'CAL I',obCal2Lbl:'CAL II',
+      obColsTitle:'Colores',obStyleCal1Lbl:'STILUS I',obColorLbl:'COLOR',obSubjsLbl:'SUBJECTA',obCal2ColorLbl:'COLOR II',
+      obProfileTitle:'Imago',obProfileSub:'Imago et nomen.',obFirstNameLbl:'PRAENOMEN',
       obPrefsTitle:'Praeferentiae',obPrefsSub:'Lingua et aspectus.',
       obOptBadge:'Optionale',obApiKeyLbl:'CLAVIS API',obCal1Google:'CAL I — ID',obCal2Google:'CAL II — ID',
       obCal1Ical:'CAL I — ICAL',obCal2Ical:'CAL II — ICAL',obOpt:'optionale',
       obSrcApiTitle:'Fons & API',obSrcApiSub:'Coniunge calendarium.',
-      obStyleTitle:'Stilus I',obStyleSub:'Colores adscribe.',
-      obCal2ColTitle:'Color II',obCal2ColSub:'Color Cal II.',
-      obExtraTitle:'Calendaria addita',obExtraSub:'Adde plura calendaria.',
-      obSrcGoogle:'Google Calendarium',obSrcGoogleSub:'Clavis API + ID. Commendatur.',
+      obStyleTitle:'Stilus I',obStyleSub:'Colores adscribe.',obCal2ColTitle:'Color II',obCal2ColSub:'Color Cal II.',
+      obExtraTitle:'Calendaria addita',obExtraSub:'Adde plura.',
+      obSrcGoogle:'Google Calendarium',obSrcGoogleSub:'Clavis API + ID.',
       obSrcIcal:'Nexus iCal',obSrcIcalSub:'Ex iPhone vel Googli.',
       obSrcBoth:'Ambo',obSrcBothSub:'Cal I Google + Cal II iCal.',
-      obPresetEcam:'Praedefinitum ECAM',obPresetEcamSub:'Subjecta automatice detegit.',
+      obPresetEcam:'ECAM',obPresetEcamSub:'Subjecta automatice detegit.',
       obPresetCustom:'Proprium',obPresetCustomSub:'Subjecta tua.',
       obPresetNone:'Color unus',obPresetNoneSub:'Omnia eadem.',
       obSubjPlaceholder:'Subjectum…',
       btnNext:'Sequens',btnBack:'Retro',btnSkip:'Omitte',btnSave:'Serva',btnClose:'Claude',
-      btnOpen:'Aperi calendarium',btnAdd:'+ Adde',btnAddCal:'+ Adde calendarium',
-      obSaved:'Servatum!',accExport:'Configurationem exporta',accImport:'Configurationem importa',
-      obCalName:'Nomen calendarii',obCal1Name:'Nomen Cal I',obCal2Name:'Nomen Cal II',
+      btnOpen:'Aperi',btnAdd:'+ Adde',btnAddCal:'+ Adde calendarium',
+      obSaved:'Servatum!',accExport:'Exporta configurationem',accImport:'Importa configurationem',
+      obCalName:'Nomen',obCal1Name:'Nomen I',obCal2Name:'Nomen II',
       obNoCal2:'Nullum secundum calendarium.',obColor:'Color:',noAllDay:'Nulla eventa diei',
-      accSrcApi:'Fons & clavis API',accCal1Style:'Stilus I',
-      accCal2Color:'Color II',accExtraCals:'Calendaria addita',
+      accSrcApi:'Fons & clavis API',accCal1Style:'Stilus I',accCal2Color:'Color II',accExtraCals:'Calendaria addita',
       sAdvanced:'Provectum',sApp:'Applicatio',sDisplay:'Aspectus',
       accAbbrevs:'Abbreviationes',accAbbrevsTitle:'Abbreviationes propriae',
-      accAbbrevsDesc:'Verba breviora in mense.',accAbbrevFrom:'Verbum plenum',accAbbrevTo:'Forma brevis',accAbbrevAdd:'+ Adde',accAbbrevEmpty:'Nullae regulae propriae.',
+      accAbbrevsDesc:'Verba breviora in mense.',accAbbrevFrom:'Verbum plenum',accAbbrevTo:'Forma brevis',
+      accAbbrevAdd:'+ Adde',accAbbrevEmpty:'Nullae regulae.',
     }
   };
   window._t=function(k,a){
@@ -697,30 +679,12 @@
     var s=S[lang]||S.en; var v=s[k]; if(v===undefined)v=S.en[k];
     if(typeof v==='function')return v(a); return v!==undefined?v:k;
   };
-  window._appLocale=function(){var l=window._getLang();return l==='fr'?'fr-FR':l==='la'?'la':l==='en'?'en-GB':'en-GB';};
-
-var _LA_MONTHS=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii',
-  'Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
-var _LA_MONTHS_NOM=['Ianuarius','Februarius','Martius','Aprilis','Maius','Iunius',
-  'Iulius','Augustus','September','October','November','December'];
-var _LA_DAYS=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
-function _fmtDateLa(ds,opts){
-  // ds = 'YYYY-MM-DD' or Date object
-  var d=(ds instanceof Date)?ds:new Date((ds+'T00:00:00'));
-  var day=d.getDate(), mon=d.getMonth(), yr=d.getFullYear();
-  var dayR=_toRoman(day), yrR=_toRoman(yr);
-  if(opts&&opts.weekday)return _LA_DAYS[d.getDay()]+', '+dayR+' '+_LA_MONTHS[mon]+' '+yrR;
-  if(opts&&opts.year===undefined)return dayR+' '+_LA_MONTHS[mon];
-  return dayR+' '+_LA_MONTHS[mon]+' '+yrR;
-}
-  function _toRoman(n){
-  if(!n||n<1||n>3999)return String(n);
-  var val=[1000,900,500,400,100,90,50,40,10,9,5,4,1];
-  var sym=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'];
-  var r='';
-  for(var i=0;i<val.length;i++){while(n>=val[i]){r+=sym[i];n-=val[i];}}
-  return r;
-}
+  window._appLocale=function(){var l=window._getLang?window._getLang():'en';return l==='fr'?'fr-FR':'en-GB';};
+  window._LA_MONTHS_NOM=['Ianuarius','Februarius','Martius','Aprilis','Maius','Iunius','Iulius','Augustus','September','October','November','December'];
+  window._LA_MONTHS=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii','Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
+  window._LA_DAYS=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
+  window._toRoman=function(n){if(!n||n<1||n>3999)return String(n);var v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'],r='';for(var i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;};
+  window._fmtDateLa=function(ds,opts){var d=(ds instanceof Date)?ds:new Date(ds+'T00:00:00');var day=d.getDate(),mon=d.getMonth(),yr=d.getFullYear();var LA_M=window._LA_MONTHS||[];var LA_D=window._LA_DAYS||[];var dayR=window._toRoman(day),yrR=window._toRoman(yr);if(opts&&opts.weekday)return LA_D[d.getDay()]+', '+dayR+' '+LA_M[mon]+' '+yrR;if(opts&&opts.noYear)return dayR+' '+LA_M[mon];return dayR+' '+LA_M[mon]+' '+yrR;};
 })();
 </script>
 
@@ -912,7 +876,7 @@ function _fmtDateLa(ds,opts){
 <!-- INSTALL BANNER -->
 <div id="ib">
   <div class="ib-ico">&#128242;</div>
-  <div class="ib-txt"><strong id="ib-title">Install the app</strong><small id="ib-sub">Share &#8594; Add to Home Screen</small></div>
+  <div class="ib-txt"><strong>Install the app</strong><small>Share &#8594; Add to Home Screen</small></div>
   <button class="ib-x" onclick="dismissBanner()">&#215;</button>
 </div>
 
@@ -983,12 +947,11 @@ function wkUpdateHdr(){
   var byDay=window._awByDay||{};
   var d=new Date(_wkCur+'T00:00:00');
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var mo=(locale==='la')?_LA_MONTHS_NOM[d.getMonth()]:d.toLocaleDateString(locale,{month:'long'});
+  var mo=(locale==='la')?(window._LA_MONTHS_NOM||[])[d.getMonth()]:d.toLocaleDateString(locale,{month:'long'});
   if(locale!=='la')mo=mo[0].toUpperCase()+mo.slice(1);
+  var yr=d.getFullYear(),yrDisp=locale==='la'?(window._toRoman?window._toRoman(yr):yr):yr;
   var ml=document.getElementById('wk-month-lbl');
-  var _yr=d.getFullYear();
-  var _yrDisp=window._getLang()==='la'?_toRoman(_yr):_yr;
-  if(ml)ml.innerHTML='<strong>'+mo+'</strong> <span>'+_yrDisp+'</span>';
+  if(ml)ml.innerHTML='<strong>'+mo+'</strong> <span>'+yrDisp+'</span>';
   var tb=document.getElementById('wk-today-btn');
   if(tb){tb.textContent=window._t?window._t('today2'):'Today';tb.classList.toggle('active',_wkCur===_wkToday);}
   var dow=d.getDay(),mon=new Date(d);mon.setDate(d.getDate()-(dow===0?6:dow-1));
@@ -996,9 +959,7 @@ function wkUpdateHdr(){
   days.innerHTML='';
   var _DOW_EN=['M','T','W','T','F','S','S'];
   var _DOW_FR=['L','M','M','J','V','S','D'];
-  var _DOW_LA=['L','M','M','I','V','S','D'];
-  var _lang_=typeof window._getLang==='function'?window._getLang():'en';
-  var _dow=_lang_==='fr'?_DOW_FR:_lang_==='la'?_DOW_LA:_DOW_EN;
+  var _dow=typeof window._getLang==='function'&&window._getLang()==='fr'?_DOW_FR:_DOW_EN;
   _dow.forEach(function(l,i){
     var day=new Date(mon);day.setDate(mon.getDate()+i);var ds=_ds(day);
     var isT=(ds===_wkToday),isSel=(ds===_wkCur),hasEv=((byDay[ds]||[]).length>0);
@@ -1186,7 +1147,7 @@ function _applyProfile(){
       var ne=document.getElementById('acc-display-name');if(ne)ne.textContent=cfg.displayName;
       var nbName=document.getElementById('nb-name-el');
       var lang=cfg.lang||'en';
-      var greeting=lang==='fr'?'Bonjour, '+cfg.displayName+' !':'Hi, '+cfg.displayName+'!';
+      var greeting=lang==='fr'?'Bonjour, '+cfg.displayName+' !':lang==='la'?'Salve, '+cfg.displayName+'!':'Hi, '+cfg.displayName+'!';
       if(nbName)nbName.childNodes[0].textContent=greeting;
     }
     var curLang=cfg.lang||'en', curTheme=cfg.theme||'auto';
@@ -1280,7 +1241,7 @@ function accRefresh(){_haptic('medium');
 }
 function accUpdateApp(){
   var st=document.getElementById('acc-update-status');
-  if(st)st.innerHTML='&#8987; Clearing…';
+  if(st)st.innerHTML='⌛ Clearing…';
   var clearP='caches' in window
     ?caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));})
     :Promise.resolve();
@@ -1293,13 +1254,10 @@ function accUpdateApp(){
         });
         return Promise.all(regs.map(function(reg){return reg.unregister();}));
       }).then(function(){
-        if(st)st.innerHTML='&#9989; Done!';
-        setTimeout(function(){window.location.href=location.href.split('?')[0];},600);
+        if(st)st.innerHTML='✅ Done!';
+        setTimeout(function(){window.location.href=location.pathname;},600);
       });
-    } else {
-      if(st)st.innerHTML='&#9989; Done!';
-      setTimeout(function(){window.location.href=location.href.split('?')[0];},600);
-    }
+    }else{if(st)st.innerHTML='✅ Done!';setTimeout(function(){window.location.href=location.pathname;},600);}
   });
 }
 function accLogout(){_haptic('warning');
@@ -1419,7 +1377,7 @@ function moToggle(){
   if(!ov)return;
   // Build global DOW row
   var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:lang==='la'?['L','M','M','I','V','S','D']:['M','T','W','T','F','S','S'];
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
   var dowsEl=document.getElementById('mo-global-dows');
   if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
@@ -1541,7 +1499,7 @@ function moRenderAll(){
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=(locale==='la')?_LA_MONTHS_NOM[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    var moName=(locale==='la')?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
     if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
@@ -1664,23 +1622,32 @@ function moRenderAll(){
 
 function _moAbbrev(s){
   if(!s)return s;
-  return s
-    .replace(/\bBienheureuses?\b/g,function(m){return m.endsWith('s')?'Bses':'Bse';})
-    .replace(/\bBienheureux\b/g,'Bx')
+  s=s
+    .replace(/\bBienheureuses\b/g,'Bses')
     .replace(/\bBienheureuse\b/g,'Bse')
+    .replace(/\bBienheureux\b/g,'Bx')
     .replace(/\bNotre-Dame\b/g,'ND')
     .replace(/\bSaintes-/g,'Stes-').replace(/\bSaintes /g,'Stes ').replace(/\bSaintes$/g,'Stes')
     .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
     .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
     .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
+  try{
+    var _cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+    (_cfg.customAbbrevs||[]).forEach(function(r){
+      if(r.from&&r.to){
+        var pat=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');
+        s=s.replace(pat,r.to);
+      }
+    });
+  }catch(e){}
+  return s;
 }
-
 function accOpenAbbrevs(){
-  if(document.getElementById('ob-overlay'))return;
+  if(document.getElementById('abbrev-sheet-overlay'))return;
   var _t=window._t||function(k,fb){return fb||k;};
   var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-  var rules=(cfg.customAbbrevs||[]).map(function(r){return {from:r.from,to:r.to};});
-  function _esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  var rules=(cfg.customAbbrevs||[]).map(function(r){return {from:r.from||'',to:r.to||''};});
+  function _esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
   function renderRows(){
     if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No custom rules yet.')+'</p>';
     return rules.map(function(r,i){
@@ -1693,29 +1660,29 @@ function accOpenAbbrevs(){
     }).join('');
   }
   window._abbrevRules=rules;
-  window._abbrevDel=function(i){rules.splice(i,1);document.getElementById('abbrev-list').innerHTML=renderRows();};
-  var el=document.createElement('div');el.id='ob-overlay';
-  el.innerHTML='<div id="ob-sheet" style="max-height:82vh;overflow-y:auto;">'+
-    '<div class="ob-orbs"><div class="ob-orb1"></div><div class="ob-orb2"></div></div>'+
-    '<button class="ob-x" onclick="_obClose()">&#215;</button>'+
-    '<div id="ob-cal-content"><div class="ob-form">'+
-    '<h2 class="ob-h2">'+_t('accAbbrevsTitle','Custom Abbreviations')+'</h2>'+
-    '<p class="ob-p2">'+_t('accAbbrevsDesc','Shorten words in the month view.')+'</p>'+
-    '<div id="abbrev-list">'+renderRows()+'</div></div></div>'+
-    '<div id="ob-cal-bottom">'+
-    '<button class="ob-btn-p" style="width:100%;margin-bottom:8px" onclick="window._abbrevAdd()">'+_t('accAbbrevAdd','+ Add rule')+'</button>'+
-    '<button class="ob-btn-p ob-btn-full" onclick="window._abbrevSave()">'+_t('btnSave','Save')+' &#10003;</button>'+
-    '</div></div>';
-  document.body.appendChild(el);
-  window._abbrevAdd=function(){
-    rules.push({from:'',to:''});
-    document.getElementById('abbrev-list').innerHTML=renderRows();
-  };
+  window._abbrevDel=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=renderRows();};
+  var ov=document.createElement('div');
+  ov.id='abbrev-sheet-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;';
+  ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;">'+
+    '<div style="display:flex;align-items:center;margin-bottom:14px;">'+
+    '<strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Custom Abbreviations')+'</strong>'+
+    '<button onclick="window._abbrevClose()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button>'+
+    '</div>'+
+    '<p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in the month view.')+'</p>'+
+    '<div id="abbrev-list">'+renderRows()+'</div>'+
+    '<button onclick="window._abbrevAdd()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add rule')+'</button>'+
+    '<button onclick="window._abbrevSave()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+  window._abbrevClose=function(){var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();};
+  ov.addEventListener('click',function(e){if(e.target===ov)window._abbrevClose();});
+  window._abbrevAdd=function(){rules.push({from:'',to:''});var el=document.getElementById('abbrev-list');if(el)el.innerHTML=renderRows();};
   window._abbrevSave=function(){
-    var cfg2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-    cfg2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});
-    localStorage.setItem('shortcut_config',JSON.stringify(cfg2));
-    _obClose();
+    var c2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+    c2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});
+    localStorage.setItem('shortcut_config',JSON.stringify(c2));
+    var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();
   };
 }
 function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1764,7 +1731,7 @@ function moToggle(){
   if(!ov)return;
   // Build global DOW row
   var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:lang==='la'?['L','M','M','I','V','S','D']:['M','T','W','T','F','S','S'];
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
   var dowsEl=document.getElementById('mo-global-dows');
   if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
@@ -1873,7 +1840,7 @@ function moRenderAll(){
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=(locale==='la')?_LA_MONTHS_NOM[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    var moName=(locale==='la')?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
     if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
@@ -2100,7 +2067,7 @@ function moToggle(){
   if(!ov)return;
   // Build global DOW row
   var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:lang==='la'?['L','M','M','I','V','S','D']:['M','T','W','T','F','S','S'];
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
   var dowsEl=document.getElementById('mo-global-dows');
   if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
@@ -2209,7 +2176,7 @@ function moRenderAll(){
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=(locale==='la')?_LA_MONTHS_NOM[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    var moName=(locale==='la')?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
     if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);

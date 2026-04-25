@@ -629,11 +629,12 @@ function awUpdateTimer() {
   if (!awLastUpdated) return;
   const secs = Math.round((Date.now()-awLastUpdated)/1000);
   const mins = Math.floor(secs/60);
-  const fr = typeof window._getLang==='function' && window._getLang()==='fr';
-  const txt = secs<10 ? (fr?'Mis à jour':'Just updated')
-    : secs<60  ? (fr?`Mis à jour il y a ${secs}s`:`Updated ${secs}s ago`)
-    : secs<120 ? (fr?'Mis à jour il y a 1min':'Updated 1min ago')
-    : (fr?`Mis à jour il y a ${mins}min`:`Updated ${mins}min ago`);
+  const _lang=typeof window._getLang==='function'?window._getLang():'en';
+  const fr=_lang==='fr', _la=_lang==='la';
+  const txt=secs<10?(fr?'Mis à jour':_la?'Modo renovatum':'Just updated')
+    :secs<60?(fr?`Mis à jour il y a ${secs}s`:_la?`Renovatum ${secs}s`:`Updated ${secs}s ago`)
+    :secs<120?(fr?'Mis à jour il y a 1min':_la?'Renovatum 1min':'Updated 1min ago')
+    :(fr?`Mis à jour il y a ${mins}min`:_la?`Renovatum ${mins}min`:`Updated ${mins}min ago`);
   ['aw-last-updated','nb-upd','acc-upd'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.textContent=txt;el.style.color='';}
@@ -695,10 +696,12 @@ function awPopOpen(el, idx) {
         <span>${(()=>{
           if(ev.start.length!==10)return awFmtTime(ev.start)+' \u2013 '+awFmtTime(ev.end)+(dur?' <span class=\"aw-pop-muted\">('+dur+')</span>':'');
           const locale2=window._currentLocale||'en-GB';
+          const isLa=window._getLang&&window._getLang()==='la';
           const sd2=new Date(ev.start+'T00:00:00');
           const rawEnd2=ev.end||ev.start;
           const ed2=new Date(rawEnd2+'T00:00:00');
-          const isM=(ed2-sd2)>86400000;
+          const isM=(ed2-sd2)>86400000-1;
+          if(isLa)return window._fmtDateLa?window._fmtDateLa(sd2,isM?{}:{noYear:true})+(isM?(' – '+window._fmtDateLa(new Date(ed2.getTime()-86400000),{noYear:true})+' ('+Math.round((ed2-sd2)/86400000)+' dies)'):''): sd2.toLocaleDateString();
           if(!isM)return sd2.toLocaleDateString(locale2,{weekday:'long',day:'numeric',month:'long'});
           const edD=new Date(ed2);edD.setDate(edD.getDate()-1);
           const days2=Math.round((ed2-sd2)/86400000);
