@@ -71,7 +71,12 @@ function awToday() { return awDateStr(new Date()); }
 
 function awFmtTime(iso) {
   if (!iso) return '';
-  return new Date(iso).toLocaleTimeString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { hour: '2-digit', minute: '2-digit' });
+  const d = new Date(iso);
+  if (_isLatinLang() && window._toRoman) {
+    const h = d.getHours(), m = d.getMinutes();
+    return window._toRoman(h) + ':' + String(m).padStart(2,'0');
+  }
+  return d.toLocaleTimeString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { hour: '2-digit', minute: '2-digit' });
 }
 function awFmtRemaining(end) {
   const ms = new Date(end) - Date.now();

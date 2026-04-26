@@ -484,6 +484,11 @@
   .abbrev-arrow{color:var(--lbl3);font-size:16px;flex-shrink:0;}
   .abbrev-del{width:28px;height:28px;border-radius:50%;border:none;background:var(--fill);color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;}
   .abbrev-empty{color:var(--lbl3);font-size:14px;text-align:center;padding:16px 0;}
+
+  .acc-update-body{display:flex;flex-direction:column;flex:1;gap:3px;}
+  #acc-update-bar-wrap{margin-top:4px;}
+  #acc-update-bar{height:3px;border-radius:99px;background:var(--fill);overflow:hidden;width:100%;}
+  #acc-update-bar-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#6366f1);transition:width .4s ease;}
 </style>
 </head>
 <body>
@@ -819,10 +824,15 @@
           <span class="acc-row-lbl" id="acc-refresh-lbl">Refresh calendar</span>
           <span id="acc-refresh-status" class="acc-row-status"></span>
         </button>
-        <button class="acc-row" onclick="accUpdateApp()">
-          <span class="acc-row-ico">&#11014;&#65039;</span>
-          <span class="acc-row-lbl" id="acc-update-lbl">Update app</span>
-          <span id="acc-update-status" class="acc-row-status"></span>
+        <button class="acc-row acc-row-update" id="acc-update-btn" onclick="accUpdateApp()">
+          <span class="acc-row-ico" id="acc-update-ico">&#11014;&#65039;</span>
+          <div class="acc-update-body">
+            <span class="acc-row-lbl" id="acc-update-lbl">Update app</span>
+            <div id="acc-update-bar-wrap" style="display:none">
+              <div id="acc-update-bar"><div id="acc-update-bar-fill"></div></div>
+            </div>
+            <span id="acc-update-status" class="acc-row-status"></span>
+          </div>
         </button>
         <button class="acc-row" onclick="accExportConfig()">
           <span class="acc-row-ico">&#128228;</span>
@@ -1241,23 +1251,53 @@ function accRefresh(){_haptic('medium');
 }
 function accUpdateApp(){
   var st=document.getElementById('acc-update-status');
-  if(st)st.innerHTML='⌛ Clearing…';
+  var ico=document.getElementById('acc-update-ico');
+  var btn=document.getElementById('acc-update-btn');
+  var barWrap=document.getElementById('acc-update-bar-wrap');
+  var barFill=document.getElementById('acc-update-bar-fill');
+  var lbl=document.getElementById('acc-update-lbl');
+  var _t=window._t||function(k,fb){return fb||k;};
+  if(btn)btn.style.pointerEvents='none';
+  if(barWrap)barWrap.style.display='block';
+  // Step 1: check for waiting SW
+  function setBar(pct){if(barFill)barFill.style.width=pct+'%';}
+  function setStatus(txt){if(st)st.textContent=txt;}
+  setStatus('Checking…');setBar(15);
+  if(ico)ico.textContent='⏳';
+  // Step 2: clear caches
   var clearP='caches' in window
-    ?caches.keys().then(function(ks){return Promise.all(ks.map(function(k){return caches.delete(k);}));})
+    ?caches.keys().then(function(ks){
+      setStatus('Clearing cache…');setBar(35);
+      return Promise.all(ks.map(function(k){return caches.delete(k);}));
+    })
     :Promise.resolve();
   clearP.then(function(){
+    setStatus('Unregistering SW…');setBar(60);
     if('serviceWorker' in navigator){
       navigator.serviceWorker.getRegistrations().then(function(regs){
+        // Send SKIP_WAITING to any waiting/installing SW
         regs.forEach(function(reg){
           if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
           if(reg.installing)reg.installing.postMessage({type:'SKIP_WAITING'});
+          if(reg.active)reg.active.postMessage({type:'SKIP_WAITING'});
         });
         return Promise.all(regs.map(function(reg){return reg.unregister();}));
       }).then(function(){
-        if(st)st.innerHTML='✅ Done!';
-        setTimeout(function(){window.location.href=location.pathname;},600);
+        setStatus('✓ Done! Reloading…');setBar(100);
+        if(ico)ico.textContent='✅';
+        setTimeout(function(){window.location.href=location.pathname;},700);
+      }).catch(function(){
+        setStatus('⚠ Error');setBar(0);
+        if(btn)btn.style.pointerEvents='';
       });
-    }else{if(st)st.innerHTML='✅ Done!';setTimeout(function(){window.location.href=location.pathname;},600);}
+    }else{
+      setStatus('✓ Done!');setBar(100);
+      if(ico)ico.textContent='✅';
+      setTimeout(function(){window.location.href=location.pathname;},700);
+    }
+  }).catch(function(){
+    setStatus('⚠ Cache error');setBar(0);
+    if(btn)btn.style.pointerEvents='';
   });
 }
 function accLogout(){_haptic('warning');
@@ -1603,7 +1643,8 @@ function moRenderAll(){
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
+        var _dayNum=isOther?'':(lang==='la'&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
+        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -1611,7 +1652,8 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yr+'</span><div class="mo-year-sep-line"></div></div>':'';
+    var yrDisp=(lang==='la'&&window._toRoman)?window._toRoman(yr):yr;
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
@@ -1944,7 +1986,8 @@ function moRenderAll(){
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
+        var _dayNum=isOther?'':(lang==='la'&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
+        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -1952,7 +1995,8 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yr+'</span><div class="mo-year-sep-line"></div></div>':'';
+    var yrDisp=(lang==='la'&&window._toRoman)?window._toRoman(yr):yr;
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
@@ -2280,7 +2324,8 @@ function moRenderAll(){
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
+        var _dayNum=isOther?'':(lang==='la'&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
+        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -2288,7 +2333,8 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yr+'</span><div class="mo-year-sep-line"></div></div>':'';
+    var yrDisp=(lang==='la'&&window._toRoman)?window._toRoman(yr):yr;
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
