@@ -1,3 +1,24 @@
+
+// Latin date formatting helpers
+function _isLatinLang() { return typeof window._getLang==='function' && window._getLang()==='la'; }
+function _laMonthShort(mon) {
+  var s=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
+  return s[mon]||'';
+}
+function _laFmtShort(d) {
+  var LA_D=['Dom','Lun','Mar','Mer','Iov','Ven','Sat'];
+  return LA_D[d.getDay()]+' '+(window._toRoman?window._toRoman(d.getDate()):d.getDate())+' '+_laMonthShort(d.getMonth());
+}
+function _laFmtLong(d) {
+  var LA_D=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
+  var LA_M=window._LA_MONTHS||[];
+  return LA_D[d.getDay()]+', '+(window._toRoman?window._toRoman(d.getDate()):d.getDate())+' '+( LA_M[d.getMonth()]||'')+(', '+(window._toRoman?window._toRoman(d.getFullYear()):d.getFullYear()));
+}
+function _laFmtMonthLong(d) {
+  var LA_M=window._LA_MONTHS_NOM||[];
+  return LA_M[d.getMonth()]||'';
+}
+function _laFmtMonthShort(d) { return _laMonthShort(d.getMonth()); }
 /*Shortcut™ JS file for Agenda by Augustin de Chalendar
 Copyright © 2026 Ogust'1. All rights reserved.
 */
@@ -87,13 +108,16 @@ function awFmtDuration(start, end) {
 }
 function awFmtDayLabel(dateStr, long = false) {
   const d = new Date(dateStr + 'T00:00:00');
+  if (_isLatinLang()) return long ? _laFmtLong(d) : _laFmtShort(d);
   const s = d.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), long
     ? { weekday: 'long', day: 'numeric', month: 'long' }
     : { weekday: 'short', day: 'numeric', month: 'short' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function awWeekdayShort(dateStr) {
-  return new Date(dateStr + 'T00:00:00')
+  const _dws = new Date(dateStr + 'T00:00:00');
+  if (_isLatinLang()) { var _lad=['Lun','Mar','Mer','Iov','Ven','Sat','Dom']; return _lad[_dws.getDay()]||''; }
+  return _dws
     .toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { weekday: 'short' })
     .replace(/^./, c => c.toUpperCase());
 }
@@ -428,10 +452,10 @@ function awRowHtml(ev, idx = -1) {
             // iCal all-day end is exclusive — subtract 1 day
             const ed=new Date(rawEnd+'T00:00:00');
             const isMulti=(ed-sd)>86400000-1;
-            if(!isMulti){return sd.toLocaleDateString(locale,{day:'numeric',month:'long'});}
+            if(!isMulti){return (window._getLang&&window._getLang()==='la'&&window._fmtDateLa)?window._fmtDateLa(sd,{noYear:true}):sd.toLocaleDateString(locale,{day:'numeric',month:'long'});}
             const edDisp=new Date(ed);edDisp.setDate(edDisp.getDate()-1);
             const days=Math.round((ed-sd)/86400000);
-            const fmt=(d)=>d.toLocaleDateString(locale,{day:'numeric',month:'long'});
+            const fmt=(d)=>(window._getLang&&window._getLang()==='la'&&window._fmtDateLa)?window._fmtDateLa(d,{noYear:true}):d.toLocaleDateString(locale,{day:'numeric',month:'long'});
             const dayWord=(window._getLang&&window._getLang()==='fr')?( days===1?'jour':'jours'):(days===1?'day':'days');
             return fmt(sd)+' – '+fmt(edDisp)+' ('+days+' '+dayWord+')';
           })()}</span>`
@@ -944,12 +968,14 @@ function awRenderCalendar(byDay, today) {
 
   // "March 2026" — if week spans two months show "Mar – Apr 2026"
   const monthLabel = (() => {
-    const month0 = d0.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'long' });
+    const _isLa = _isLatinLang();
+    const month0 = _isLa ? _laFmtMonthLong(d0) : d0.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'long' });
     const year0  = d0.getFullYear();
+    const year0D = _isLa ? (window._toRoman?window._toRoman(year0):year0) : year0;
     if (d0.getMonth() === d6.getMonth()) {
-      return `<strong>${month0}</strong> <span class="aw-cal-year">${year0}</span>`;
+      return `<strong>${month0}</strong> <span class="aw-cal-year">${year0D}</span>`;
     }
-    const month6 = d6.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'short' });
+    const month6 = _isLa ? _laFmtMonthShort(d6) : d6.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'short' });
     const year6  = d6.getFullYear();
     const yearSuffix = year0 === year6 ? ` <span class="aw-cal-year">${year6}</span>` : ` <span class="aw-cal-year">${year0}</span> \u2013 <span class="aw-cal-year">${year6}</span>`;
     return `<strong>${month0.slice(0,3)} \u2013 ${month6}</strong>${yearSuffix}`;
