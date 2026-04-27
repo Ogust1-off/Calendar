@@ -957,7 +957,7 @@ function wkUpdateHdr(){
   var byDay=window._awByDay||{};
   var d=new Date(_wkCur+'T00:00:00');
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var mo=(locale==='la')?(window._LA_MONTHS_NOM||[])[d.getMonth()]:d.toLocaleDateString(locale,{month:'long'});
+  var mo=(locale==='la'||window._getLang&&window._getLang()==='la')?(window._LA_MONTHS_NOM||[])[d.getMonth()]:d.toLocaleDateString(locale,{month:'long'});
   if(locale!=='la')mo=mo[0].toUpperCase()+mo.slice(1);
   var yr=d.getFullYear(),yrDisp=locale==='la'?(window._toRoman?window._toRoman(yr):yr):yr;
   var ml=document.getElementById('wk-month-lbl');
@@ -1417,7 +1417,7 @@ function moToggle(){
   if(!ov)return;
   // Build global DOW row
   var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:lang==='la'?['L','M','M','I','V','S','D']:['M','T','W','T','F','S','S'];
   var dowsEl=document.getElementById('mo-global-dows');
   if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
@@ -1534,12 +1534,14 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var lang=typeof window._getLang==='function'?window._getLang():'en';
+  var isLatin=(lang==='la');
 
   var html='';
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=(locale==='la')?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    var moName=isLatin?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
     if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
@@ -1643,7 +1645,7 @@ function moRenderAll(){
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var _dayNum=isOther?'':(lang==='la'&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
+        var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
         var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
@@ -1652,7 +1654,7 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yrDisp=(lang==='la'&&window._toRoman)?window._toRoman(yr):yr;
+    var yrDisp=(isLatin&&window._toRoman)?window._toRoman(yr):yr;
     var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
@@ -1773,7 +1775,7 @@ function moToggle(){
   if(!ov)return;
   // Build global DOW row
   var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:lang==='la'?['L','M','M','I','V','S','D']:['M','T','W','T','F','S','S'];
   var dowsEl=document.getElementById('mo-global-dows');
   if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
@@ -1877,12 +1879,14 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var lang=typeof window._getLang==='function'?window._getLang():'en';
+  var isLatin=(lang==='la');
 
   var html='';
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=(locale==='la')?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    var moName=isLatin?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
     if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
@@ -1986,7 +1990,7 @@ function moRenderAll(){
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var _dayNum=isOther?'':(lang==='la'&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
+        var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
         var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
@@ -1995,7 +1999,7 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yrDisp=(lang==='la'&&window._toRoman)?window._toRoman(yr):yr;
+    var yrDisp=(isLatin&&window._toRoman)?window._toRoman(yr):yr;
     var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
@@ -2111,7 +2115,7 @@ function moToggle(){
   if(!ov)return;
   // Build global DOW row
   var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:['M','T','W','T','F','S','S'];
+  var DOWS=lang==='fr'?['L','M','M','J','V','S','D']:lang==='la'?['L','M','M','I','V','S','D']:['M','T','W','T','F','S','S'];
   var dowsEl=document.getElementById('mo-global-dows');
   if(dowsEl)dowsEl.innerHTML=DOWS.map(function(d){return '<div class="mo-dow">'+d+'</div>';}).join('');
   moRenderAll();
@@ -2215,12 +2219,14 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+  var lang=typeof window._getLang==='function'?window._getLang():'en';
+  var isLatin=(lang==='la');
 
   var html='';
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=(locale==='la')?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
+    var moName=isLatin?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
     if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
@@ -2324,7 +2330,7 @@ function moRenderAll(){
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var _dayNum=isOther?'':(lang==='la'&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
+        var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
         var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
@@ -2333,7 +2339,7 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yrDisp=(lang==='la'&&window._toRoman)?window._toRoman(yr):yr;
+    var yrDisp=(isLatin&&window._toRoman)?window._toRoman(yr):yr;
     var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
