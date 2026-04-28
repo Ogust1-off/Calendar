@@ -199,7 +199,7 @@
   .wk-mini-dow{font-size:11px;font-weight:500;letter-spacing:.02em;text-transform:uppercase;color:var(--lbl3);line-height:1}
   .wk-mini.is-today .wk-mini-dow{color:var(--red)}
   .wk-mini-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:16px;font-weight:400;color:var(--lbl);font-variant-numeric:tabular-nums;line-height:1;
+    font-size:16px;font-weight:400;overflow:hidden;color:var(--lbl);font-variant-numeric:tabular-nums;line-height:1;
     transition:background .15s,color .15s}
   .wk-mini.is-today .wk-mini-num{color:var(--red);font-weight:600}
   .wk-mini.is-sel .wk-mini-num{background:var(--tint);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(10,132,255,.35)}
@@ -309,6 +309,9 @@
     display:flex;align-items:center;justify-content:center;
     font-weight:600;font-size:17px;
   }
+  /* Smaller font for Roman numerals */
+  .mo-day-num.mo-day-roman{font-size:9px!important;letter-spacing:-.02em;}
+  .mo-day.mo-today .mo-day-num.mo-day-roman{font-size:9px!important;}
   /* Day number — same size as week view */
   .mo-day-num{
     font-size:17px;font-weight:400;color:var(--lbl);
@@ -684,7 +687,7 @@
     var s=S[lang]||S.en; var v=s[k]; if(v===undefined)v=S.en[k];
     if(typeof v==='function')return v(a); return v!==undefined?v:k;
   };
-  window._appLocale=function(){var l=window._getLang?window._getLang():'en';return l==='fr'?'fr-FR':'en-GB';};
+  window._appLocale=function(){var l=window._getLang?window._getLang():'en';return l==='fr'?'fr-FR':l==='la'?'la':'en-GB';};
   window._LA_MONTHS_NOM=['Ianuarius','Februarius','Martius','Aprilis','Maius','Iunius','Iulius','Augustus','September','October','November','December'];
   window._LA_MONTHS=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii','Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
   window._LA_DAYS=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
@@ -973,9 +976,10 @@ function wkUpdateHdr(){
   _dow.forEach(function(l,i){
     var day=new Date(mon);day.setDate(mon.getDate()+i);var ds=_ds(day);
     var isT=(ds===_wkToday),isSel=(ds===_wkCur),hasEv=((byDay[ds]||[]).length>0);
+    var _isLa2=typeof window._getLang==='function'&&window._getLang()==='la';
     var cls='wk-mini'+(isT?' is-today':'')+(isSel?' is-sel':'')+(hasEv?' has-ev':'');
     var btn=document.createElement('button');btn.className=cls;btn.dataset.date=ds;
-    btn.innerHTML='<span class="wk-mini-dow">'+l+'</span><span class="wk-mini-num">'+day.getDate()+'</span><span class="wk-mini-dot"></span>';
+    btn.innerHTML='<span class="wk-mini-dow">'+l+'</span><span class="wk-mini-num">'+(_isLa2&&window._toRoman?window._toRoman(day.getDate()):day.getDate())+'</span><span class="wk-mini-dot"></span>';
     (function(date){btn.addEventListener('click',function(){_wkCur=date;wkSnap(_wkCur,true,true);wkUpdateHdr();});})(ds);
     days.appendChild(btn);
   });
@@ -1641,12 +1645,13 @@ function moRenderAll(){
             realShown++;
           }
           var remaining=realCount-realShown;
-          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
+          if(remaining>0)evHtml+='<div class="mo-ev-more">'+(isLatin&&window._toRoman?'+'+window._toRoman(remaining):'+'+remaining)+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
         var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
+        var _numCls='mo-day-num'+(isLatin&&!isOther?' mo-day-roman':'');
+        var numH='<div class="'+_numCls+'"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -1986,12 +1991,13 @@ function moRenderAll(){
             realShown++;
           }
           var remaining=realCount-realShown;
-          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
+          if(remaining>0)evHtml+='<div class="mo-ev-more">'+(isLatin&&window._toRoman?'+'+window._toRoman(remaining):'+'+remaining)+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
         var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
+        var _numCls='mo-day-num'+(isLatin&&!isOther?' mo-day-roman':'');
+        var numH='<div class="'+_numCls+'"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -2326,12 +2332,13 @@ function moRenderAll(){
             realShown++;
           }
           var remaining=realCount-realShown;
-          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
+          if(remaining>0)evHtml+='<div class="mo-ev-more">'+(isLatin&&window._toRoman?'+'+window._toRoman(remaining):'+'+remaining)+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
         var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
-        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
+        var _numCls='mo-day-num'+(isLatin&&!isOther?' mo-day-roman':'');
+        var numH='<div class="'+_numCls+'"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }

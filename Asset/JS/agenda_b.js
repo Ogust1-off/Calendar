@@ -107,6 +107,11 @@ function awFmtDuration(start, end) {
   const ms = new Date(end) - new Date(start);
   const h  = Math.floor(ms / 3600000);
   const m  = Math.floor((ms % 3600000) / 60000);
+  if (_isLatinLang() && window._toRoman) {
+    if (h === 0) return window._toRoman(m) + 'min';
+    if (m === 0) return window._toRoman(h) + 'h';
+    return window._toRoman(h) + 'h' + window._toRoman(m);
+  }
   if (h === 0) return `${m}min`;
   if (m === 0) return `${h}h`;
   return `${h}h${awPad(m)}`;
@@ -420,7 +425,7 @@ function awRowHtml(ev, idx = -1) {
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
     group     ? `<span class="aw-row-badge aw-row-badge--group">${group}</span>` : '',
-    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">${window._t?window._t('inProgress'):'In progress'}</span>` : '',
+    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">${window._t?window._t('inProgress'):(window._getLang&&window._getLang()==='la'?'In progressu':'In progress')}</span>` : '',
   ].filter(Boolean).join('');
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
@@ -660,10 +665,11 @@ function awUpdateTimer() {
   const mins = Math.floor(secs/60);
   const _lang=typeof window._getLang==='function'?window._getLang():'en';
   const fr=_lang==='fr', _la=_lang==='la';
+  const _R=(n)=>(_la&&window._toRoman)?window._toRoman(n):n;
   const txt=secs<10?(fr?'Mis à jour':_la?'Modo renovatum':'Just updated')
-    :secs<60?(fr?`Mis à jour il y a ${secs}s`:_la?`Renovatum ${secs}s`:`Updated ${secs}s ago`)
-    :secs<120?(fr?'Mis à jour il y a 1min':_la?'Renovatum 1min':'Updated 1min ago')
-    :(fr?`Mis à jour il y a ${mins}min`:_la?`Renovatum ${mins}min`:`Updated ${mins}min ago`);
+    :secs<60?(fr?`Mis à jour il y a ${secs}s`:_la?`Renovatum ${_R(secs)}s`:`Updated ${secs}s ago`)
+    :secs<120?(fr?'Mis à jour il y a 1min':_la?'Renovatum Imin':'Updated 1min ago')
+    :(fr?`Mis à jour il y a ${mins}min`:_la?`Renovatum ${_R(mins)}min`:`Updated ${mins}min ago`);
   ['aw-last-updated','nb-upd','acc-upd'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.textContent=txt;el.style.color='';}
@@ -758,11 +764,11 @@ function awPopOpen(el, idx) {
       ${typeBadge || group || startsSoon? `<div class="aw-pop-tags">
         ${typeBadge ? `<span class="aw-pop-tag" style="border-color:${accent};color:${accent}">${typeBadge}</span>` : ''}
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
-        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
+        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):(window._getLang&&window._getLang()==='la'?'In progressu':'In progress')}</span>` : ''}
         ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'Done'}</span>` : ''}
         ${startsSoon ? `<span class="aw-pop-tag">${window._t?window._t("startingSoon"):"STARTING SOON"}</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
-        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
+        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):(window._getLang&&window._getLang()==='la'?'In progressu':'In progress')}</span>` : ''}
         ${past ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'Done'}</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
@@ -1272,7 +1278,7 @@ function awRenderDay(ds, container, preserveScroll) {
   const laid=awLayoutColumns(timed, ds);
   const now=new Date(), nowH=now.getHours()+now.getMinutes()/60;
   let html=`<div class="awd-grid" style="height:${gridH}px"><div class="awd-gutter">`;
-  for(let h=1;h<24;h++) html+=`<div class="awd-hour-lbl" style="top:${h*AW_PX_PER_HOUR}px">${String(h).padStart(2,'0')}:00</div>`;
+  for(let h=1;h<24;h++) html+=`<div class="awd-hour-lbl" style="top:${h*AW_PX_PER_HOUR}px">${_isLatinLang()&&window._toRoman?window._toRoman(h):(String(h).padStart(2,'0')+':00')}</div>`;
   html+=`</div><div class="awd-col">`;
   for(let h=0;h<=24;h++) html+=`<div class="${h%6===0?'awd-hline major':'awd-hline'}" style="top:${h*AW_PX_PER_HOUR}px"></div>`;
   if(isToday) html+=`<div class="awd-now" style="top:${nowH*AW_PX_PER_HOUR}px"><div class="awd-now-dot"></div></div>`;
