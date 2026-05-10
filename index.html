@@ -73,45 +73,17 @@
   }}
 
   /* ── Splash ── */
-  #splash{
-    position:fixed;inset:0;z-index:9000;
-    display:flex;align-items:center;justify-content:center;
-    background:var(--bg);
-    transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);
-    pointer-events:none;
-  }
+  #splash{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .5s cubic-bezier(.4,0,.2,1),transform .5s cubic-bezier(.4,0,.2,1);pointer-events:none;}
   #splash.hide{opacity:0;transform:scale(1.05);}
   #splash-inner{display:flex;flex-direction:column;align-items:center;gap:14px;}
-  #splash-logo{
-    animation:sp-logo .55s cubic-bezier(.34,1.56,.64,1) both;
-    filter:drop-shadow(0 10px 28px rgba(99,102,241,.4));
-  }
+  #splash-logo{animation:sp-logo .55s cubic-bezier(.34,1.56,.64,1) both;filter:drop-shadow(0 10px 28px rgba(99,102,241,.4));}
   #splash-logo svg{border-radius:22px;}
-  @keyframes sp-logo{
-    0%{opacity:0;transform:scale(.55) translateY(18px);}
-    65%{opacity:1;transform:scale(1.07) translateY(-3px);}
-    100%{opacity:1;transform:scale(1) translateY(0);}
-  }
-  #splash-name{
-    font-size:30px;font-weight:800;letter-spacing:-.05em;color:var(--lbl);
-    font-family:-apple-system,"SF Pro Display",sans-serif;
-    animation:sp-up .42s .2s cubic-bezier(.34,1.3,.64,1) both;
-  }
-  #splash-sub{
-    font-size:14px;font-weight:500;color:var(--lbl3);
-    animation:sp-up .38s .32s ease both;
-  }
+  @keyframes sp-logo{0%{opacity:0;transform:scale(.55) translateY(18px);}65%{opacity:1;transform:scale(1.07) translateY(-3px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+  #splash-name{font-size:30px;font-weight:800;letter-spacing:-.05em;color:var(--lbl);font-family:-apple-system,"SF Pro Display",sans-serif;animation:sp-up .42s .2s cubic-bezier(.34,1.3,.64,1) both;}
+  #splash-sub{font-size:14px;font-weight:500;color:var(--lbl3);animation:sp-up .38s .32s ease both;}
   @keyframes sp-up{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-  #splash-bar{
-    width:60px;height:3px;border-radius:99px;
-    background:var(--fill);overflow:hidden;margin-top:2px;
-    animation:sp-up .35s .42s ease both;
-  }
-  #splash-bar-fill{
-    height:100%;width:0;border-radius:99px;
-    background:linear-gradient(90deg,#3b82f6,#6366f1);
-    animation:sp-bar 1s .48s ease-out forwards;
-  }
+  #splash-bar{width:60px;height:3px;border-radius:99px;background:var(--fill);overflow:hidden;margin-top:2px;animation:sp-up .35s .42s ease both;}
+  #splash-bar-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#6366f1);animation:sp-bar 1s .48s ease-out forwards;}
   @keyframes sp-bar{to{width:100%;}}
 /* ── Shell ── */
   #app{position:fixed;inset:0;display:flex;flex-direction:column;height:100dvh}
@@ -199,8 +171,9 @@
   .wk-mini-dow{font-size:11px;font-weight:500;letter-spacing:.02em;text-transform:uppercase;color:var(--lbl3);line-height:1}
   .wk-mini.is-today .wk-mini-dow{color:var(--red)}
   .wk-mini-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-    font-size:16px;font-weight:400;overflow:hidden;color:var(--lbl);font-variant-numeric:tabular-nums;line-height:1;
+    font-size:16px;font-weight:400;color:var(--lbl);font-variant-numeric:tabular-nums;line-height:1;
     transition:background .15s,color .15s}
+  .wk-mini.is-roman .wk-mini-num{font-size:9px!important;letter-spacing:0;}
   .wk-mini.is-today .wk-mini-num{color:var(--red);font-weight:600}
   .wk-mini.is-sel .wk-mini-num{background:var(--tint);color:#fff;font-weight:600;box-shadow:0 2px 8px rgba(10,132,255,.35)}
   .wk-mini.is-today.is-sel .wk-mini-num{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(255,69,58,.35)}
@@ -286,8 +259,8 @@
   .mo-year-sep-num{font-size:32px;font-weight:700;color:var(--lbl);letter-spacing:-.05em;line-height:1;flex-shrink:0;}
   .mo-year-sep-line{flex:1;height:1px;background:var(--sep);margin-top:4px;}
   .mo-month-name{
-    font-size:24px;font-weight:700;letter-spacing:-.04em;
-    color:var(--lbl);padding:16px 0 4px 6px;
+    font-size:17px;font-weight:700;letter-spacing:-.02em;
+    color:var(--lbl3);padding:12px 0 2px 8px;
   }
   .mo-month-name.mo-current{color:var(--red);}
   /* Grid */
@@ -309,9 +282,7 @@
     display:flex;align-items:center;justify-content:center;
     font-weight:600;font-size:17px;
   }
-  /* Smaller font for Roman numerals */
-  .mo-day-num.mo-day-roman{font-size:9px!important;letter-spacing:-.02em;}
-  .mo-day.mo-today .mo-day-num.mo-day-roman{font-size:9px!important;}
+  .mo-day-num.mo-day-roman,.mo-day.mo-today .mo-day-num.mo-day-roman{font-size:8px!important;letter-spacing:0;}
   /* Day number — same size as week view */
   .mo-day-num{
     font-size:17px;font-weight:400;color:var(--lbl);
@@ -487,11 +458,6 @@
   .abbrev-arrow{color:var(--lbl3);font-size:16px;flex-shrink:0;}
   .abbrev-del{width:28px;height:28px;border-radius:50%;border:none;background:var(--fill);color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;}
   .abbrev-empty{color:var(--lbl3);font-size:14px;text-align:center;padding:16px 0;}
-
-  .acc-update-body{display:flex;flex-direction:column;flex:1;gap:3px;}
-  #acc-update-bar-wrap{margin-top:4px;}
-  #acc-update-bar{height:3px;border-radius:99px;background:var(--fill);overflow:hidden;width:100%;}
-  #acc-update-bar-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#6366f1);transition:width .4s ease;}
 </style>
 </head>
 <body>
@@ -541,6 +507,7 @@
   }
   // Expose lang helper early
   window._getLang=function(){try{var d=JSON.parse(localStorage.getItem('shortcut_config')||'null');return(d&&d.lang)||'en';}catch(e){return'en';}};
+  (function(){var l=window._getLang();var msg=l==='fr'?'Veuillez tourner votre iPhone':l==='la'?'Converte iPhone tuum':'Please rotate your iPhone';var st=document.createElement('style');st.textContent='@media(orientation:landscape){body::after{content:"'+msg+'"!important}}';document.head.appendChild(st);})();
 })();
 </script>
 
@@ -590,8 +557,7 @@
       accSrcApi:'Source & API key',accCal1Style:'Calendar 1 colour style',
       accCal2Color:'Calendar 2 colour',accExtraCals:'Extra calendars',
       sAdvanced:'Advanced',sApp:'App',sDisplay:'Display',
-      accAbbrevs:'Month abbreviations',accAbbrevsTitle:'Custom Abbreviations',
-      accAbbrevsDesc:'Shorten words in the month view.',accAbbrevFrom:'Full word',accAbbrevTo:'Short form',accAbbrevAdd:'+ Add rule',accAbbrevEmpty:'No custom rules yet.',
+      accAbbrevs:'Month abbreviations',accAbbrevsTitle:'Custom Abbreviations',accAbbrevsDesc:'Shorten words in the month view.',accAbbrevFrom:'Full word',accAbbrevTo:'Short form',accAbbrevAdd:'+ Add rule',accAbbrevEmpty:'No custom rules yet.',
     },
     fr:{today:'Aujourd\u2019hui',allDay:'Toute la journ\u00e9e',allDayLabel:'journ\u00e9e',inProgress:'En cours',
       completed:'TERMIN\u00c9',startingSoon:'BIENT\u00d4T',left:'restant',in:'dans ',inLabel:'Dans',elapsed:'\u00e9coul\u00e9',
@@ -635,21 +601,22 @@
       accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
       accCal2Color:'Couleur Cal\u00a02',accExtraCals:'Calendriers suppl\u00e9mentaires',
       sAdvanced:'Avanc\u00e9',sApp:'Application',sDisplay:'Affichage',
+      accAbbrevs:'Abréviations (mois)',accAbbrevsTitle:'Abréviations personnalisées',accAbbrevsDesc:'Raccourcir les mots dans la vue mois.',accAbbrevFrom:'Mot complet',accAbbrevTo:'Abréviation',accAbbrevAdd:'+ Ajouter',accAbbrevEmpty:'Aucune règle personnalisée.',
     },
     la:{today:'Hodie',allDay:'Totus dies',allDayLabel:'dies',inProgress:'In progressu',
       completed:'COMPLETUM',startingSoon:'MOX INCIPIT',left:'reliquum',in:'in ',inLabel:'In',elapsed:'transivit',
       justUpdated:'Modo renovatum',offline:'Sine rete',updateFailed:'Error renovationis',
       noMoreToday:'Nulla iam eventa hodie',noUpcoming:'Nulla eventa futura',
-      enjoyBreak:'Otio fruere!',haveGreatWe:'Bonum finem hebdomadis!',
-      nextClass:'Schola proxima',tabAgenda:'Agenda',tabWeek:'Hebdomas',tabAccount:'Ratio',
-      today2:'Hodie',locale:'la',refreshBtn:'Renovare',settingsTitle:'API et Calendaria',
-      updateAppBtn:'Applicationem renovare',langLabel:'Lingua',themeLabel:'Aspectus',
-      themeDark:'Obscurus',themeLight:'Clarus',themeAuto:'Automaticus',
+      enjoyBreak:'Otio fruere!',haveGreatWe:'Bonum finem hebdomadis!',nextClass:'Schola proxima',
+      tabAgenda:'Agenda',tabWeek:'Hebdomas',tabAccount:'Ratio',today2:'Hodie',
+      refreshBtn:'Renovare',updateAppBtn:'Applicationem renovare',
+      langLabel:'Lingua',themeLabel:'Aspectus',themeDark:'Obscurus',themeLight:'Clarus',themeAuto:'Automaticus',
       logoutBtn:'Exire',byShortcut:'ab Shortcut™',sCalendars:'Calendaria',
       obWelcomeSub:'Agenda tuum, semper tecum.',
       obFeat1:'Agenda et horologium',obFeat2:'Cursus realis',obFeat3:'Claves in machina',obFeat4:'Sine rete',
       obStartBtn:'Incipe',obLegal:'Data tua hic manent.',
       obSrcTitle:'Fons',obSrcSub:'Quomodo calendarium accedis?',
+      obSrcApiTitle:'Fons & API',obSrcApiSub:'Coniunge calendarium.',
       obApiTitle:'Clavis API',obApiSub:'Ad calendaria accedenda.',
       obGCalTitle:'Calendaria Googlis',obGCalSub:'IDs calendariorum.',
       obIcalTitle:'Nexus iCal',obIcalSub:'Ex iPhone vel Googli.',
@@ -660,7 +627,6 @@
       obPrefsTitle:'Praeferentiae',obPrefsSub:'Lingua et aspectus.',
       obOptBadge:'Optionale',obApiKeyLbl:'CLAVIS API',obCal1Google:'CAL I — ID',obCal2Google:'CAL II — ID',
       obCal1Ical:'CAL I — ICAL',obCal2Ical:'CAL II — ICAL',obOpt:'optionale',
-      obSrcApiTitle:'Fons & API',obSrcApiSub:'Coniunge calendarium.',
       obStyleTitle:'Stilus I',obStyleSub:'Colores adscribe.',obCal2ColTitle:'Color II',obCal2ColSub:'Color Cal II.',
       obExtraTitle:'Calendaria addita',obExtraSub:'Adde plura.',
       obSrcGoogle:'Google Calendarium',obSrcGoogleSub:'Clavis API + ID.',
@@ -692,7 +658,7 @@
   window._LA_MONTHS=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii','Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
   window._LA_DAYS=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
   window._toRoman=function(n){if(!n||n<1||n>3999)return String(n);var v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'],r='';for(var i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;};
-  window._fmtDateLa=function(ds,opts){var d=(ds instanceof Date)?ds:new Date(ds+'T00:00:00');var day=d.getDate(),mon=d.getMonth(),yr=d.getFullYear();var LA_M=window._LA_MONTHS||[];var LA_D=window._LA_DAYS||[];var dayR=window._toRoman(day),yrR=window._toRoman(yr);if(opts&&opts.weekday)return LA_D[d.getDay()]+', '+dayR+' '+LA_M[mon]+' '+yrR;if(opts&&opts.noYear)return dayR+' '+LA_M[mon];return dayR+' '+LA_M[mon]+' '+yrR;};
+  window._fmtDateLa=function(ds,opts){var d=(ds instanceof Date)?ds:new Date(ds+'T00:00:00');var day=d.getDate(),mon=d.getMonth(),yr=d.getFullYear();var LA_M=window._LA_MONTHS||[];var LA_D=window._LA_DAYS||[];var R=window._toRoman||String;if(opts&&opts.weekday)return LA_D[d.getDay()]+', '+R(day)+' '+LA_M[mon]+', '+R(yr);if(opts&&opts.noYear)return R(day)+' '+LA_M[mon];return R(day)+' '+LA_M[mon]+' '+R(yr);};
 })();
 </script>
 
@@ -827,13 +793,11 @@
           <span class="acc-row-lbl" id="acc-refresh-lbl">Refresh calendar</span>
           <span id="acc-refresh-status" class="acc-row-status"></span>
         </button>
-        <button class="acc-row acc-row-update" id="acc-update-btn" onclick="accUpdateApp()">
+        <button class="acc-row" id="acc-update-btn" onclick="accUpdateApp()">
           <span class="acc-row-ico" id="acc-update-ico">&#11014;&#65039;</span>
-          <div class="acc-update-body">
+          <div style="display:flex;flex-direction:column;flex:1;gap:2px;">
             <span class="acc-row-lbl" id="acc-update-lbl">Update app</span>
-            <div id="acc-update-bar-wrap" style="display:none">
-              <div id="acc-update-bar"><div id="acc-update-bar-fill"></div></div>
-            </div>
+            <div id="acc-update-bar-wrap" style="display:none"><div id="acc-update-bar" style="height:3px;border-radius:99px;background:var(--fill);overflow:hidden;"><div id="acc-update-bar-fill" style="height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#6366f1);transition:width .4s;"></div></div></div>
             <span id="acc-update-status" class="acc-row-status"></span>
           </div>
         </button>
@@ -960,11 +924,12 @@ function wkUpdateHdr(){
   var byDay=window._awByDay||{};
   var d=new Date(_wkCur+'T00:00:00');
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var mo=(locale==='la'||window._getLang&&window._getLang()==='la')?(window._LA_MONTHS_NOM||[])[d.getMonth()]:d.toLocaleDateString(locale,{month:'long'});
-  if(locale!=='la')mo=mo[0].toUpperCase()+mo.slice(1);
-  var yr=d.getFullYear(),yrDisp=locale==='la'?(window._toRoman?window._toRoman(yr):yr):yr;
+  var _isLaH=locale==='la';
+  var mo=_isLaH?(window._LA_MONTHS_NOM||[])[d.getMonth()]:d.toLocaleDateString(locale,{month:'long'});
+  if(!_isLaH)mo=mo[0].toUpperCase()+mo.slice(1);
+  var _yrH=d.getFullYear(),_yrHD=_isLaH&&window._toRoman?window._toRoman(_yrH):_yrH;
   var ml=document.getElementById('wk-month-lbl');
-  if(ml)ml.innerHTML='<strong>'+mo+'</strong> <span>'+yrDisp+'</span>';
+  if(ml)ml.innerHTML='<strong>'+mo+'</strong> <span>'+_yrHD+'</span>';
   var tb=document.getElementById('wk-today-btn');
   if(tb){tb.textContent=window._t?window._t('today2'):'Today';tb.classList.toggle('active',_wkCur===_wkToday);}
   var dow=d.getDay(),mon=new Date(d);mon.setDate(d.getDate()-(dow===0?6:dow-1));
@@ -976,10 +941,10 @@ function wkUpdateHdr(){
   _dow.forEach(function(l,i){
     var day=new Date(mon);day.setDate(mon.getDate()+i);var ds=_ds(day);
     var isT=(ds===_wkToday),isSel=(ds===_wkCur),hasEv=((byDay[ds]||[]).length>0);
-    var _isLa2=typeof window._getLang==='function'&&window._getLang()==='la';
-    var cls='wk-mini'+(isT?' is-today':'')+(isSel?' is-sel':'')+(hasEv?' has-ev':'');
+    var _isLaM=typeof window._getLang==='function'&&window._getLang()==='la';
+    var cls='wk-mini'+(isT?' is-today':'')+(_isLaM?' is-roman':'')+(isSel?' is-sel':'')+(hasEv?' has-ev':'');
     var btn=document.createElement('button');btn.className=cls;btn.dataset.date=ds;
-    btn.innerHTML='<span class="wk-mini-dow">'+l+'</span><span class="wk-mini-num">'+(_isLa2&&window._toRoman?window._toRoman(day.getDate()):day.getDate())+'</span><span class="wk-mini-dot"></span>';
+    btn.innerHTML='<span class="wk-mini-dow">'+l+'</span><span class="wk-mini-num">'+(_isLaM&&window._toRoman?window._toRoman(day.getDate()):day.getDate())+'</span><span class="wk-mini-dot"></span>';
     (function(date){btn.addEventListener('click',function(){_wkCur=date;wkSnap(_wkCur,true,true);wkUpdateHdr();});})(ds);
     days.appendChild(btn);
   });
@@ -1254,54 +1219,22 @@ function accRefresh(){_haptic('medium');
   }
 }
 function accUpdateApp(){
-  var st=document.getElementById('acc-update-status');
-  var ico=document.getElementById('acc-update-ico');
-  var btn=document.getElementById('acc-update-btn');
-  var barWrap=document.getElementById('acc-update-bar-wrap');
-  var barFill=document.getElementById('acc-update-bar-fill');
-  var lbl=document.getElementById('acc-update-lbl');
-  var _t=window._t||function(k,fb){return fb||k;};
-  if(btn)btn.style.pointerEvents='none';
-  if(barWrap)barWrap.style.display='block';
-  // Step 1: check for waiting SW
-  function setBar(pct){if(barFill)barFill.style.width=pct+'%';}
-  function setStatus(txt){if(st)st.textContent=txt;}
-  setStatus('Checking…');setBar(15);
+  var st=document.getElementById('acc-update-status');var ico=document.getElementById('acc-update-ico');
+  function setBar(p){var f=document.getElementById('acc-update-bar-fill');if(f)f.style.width=p+'%';}
+  function setSt(t){if(st)st.textContent=t;}
+  setSt('Checking…');setBar(15);
+  var btn=document.getElementById('acc-update-btn');if(btn)btn.style.pointerEvents='none';
+  var barW=document.getElementById('acc-update-bar-wrap');if(barW)barW.style.display='block';
   if(ico)ico.textContent='⏳';
-  // Step 2: clear caches
-  var clearP='caches' in window
-    ?caches.keys().then(function(ks){
-      setStatus('Clearing cache…');setBar(35);
-      return Promise.all(ks.map(function(k){return caches.delete(k);}));
-    })
-    :Promise.resolve();
-  clearP.then(function(){
-    setStatus('Unregistering SW…');setBar(60);
+  var clrP='caches' in window?caches.keys().then(function(ks){setSt('Clearing…');setBar(40);return Promise.all(ks.map(function(k){return caches.delete(k);}));}):Promise.resolve();
+  clrP.then(function(){
+    setSt('Unregistering…');setBar(70);
     if('serviceWorker' in navigator){
       navigator.serviceWorker.getRegistrations().then(function(regs){
-        // Send SKIP_WAITING to any waiting/installing SW
-        regs.forEach(function(reg){
-          if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
-          if(reg.installing)reg.installing.postMessage({type:'SKIP_WAITING'});
-          if(reg.active)reg.active.postMessage({type:'SKIP_WAITING'});
-        });
-        return Promise.all(regs.map(function(reg){return reg.unregister();}));
-      }).then(function(){
-        setStatus('✓ Done! Reloading…');setBar(100);
-        if(ico)ico.textContent='✅';
-        setTimeout(function(){window.location.href=location.pathname;},700);
-      }).catch(function(){
-        setStatus('⚠ Error');setBar(0);
-        if(btn)btn.style.pointerEvents='';
-      });
-    }else{
-      setStatus('✓ Done!');setBar(100);
-      if(ico)ico.textContent='✅';
-      setTimeout(function(){window.location.href=location.pathname;},700);
-    }
-  }).catch(function(){
-    setStatus('⚠ Cache error');setBar(0);
-    if(btn)btn.style.pointerEvents='';
+        regs.forEach(function(r){if(r.waiting)r.waiting.postMessage({type:'SKIP_WAITING'});if(r.installing)r.installing.postMessage({type:'SKIP_WAITING'});if(r.active)r.active.postMessage({type:'SKIP_WAITING'});});
+        return Promise.all(regs.map(function(r){return r.unregister();}));
+      }).then(function(){setSt('✓ Done!');setBar(100);if(ico)ico.textContent='✅';setTimeout(function(){window.location.href=location.pathname;},700);});
+    }else{setSt('✓ Done!');setBar(100);if(ico)ico.textContent='✅';setTimeout(function(){window.location.href=location.pathname;},700);}
   });
 }
 function accLogout(){_haptic('warning');
@@ -1538,15 +1471,13 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var isLatin=(lang==='la');
 
   var html='';
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=isLatin?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
-    if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
+    var moName=d0.toLocaleDateString(locale,{month:'long'});
+    moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
 
@@ -1645,13 +1576,11 @@ function moRenderAll(){
             realShown++;
           }
           var remaining=realCount-realShown;
-          if(remaining>0)evHtml+='<div class="mo-ev-more">'+(isLatin&&window._toRoman?'+'+window._toRoman(remaining):'+'+remaining)+'</div>';
+          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
-        var _numCls='mo-day-num'+(isLatin&&!isOther?' mo-day-roman':'');
-        var numH='<div class="'+_numCls+'"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
+        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -1659,8 +1588,7 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yrDisp=(isLatin&&window._toRoman)?window._toRoman(yr):yr;
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
@@ -1671,24 +1599,12 @@ function moRenderAll(){
 
 function _moAbbrev(s){
   if(!s)return s;
-  s=s
-    .replace(/\bBienheureuses\b/g,'Bses')
-    .replace(/\bBienheureuse\b/g,'Bse')
-    .replace(/\bBienheureux\b/g,'Bx')
-    .replace(/\bNotre-Dame\b/g,'ND')
+  s=s.replace(/\bBienheureuses\b/g,'Bses').replace(/\bBienheureuse\b/g,'Bse').replace(/\bBienheureux\b/g,'Bx').replace(/\bNotre-Dame\b/g,'ND')
     .replace(/\bSaintes-/g,'Stes-').replace(/\bSaintes /g,'Stes ').replace(/\bSaintes$/g,'Stes')
     .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
     .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
     .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
-  try{
-    var _cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-    (_cfg.customAbbrevs||[]).forEach(function(r){
-      if(r.from&&r.to){
-        var pat=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');
-        s=s.replace(pat,r.to);
-      }
-    });
-  }catch(e){}
+  try{var c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
   return s;
 }
 function accOpenAbbrevs(){
@@ -1696,43 +1612,19 @@ function accOpenAbbrevs(){
   var _t=window._t||function(k,fb){return fb||k;};
   var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
   var rules=(cfg.customAbbrevs||[]).map(function(r){return {from:r.from||'',to:r.to||''};});
-  function _esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-  function renderRows(){
-    if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No custom rules yet.')+'</p>';
-    return rules.map(function(r,i){
-      return '<div class="abbrev-row">'+
-        '<input class="abbrev-inp" placeholder="'+_t('accAbbrevFrom','Full word')+'" value="'+_esc(r.from)+'" oninput="window._abbrevRules['+i+'].from=this.value"/>'+
-        '<span class="abbrev-arrow">&rarr;</span>'+
-        '<input class="abbrev-inp" placeholder="'+_t('accAbbrevTo','Short')+'" value="'+_esc(r.to)+'" oninput="window._abbrevRules['+i+'].to=this.value"/>'+
-        '<button class="abbrev-del" onclick="window._abbrevDel('+i+')">&#10005;</button>'+
-      '</div>';
-    }).join('');
-  }
-  window._abbrevRules=rules;
-  window._abbrevDel=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=renderRows();};
-  var ov=document.createElement('div');
-  ov.id='abbrev-sheet-overlay';
+  function _e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function rows(){if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No rules yet.')+'</p>';
+    return rules.map(function(r,i){return '<div class="abbrev-row"><input class="abbrev-inp" placeholder="'+_t('accAbbrevFrom','Word')+'" value="'+_e(r.from)+'" oninput="window._aR['+i+'].from=this.value"/><span class="abbrev-arrow">&rarr;</span><input class="abbrev-inp" placeholder="'+_t('accAbbrevTo','Short')+'" value="'+_e(r.to)+'" oninput="window._aR['+i+'].to=this.value"/><button class="abbrev-del" onclick="window._aD('+i+')">&#10005;</button></div>';}).join('');}
+  window._aR=rules;
+  window._aD=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
+  var ov=document.createElement('div');ov.id='abbrev-sheet-overlay';
   ov.style.cssText='position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;';
-  ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;">'+
-    '<div style="display:flex;align-items:center;margin-bottom:14px;">'+
-    '<strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Custom Abbreviations')+'</strong>'+
-    '<button onclick="window._abbrevClose()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button>'+
-    '</div>'+
-    '<p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in the month view.')+'</p>'+
-    '<div id="abbrev-list">'+renderRows()+'</div>'+
-    '<button onclick="window._abbrevAdd()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add rule')+'</button>'+
-    '<button onclick="window._abbrevSave()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button>'+
-    '</div>';
+  ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;"><div style="display:flex;align-items:center;margin-bottom:14px;"><strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Abbreviations')+'</strong><button onclick="window._aC()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button></div><p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in month view.')+'</p><div id="abbrev-list">'+rows()+'</div><button onclick="window._aA()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add')+'</button><button onclick="window._aS()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button></div>';
   document.body.appendChild(ov);
-  window._abbrevClose=function(){var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();};
-  ov.addEventListener('click',function(e){if(e.target===ov)window._abbrevClose();});
-  window._abbrevAdd=function(){rules.push({from:'',to:''});var el=document.getElementById('abbrev-list');if(el)el.innerHTML=renderRows();};
-  window._abbrevSave=function(){
-    var c2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-    c2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});
-    localStorage.setItem('shortcut_config',JSON.stringify(c2));
-    var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();
-  };
+  window._aC=function(){var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();};
+  ov.addEventListener('click',function(e){if(e.target===ov)window._aC();});
+  window._aA=function(){rules.push({from:'',to:''});var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
+  window._aS=function(){var c2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};c2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});localStorage.setItem('shortcut_config',JSON.stringify(c2));window._aC();};
 }
 function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
@@ -1884,15 +1776,13 @@ function moRenderAll(){
   var byDay=window._awByDay||{};
   var AW_HEX=window.AW_COLOR_HEX||{};
   var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
-  var lang=typeof window._getLang==='function'?window._getLang():'en';
-  var isLatin=(lang==='la');
 
   var html='';
   for(var delta=-6;delta<=13;delta++){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
-    var moName=isLatin?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
-    if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
+    var moName=d0.toLocaleDateString(locale,{month:'long'});
+    moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
 
@@ -1991,13 +1881,11 @@ function moRenderAll(){
             realShown++;
           }
           var remaining=realCount-realShown;
-          if(remaining>0)evHtml+='<div class="mo-ev-more">'+(isLatin&&window._toRoman?'+'+window._toRoman(remaining):'+'+remaining)+'</div>';
+          if(remaining>0)evHtml+='<div class="mo-ev-more">+'+remaining+'</div>';
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
-        var _numCls='mo-day-num'+(isLatin&&!isOther?' mo-day-roman':'');
-        var numH='<div class="'+_numCls+'"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
+        var numH='<div class="mo-day-num"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+( isOther?'':(isToday?cur.getDate():cur.getDate()))+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -2005,8 +1893,7 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yrDisp=(isLatin&&window._toRoman)?window._toRoman(yr):yr;
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep">'+yr+'</div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
@@ -2015,6 +1902,35 @@ function moRenderAll(){
   container.innerHTML=html;
 }
 
+function _moAbbrev(s){
+  if(!s)return s;
+  s=s.replace(/\bBienheureuses\b/g,'Bses').replace(/\bBienheureuse\b/g,'Bse').replace(/\bBienheureux\b/g,'Bx').replace(/\bNotre-Dame\b/g,'ND')
+    .replace(/\bSaintes-/g,'Stes-').replace(/\bSaintes /g,'Stes ').replace(/\bSaintes$/g,'Stes')
+    .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
+    .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
+    .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
+  try{var c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
+  return s;
+}
+function accOpenAbbrevs(){
+  if(document.getElementById('abbrev-sheet-overlay'))return;
+  var _t=window._t||function(k,fb){return fb||k;};
+  var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+  var rules=(cfg.customAbbrevs||[]).map(function(r){return {from:r.from||'',to:r.to||''};});
+  function _e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function rows(){if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No rules yet.')+'</p>';
+    return rules.map(function(r,i){return '<div class="abbrev-row"><input class="abbrev-inp" placeholder="'+_t('accAbbrevFrom','Word')+'" value="'+_e(r.from)+'" oninput="window._aR['+i+'].from=this.value"/><span class="abbrev-arrow">&rarr;</span><input class="abbrev-inp" placeholder="'+_t('accAbbrevTo','Short')+'" value="'+_e(r.to)+'" oninput="window._aR['+i+'].to=this.value"/><button class="abbrev-del" onclick="window._aD('+i+')">&#10005;</button></div>';}).join('');}
+  window._aR=rules;
+  window._aD=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
+  var ov=document.createElement('div');ov.id='abbrev-sheet-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;';
+  ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;"><div style="display:flex;align-items:center;margin-bottom:14px;"><strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Abbreviations')+'</strong><button onclick="window._aC()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button></div><p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in month view.')+'</p><div id="abbrev-list">'+rows()+'</div><button onclick="window._aA()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add')+'</button><button onclick="window._aS()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button></div>';
+  document.body.appendChild(ov);
+  window._aC=function(){var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();};
+  ov.addEventListener('click',function(e){if(e.target===ov)window._aC();});
+  window._aA=function(){rules.push({from:'',to:''});var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
+  window._aS=function(){var c2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};c2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});localStorage.setItem('shortcut_config',JSON.stringify(c2));window._aC();};
+}
 function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 
@@ -2233,7 +2149,7 @@ function moRenderAll(){
     var d0=new Date(refYear,refMonth+delta,1);
     var yr=d0.getFullYear(), mo=d0.getMonth();
     var moName=isLatin?(window._LA_MONTHS_NOM||[])[mo]:d0.toLocaleDateString(locale,{month:'long'});
-    if(locale!=='la')moName=moName[0].toUpperCase()+moName.slice(1);
+    if(!isLatin)moName=moName[0].toUpperCase()+moName.slice(1);
     var todayYear=parseInt(today.slice(0,4)), todayMonth=parseInt(today.slice(5,7))-1;
     var isCurMo=(yr===todayYear&&mo===todayMonth);
 
@@ -2336,9 +2252,9 @@ function moRenderAll(){
         }
         var cls='mo-day'+(isOther?' mo-other':'')+(isToday?' mo-today':'');
         // Day number: onclick navigates; event pills handle their own click
-        var _dayNum=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
-        var _numCls='mo-day-num'+(isLatin&&!isOther?' mo-day-roman':'');
-        var numH='<div class="'+_numCls+'"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dayNum+'</div>';
+        var _dn=isOther?'':(isLatin&&window._toRoman?window._toRoman(cur.getDate()):cur.getDate());
+        var _nc='mo-day-num'+(isLatin&&!isOther?' mo-day-roman':'');
+        var numH='<div class="'+_nc+'"'+(isOther?'':' onclick="moSelectDay(this.closest(\'[data-ds]\').dataset.ds)"')+'>'+_dn+'</div>';
         weekHtml+='<div class="'+cls+'" data-ds="'+ds+'">'+numH+(evHtml?'<div class="mo-ev-wrap">'+evHtml+'</div>':'')+'</div>';
         cur.setDate(cur.getDate()+1);
       }
@@ -2346,8 +2262,8 @@ function moRenderAll(){
       weeksHtml+=weekHtml;
     }
     // Year separator: show big year label before January
-    var yrDisp=(isLatin&&window._toRoman)?window._toRoman(yr):yr;
-    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrDisp+'</span><div class="mo-year-sep-line"></div></div>':'';
+    var yrD=isLatin&&window._toRoman?window._toRoman(yr):yr;
+    var yearSep=(mo===0&&delta!==0)?'<div class="mo-year-sep"><span class="mo-year-sep-num">'+yrD+'</span><div class="mo-year-sep-line"></div></div>':'';
     html+=yearSep+'<div class="mo-month-block" id="mo-m-'+yr+'-'+mo+'">'+
       '<div class="mo-month-name'+(isCurMo?' mo-current':'')+'">'+moName+'</div>'+
       '<div class="mo-weeks">'+weeksHtml+'</div>'+
@@ -2356,6 +2272,35 @@ function moRenderAll(){
   container.innerHTML=html;
 }
 
+function _moAbbrev(s){
+  if(!s)return s;
+  s=s.replace(/\bBienheureuses\b/g,'Bses').replace(/\bBienheureuse\b/g,'Bse').replace(/\bBienheureux\b/g,'Bx').replace(/\bNotre-Dame\b/g,'ND')
+    .replace(/\bSaintes-/g,'Stes-').replace(/\bSaintes /g,'Stes ').replace(/\bSaintes$/g,'Stes')
+    .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
+    .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
+    .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
+  try{var c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
+  return s;
+}
+function accOpenAbbrevs(){
+  if(document.getElementById('abbrev-sheet-overlay'))return;
+  var _t=window._t||function(k,fb){return fb||k;};
+  var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
+  var rules=(cfg.customAbbrevs||[]).map(function(r){return {from:r.from||'',to:r.to||''};});
+  function _e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+  function rows(){if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No rules yet.')+'</p>';
+    return rules.map(function(r,i){return '<div class="abbrev-row"><input class="abbrev-inp" placeholder="'+_t('accAbbrevFrom','Word')+'" value="'+_e(r.from)+'" oninput="window._aR['+i+'].from=this.value"/><span class="abbrev-arrow">&rarr;</span><input class="abbrev-inp" placeholder="'+_t('accAbbrevTo','Short')+'" value="'+_e(r.to)+'" oninput="window._aR['+i+'].to=this.value"/><button class="abbrev-del" onclick="window._aD('+i+')">&#10005;</button></div>';}).join('');}
+  window._aR=rules;
+  window._aD=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
+  var ov=document.createElement('div');ov.id='abbrev-sheet-overlay';
+  ov.style.cssText='position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;';
+  ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;"><div style="display:flex;align-items:center;margin-bottom:14px;"><strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Abbreviations')+'</strong><button onclick="window._aC()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button></div><p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in month view.')+'</p><div id="abbrev-list">'+rows()+'</div><button onclick="window._aA()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add')+'</button><button onclick="window._aS()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button></div>';
+  document.body.appendChild(ov);
+  window._aC=function(){var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();};
+  ov.addEventListener('click',function(e){if(e.target===ov)window._aC();});
+  window._aA=function(){rules.push({from:'',to:''});var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
+  window._aS=function(){var c2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};c2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});localStorage.setItem('shortcut_config',JSON.stringify(c2));window._aC();};
+}
 function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 
@@ -2375,7 +2320,7 @@ function moSelectDay(ds){
       // Rebuild using ds as the new centre date
       var saved_today=_wkToday;
       wkInit(window._awByDay, ds);
-      _wkToday=saved_today; // restore real today
+      _wkToday=saved_today; // re real today
       // Re-mark real today in the header
       wkUpdateHdr();
     }

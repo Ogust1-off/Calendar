@@ -1,24 +1,3 @@
-
-// Latin date formatting helpers
-function _isLatinLang() { return typeof window._getLang==='function' && window._getLang()==='la'; }
-function _laMonthShort(mon) {
-  var s=['Ian','Feb','Mar','Apr','Mai','Iun','Iul','Aug','Sep','Oct','Nov','Dec'];
-  return s[mon]||'';
-}
-function _laFmtShort(d) {
-  var LA_D=['Dom','Lun','Mar','Mer','Iov','Ven','Sat'];
-  return LA_D[d.getDay()]+' '+(window._toRoman?window._toRoman(d.getDate()):d.getDate())+' '+_laMonthShort(d.getMonth());
-}
-function _laFmtLong(d) {
-  var LA_D=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
-  var LA_M=window._LA_MONTHS||[];
-  return LA_D[d.getDay()]+', '+(window._toRoman?window._toRoman(d.getDate()):d.getDate())+' '+( LA_M[d.getMonth()]||'')+(', '+(window._toRoman?window._toRoman(d.getFullYear()):d.getFullYear()));
-}
-function _laFmtMonthLong(d) {
-  var LA_M=window._LA_MONTHS_NOM||[];
-  return LA_M[d.getMonth()]||'';
-}
-function _laFmtMonthShort(d) { return _laMonthShort(d.getMonth()); }
 /*Shortcut™ JS file for Agenda by Augustin de Chalendar
 Copyright © 2026 Ogust'1. All rights reserved.
 */
@@ -71,12 +50,9 @@ function awToday() { return awDateStr(new Date()); }
 
 function awFmtTime(iso) {
   if (!iso) return '';
-  const d = new Date(iso);
-  if (_isLatinLang() && window._toRoman) {
-    const hr = d.getHours(), mn = d.getMinutes();
-    return window._toRoman(hr) + (mn === 0 ? '' : '.' + window._toRoman(mn));
-  }
-  return d.toLocaleTimeString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { hour: '2-digit', minute: '2-digit' });
+  const _d=new Date(iso);
+  if(window._getLang&&window._getLang()==='la'&&window._toRoman){const _h=_d.getHours(),_m=_d.getMinutes();return window._toRoman(_h)+(_m===0?'':'.'+window._toRoman(_m));}
+  return _d.toLocaleTimeString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { hour: '2-digit', minute: '2-digit' });
 }
 function awFmtRemaining(end) {
   const ms = new Date(end) - Date.now();
@@ -85,9 +61,11 @@ function awFmtRemaining(end) {
   const h   = Math.floor(totalSec / 3600);
   const min = Math.floor((totalSec % 3600) / 60);
   const sec = totalSec % 60;
-  if (h > 0)   return `${h}h${String(min).padStart(2,'0')}`;
-  if (min > 0) return `${min}min`;
-  return `${sec}s`;
+  const _laR=window._getLang&&window._getLang()==='la'&&window._toRoman;
+  const R=n=>_laR?window._toRoman(n):n;
+  if (h > 0)   return R(h)+'h'+(_laR?R(min):String(min).padStart(2,'0'));
+  if (min > 0) return R(min)+'min';
+  return R(sec)+'s';
 }
 
 function awFmtRemainingLong(end) {
@@ -107,10 +85,10 @@ function awFmtDuration(start, end) {
   const ms = new Date(end) - new Date(start);
   const h  = Math.floor(ms / 3600000);
   const m  = Math.floor((ms % 3600000) / 60000);
-  if (_isLatinLang() && window._toRoman) {
-    if (h === 0) return window._toRoman(m) + 'min';
-    if (m === 0) return window._toRoman(h) + 'h';
-    return window._toRoman(h) + 'h' + window._toRoman(m);
+  if(window._getLang&&window._getLang()==='la'&&window._toRoman){
+    if(h===0)return window._toRoman(m)+'min';
+    if(m===0)return window._toRoman(h)+'h';
+    return window._toRoman(h)+'h'+window._toRoman(m);
   }
   if (h === 0) return `${m}min`;
   if (m === 0) return `${h}h`;
@@ -118,16 +96,21 @@ function awFmtDuration(start, end) {
 }
 function awFmtDayLabel(dateStr, long = false) {
   const d = new Date(dateStr + 'T00:00:00');
-  if (_isLatinLang()) return long ? _laFmtLong(d) : _laFmtShort(d);
+  if(window._getLang&&window._getLang()==='la'){
+    const LA_D=window._LA_DAYS||[];const LA_DS=['Lun','Mar','Mer','Iov','Ven','Sat','Dom'];
+    const LA_M=window._LA_MONTHS||[];const LA_MN=window._LA_MONTHS_NOM||[];
+    const R=n=>window._toRoman?window._toRoman(n):n;
+    return long?(LA_D[d.getDay()]||'')+', '+R(d.getDate())+' '+(LA_M[d.getMonth()]||'')+', '+R(d.getFullYear()):(LA_DS[d.getDay()]||'')+' '+R(d.getDate())+' '+(LA_MN[d.getMonth()]||'');
+  }
   const s = d.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), long
     ? { weekday: 'long', day: 'numeric', month: 'long' }
     : { weekday: 'short', day: 'numeric', month: 'short' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 function awWeekdayShort(dateStr) {
-  const _dws = new Date(dateStr + 'T00:00:00');
-  if (_isLatinLang()) { var _lad=['Lun','Mar','Mer','Iov','Ven','Sat','Dom']; return _lad[_dws.getDay()]||''; }
-  return _dws
+  const _dw=new Date(dateStr+'T00:00:00');
+  if(window._getLang&&window._getLang()==='la'){var _S=['Lun','Mar','Mer','Iov','Ven','Sat','Dom'];return _S[_dw.getDay()]||'';}
+  return _dw
     .toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { weekday: 'short' })
     .replace(/^./, c => c.toUpperCase());
 }
@@ -425,7 +408,7 @@ function awRowHtml(ev, idx = -1) {
   const badges = [
     typeBadge ? `<span class="aw-row-badge" style="color:${accent};border-color:${accent}${isLM?'33':'44'};background:${accent}${isLM?'18':'22'}">${typeBadge}</span>` : '',
     group     ? `<span class="aw-row-badge aw-row-badge--group">${group}</span>` : '',
-    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">${window._t?window._t('inProgress'):(window._getLang&&window._getLang()==='la'?'In progressu':'In progress')}</span>` : '',
+    now       ? `<span class="aw-now-badge" style="color:${accent};background:${accent}${isLM?'18':'22'};border-color:${accent}${isLM?'44':'55'}">${window._t?window._t('inProgress'):'In progress'}</span>` : '',
   ].filter(Boolean).join('');
 
   const { teacher, mapUrl, visioUrl, visioLabel, transport } = awParseDesc(ev.description || '');
@@ -462,10 +445,10 @@ function awRowHtml(ev, idx = -1) {
             // iCal all-day end is exclusive — subtract 1 day
             const ed=new Date(rawEnd+'T00:00:00');
             const isMulti=(ed-sd)>86400000-1;
-            if(!isMulti){return (window._getLang&&window._getLang()==='la'&&window._fmtDateLa)?window._fmtDateLa(sd,{noYear:true}):sd.toLocaleDateString(locale,{day:'numeric',month:'long'});}
+            if(!isMulti){return sd.toLocaleDateString(locale,{day:'numeric',month:'long'});}
             const edDisp=new Date(ed);edDisp.setDate(edDisp.getDate()-1);
             const days=Math.round((ed-sd)/86400000);
-            const fmt=(d)=>(window._getLang&&window._getLang()==='la'&&window._fmtDateLa)?window._fmtDateLa(d,{noYear:true}):d.toLocaleDateString(locale,{day:'numeric',month:'long'});
+            const fmt=(d)=>d.toLocaleDateString(locale,{day:'numeric',month:'long'});
             const dayWord=(window._getLang&&window._getLang()==='fr')?( days===1?'jour':'jours'):(days===1?'day':'days');
             return fmt(sd)+' – '+fmt(edDisp)+' ('+days+' '+dayWord+')';
           })()}</span>`
@@ -663,13 +646,10 @@ function awUpdateTimer() {
   if (!awLastUpdated) return;
   const secs = Math.round((Date.now()-awLastUpdated)/1000);
   const mins = Math.floor(secs/60);
-  const _lang=typeof window._getLang==='function'?window._getLang():'en';
-  const fr=_lang==='fr', _la=_lang==='la';
-  const _R=(n)=>(_la&&window._toRoman)?window._toRoman(n):n;
-  const txt=secs<10?(fr?'Mis à jour':_la?'Modo renovatum':'Just updated')
-    :secs<60?(fr?`Mis à jour il y a ${secs}s`:_la?`Renovatum ${_R(secs)}s`:`Updated ${secs}s ago`)
-    :secs<120?(fr?'Mis à jour il y a 1min':_la?'Renovatum Imin':'Updated 1min ago')
-    :(fr?`Mis à jour il y a ${mins}min`:_la?`Renovatum ${_R(mins)}min`:`Updated ${mins}min ago`);
+  const _langU=typeof window._getLang==='function'?window._getLang():'en';
+  const fr=_langU==='fr',_la=_langU==='la';
+  const _RU=n=>(_la&&window._toRoman)?window._toRoman(n):n;
+  const txt=secs<10?(fr?'Mis à jour':_la?'Modo renovatum':'Just updated'):secs<60?(fr?`Mis à jour il y a ${secs}s`:_la?`Renovatum ${_RU(secs)}s`:`Updated ${secs}s ago`):secs<120?(fr?'Mis à jour il y a 1min':_la?'Renovatum Imin':'Updated 1min ago'):(fr?`Mis à jour il y a ${mins}min`:_la?`Renovatum ${_RU(mins)}min`:`Updated ${mins}min ago`);
   ['aw-last-updated','nb-upd','acc-upd'].forEach(id=>{
     const el=document.getElementById(id);
     if(el){el.textContent=txt;el.style.color='';}
@@ -731,16 +711,16 @@ function awPopOpen(el, idx) {
         <span>${(()=>{
           if(ev.start.length!==10)return awFmtTime(ev.start)+' \u2013 '+awFmtTime(ev.end)+(dur?' <span class=\"aw-pop-muted\">('+dur+')</span>':'');
           const locale2=window._currentLocale||'en-GB';
-          const isLa=window._getLang&&window._getLang()==='la';
           const sd2=new Date(ev.start+'T00:00:00');
           const rawEnd2=ev.end||ev.start;
           const ed2=new Date(rawEnd2+'T00:00:00');
           const isM=(ed2-sd2)>86400000-1;
-          if(isLa)return window._fmtDateLa?window._fmtDateLa(sd2,isM?{}:{noYear:true})+(isM?(' – '+window._fmtDateLa(new Date(ed2.getTime()-86400000),{noYear:true})+' ('+Math.round((ed2-sd2)/86400000)+' dies)'):''): sd2.toLocaleDateString();
+          if(window._getLang&&window._getLang()==='la'&&window._fmtDateLa){if(!isM)return window._fmtDateLa(sd2,{weekday:true});}
           if(!isM)return sd2.toLocaleDateString(locale2,{weekday:'long',day:'numeric',month:'long'});
           const edD=new Date(ed2);edD.setDate(edD.getDate()-1);
           const days2=Math.round((ed2-sd2)/86400000);
-          const fmt2=(d)=>d.toLocaleDateString(locale2,{day:'numeric',month:'long'});
+          const _laFmt=window._getLang&&window._getLang()==='la'&&window._fmtDateLa;
+          const fmt2=(d)=>_laFmt?window._fmtDateLa(d,{noYear:true}):d.toLocaleDateString(locale2,{day:'numeric',month:'long'});
           const dw=(window._getLang&&window._getLang()==='fr')?(days2===1?'jour':'jours'):(days2===1?'day':'days');
           return fmt2(sd2)+' \u2013 '+fmt2(edD)+' ('+days2+'\u00a0'+dw+')';
         })()}</span>
@@ -764,11 +744,11 @@ function awPopOpen(el, idx) {
       ${typeBadge || group || startsSoon? `<div class="aw-pop-tags">
         ${typeBadge ? `<span class="aw-pop-tag" style="border-color:${accent};color:${accent}">${typeBadge}</span>` : ''}
         ${group     ? `<span class="aw-pop-tag">${group}</span>` : ''}
-        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):(window._getLang&&window._getLang()==='la'?'In progressu':'In progress')}</span>` : ''}
+        ${now       ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
         ${past      ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'Done'}</span>` : ''}
         ${startsSoon ? `<span class="aw-pop-tag">${window._t?window._t("startingSoon"):"STARTING SOON"}</span>` : ''}
       </div>` : (now || past) ? `<div class="aw-pop-tags">
-        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):(window._getLang&&window._getLang()==='la'?'In progressu':'In progress')}</span>` : ''}
+        ${now  ? `<span class="aw-pop-tag aw-pop-tag-now" style="color:${accent};background:${accent}18;border-color:${accent}40">${window._t?window._t('inProgress'):'In progress'}</span>` : ''}
         ${past ? `<span class="aw-pop-tag aw-pop-tag-past">${window._t?window._t('completed'):'Done'}</span>` : ''}
       </div>` : ''}
       ${startsSoon ? `
@@ -979,16 +959,16 @@ function awRenderCalendar(byDay, today) {
 
   // "March 2026" — if week spans two months show "Mar – Apr 2026"
   const monthLabel = (() => {
-    const _isLa = _isLatinLang();
-    const month0 = _isLa ? _laFmtMonthLong(d0) : d0.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'long' });
-    const year0  = d0.getFullYear();
-    const year0D = _isLa ? (window._toRoman?window._toRoman(year0):year0) : year0;
+    const _laC=window._getLang&&window._getLang()==='la';
+    const _RC=n=>(_laC&&window._toRoman)?window._toRoman(n):n;
+    const month0=_laC?(window._LA_MONTHS_NOM||[])[d0.getMonth()]:d0.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'long' });
+    const year0=d0.getFullYear();
     if (d0.getMonth() === d6.getMonth()) {
-      return `<strong>${month0}</strong> <span class="aw-cal-year">${year0D}</span>`;
+      return `<strong>${month0}</strong> <span class="aw-cal-year">${_RC(year0)}</span>`;
     }
-    const month6 = _isLa ? _laFmtMonthShort(d6) : d6.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'short' });
-    const year6  = d6.getFullYear();
-    const yearSuffix = year0 === year6 ? ` <span class="aw-cal-year">${year6}</span>` : ` <span class="aw-cal-year">${year0}</span> \u2013 <span class="aw-cal-year">${year6}</span>`;
+    const month6=_laC?(window._LA_MONTHS_NOM||[])[d6.getMonth()]:d6.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'short' });
+    const year6=d6.getFullYear();
+    const yearSuffix = year0 === year6 ? ` <span class="aw-cal-year">${_RC(year6)}</span>` : ` <span class="aw-cal-year">${_RC(year0)}</span> \u2013 <span class="aw-cal-year">${_RC(year6)}</span>`;
     return `<strong>${month0.slice(0,3)} \u2013 ${month6}</strong>${yearSuffix}`;
   })();
 
@@ -1177,7 +1157,12 @@ async function awInit() {
     if (typeof showOnboarding === 'function') showOnboarding();
     return;
   }
-  if (!navigator.onLine) { awScheduleReload(); return; }
+  if (!navigator.onLine) {
+    const _lo=window._getLang?window._getLang():'en';
+    const _om=_lo==='fr'?'Hors ligne':_lo==='la'?'Sine rete':'Offline';
+    ['aw-last-updated','nb-upd','acc-upd'].forEach(id=>{const e=document.getElementById(id);if(e){e.textContent=_om;e.style.color='var(--amber,#f59e0b)';}});
+    awScheduleReload(); return;
+  }
   try {
     awRender(await awFetch());
     // Clear any offline error state
@@ -1278,7 +1263,7 @@ function awRenderDay(ds, container, preserveScroll) {
   const laid=awLayoutColumns(timed, ds);
   const now=new Date(), nowH=now.getHours()+now.getMinutes()/60;
   let html=`<div class="awd-grid" style="height:${gridH}px"><div class="awd-gutter">`;
-  for(let h=1;h<24;h++) html+=`<div class="awd-hour-lbl" style="top:${h*AW_PX_PER_HOUR}px">${_isLatinLang()&&window._toRoman?window._toRoman(h):(String(h).padStart(2,'0')+':00')}</div>`;
+  for(let h=1;h<24;h++) html+=`<div class="awd-hour-lbl" style="top:${h*AW_PX_PER_HOUR}px">${(window._getLang&&window._getLang()==='la'&&window._toRoman)?window._toRoman(h):(String(h).padStart(2,'0')+':00')}</div>`;
   html+=`</div><div class="awd-col">`;
   for(let h=0;h<=24;h++) html+=`<div class="${h%6===0?'awd-hline major':'awd-hline'}" style="top:${h*AW_PX_PER_HOUR}px"></div>`;
   if(isToday) html+=`<div class="awd-now" style="top:${nowH*AW_PX_PER_HOUR}px"><div class="awd-now-dot"></div></div>`;
