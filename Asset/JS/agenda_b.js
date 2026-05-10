@@ -75,6 +75,8 @@ function awFmtRemainingLong(end) {
   const h   = Math.floor(totalSec / 3600);
   const min = Math.floor((totalSec % 3600) / 60);
   const sec = totalSec % 60;
+  const _laRL=window._getLang&&window._getLang()==='la'&&window._toRoman;
+  const R=n=>_laRL?window._toRoman(n):n;
   if (h > 0)   return `${h}h${String(min).padStart(2,'0')}`;
   if (min > 0) return `${min}min ${String(sec).padStart(2,'0')}s`;
   return `${sec}s`;

@@ -499,8 +499,10 @@
       var cfg2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
       if(cfg2.displayName){
         var lang2=cfg2.lang||'en';
+        var _ss=document.getElementById('splash-sub');
+        if(_ss)_ss.textContent=lang2==='fr'?'par Shortcut™':lang2==='la'?'ab Shortcut™':'by Shortcut™';
         var sn=document.getElementById('splash-name');
-        if(sn)sn.textContent=lang2==='fr'?'Bonjour '+cfg2.displayName+' !':'Hi, '+cfg2.displayName+'!';
+        if(sn)sn.textContent=lang2==='fr'?'Bonjour '+cfg2.displayName+' !':lang2==='la'?'Salve, '+cfg2.displayName+'!':'Hi, '+cfg2.displayName+'!';
       }
     }catch(se){}
     setTimeout(window._hideSplash,3500);
@@ -646,6 +648,7 @@
       accAbbrevs:'Abbreviationes',accAbbrevsTitle:'Abbreviationes propriae',
       accAbbrevsDesc:'Verba breviora in mense.',accAbbrevFrom:'Verbum plenum',accAbbrevTo:'Forma brevis',
       accAbbrevAdd:'+ Adde',accAbbrevEmpty:'Nullae regulae.',
+      popDesc:'Descriptio',popTeacher:'Magister',popLocation:'Locus',popVisio:'Visio',
     }
   };
   window._t=function(k,a){
@@ -1394,10 +1397,12 @@ function moToggle(){
     var lbl=document.getElementById('mo-cur-month-lbl');
     if(lbl){
       var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+      var _isLaS=(locale==='la');
       var d0=new Date(y,m,1);
-      var mn=d0.toLocaleDateString(locale,{month:'long'});
-      mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
+      var mn=_isLaS?(window._LA_MONTHS_NOM||[])[m]:d0.toLocaleDateString(locale,{month:'long'});
+      if(!_isLaS)mn=mn[0].toUpperCase()+mn.slice(1);
+      var _yrS=_isLaS&&window._toRoman?window._toRoman(y):y;
+      lbl.textContent=mn+' '+_yrS;
       // Sync week view header label
       var wml=document.getElementById('wk-month-lbl');
       if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
@@ -1705,10 +1710,12 @@ function moToggle(){
     var lbl=document.getElementById('mo-cur-month-lbl');
     if(lbl){
       var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+      var _isLaS=(locale==='la');
       var d0=new Date(y,m,1);
-      var mn=d0.toLocaleDateString(locale,{month:'long'});
-      mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
+      var mn=_isLaS?(window._LA_MONTHS_NOM||[])[m]:d0.toLocaleDateString(locale,{month:'long'});
+      if(!_isLaS)mn=mn[0].toUpperCase()+mn.slice(1);
+      var _yrS=_isLaS&&window._toRoman?window._toRoman(y):y;
+      lbl.textContent=mn+' '+_yrS;
       // Sync week view header label
       var wml=document.getElementById('wk-month-lbl');
       if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
@@ -2070,10 +2077,12 @@ function moToggle(){
     var lbl=document.getElementById('mo-cur-month-lbl');
     if(lbl){
       var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+      var _isLaS=(locale==='la');
       var d0=new Date(y,m,1);
-      var mn=d0.toLocaleDateString(locale,{month:'long'});
-      mn=mn[0].toUpperCase()+mn.slice(1);
-      lbl.textContent=mn+' '+y;
+      var mn=_isLaS?(window._LA_MONTHS_NOM||[])[m]:d0.toLocaleDateString(locale,{month:'long'});
+      if(!_isLaS)mn=mn[0].toUpperCase()+mn.slice(1);
+      var _yrS=_isLaS&&window._toRoman?window._toRoman(y):y;
+      lbl.textContent=mn+' '+_yrS;
       // Sync week view header label
       var wml=document.getElementById('wk-month-lbl');
       if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
