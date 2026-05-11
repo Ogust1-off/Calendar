@@ -322,6 +322,7 @@
   /* Timed: text uses event color */
   .mo-ev-timed .mo-ev-txt{color:var(--lbl);}
   .mo-ev-wrap{display:flex;flex-direction:column;gap:4px;}
+  .mo-ev-cont-txt{opacity:.75;font-size:9.5px;}
   /* +N */
   .mo-ev-more{
     font-size:10px;font-weight:400;color:var(--lbl3);
@@ -857,7 +858,11 @@
 <div id="ib">
   <div class="ib-ico">&#128242;</div>
   <div class="ib-txt"><strong>Install the app</strong><small>Share &#8594; Add to Home Screen</small></div>
-  <button class="ib-x" onclick="dismissBanner()">&#215;</button>
+  <button class="ib-x" onclick="dismissBanner()">
+        &#10005;
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -2222,7 +2227,10 @@ function moRenderAll(){
           allDayCont.forEach(function(ev2){
             var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
             var isLit=(ev2.hex==='#f8f4ec');
-            evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')"></div>';
+            var txC=isLit?'rgba(60,40,20,0.7)':'rgba(255,255,255,0.75)';
+            // Show event name on continuation cells (truncated, low opacity)
+            var contName=ev2.isEnd?'':('<span class="mo-ev-txt mo-ev-cont-txt" style="color:'+txC+'">'+_moEsc(_moAbbrev(ev2.name))+'</span>');
+            evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+contName+'</div>';
           });
           // PASS 2: real events up to maxReal
           for(var ai=0;ai<allDayStarts.length&&realShown<maxReal;ai++){
@@ -2348,6 +2356,7 @@ window.addEventListener('load',function(){
   if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone&&!localStorage.getItem('ib'))
     setTimeout(function(){document.getElementById('ib').classList.add('on');},5000);
 });
+
 </script>
 </body>
 </html>
