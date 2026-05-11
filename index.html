@@ -940,7 +940,9 @@ function wkUpdateHdr(){
   days.innerHTML='';
   var _DOW_EN=['M','T','W','T','F','S','S'];
   var _DOW_FR=['L','M','M','J','V','S','D'];
-  var _dow=typeof window._getLang==='function'&&window._getLang()==='fr'?_DOW_FR:_DOW_EN;
+  var _DOW_LA=['L','M','M','I','V','S','D'];
+  var _lg=typeof window._getLang==='function'?window._getLang():'en';
+  var _dow=_lg==='fr'?_DOW_FR:_lg==='la'?_DOW_LA:_DOW_EN;
   _dow.forEach(function(l,i){
     var day=new Date(mon);day.setDate(mon.getDate()+i);var ds=_ds(day);
     var isT=(ds===_wkToday),isSel=(ds===_wkCur),hasEv=((byDay[ds]||[]).length>0);
@@ -1421,12 +1423,14 @@ function moToggle(){
           var parts=visible.id.replace('mo-m-','').split('-');
           var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
           var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+          var _isLaLive=(locale==='la');
           var d=new Date(yr,mo,1);
-          var mn=d.toLocaleDateString(locale,{month:'long'});
-          mn=mn[0].toUpperCase()+mn.slice(1);
+          var mn=_isLaLive?(window._LA_MONTHS_NOM||[])[mo]:d.toLocaleDateString(locale,{month:'long'});
+          if(!_isLaLive)mn=mn[0].toUpperCase()+mn.slice(1);
+          var _yrLive=_isLaLive&&window._toRoman?window._toRoman(yr):yr;
           // Update wk-month-lbl in real time while scrolling
           var wml=document.getElementById('wk-month-lbl');
-          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
+          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+_yrLive+'</span>';
         }
       },{passive:true});
     }
@@ -1734,12 +1738,14 @@ function moToggle(){
           var parts=visible.id.replace('mo-m-','').split('-');
           var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
           var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+          var _isLaLive=(locale==='la');
           var d=new Date(yr,mo,1);
-          var mn=d.toLocaleDateString(locale,{month:'long'});
-          mn=mn[0].toUpperCase()+mn.slice(1);
+          var mn=_isLaLive?(window._LA_MONTHS_NOM||[])[mo]:d.toLocaleDateString(locale,{month:'long'});
+          if(!_isLaLive)mn=mn[0].toUpperCase()+mn.slice(1);
+          var _yrLive=_isLaLive&&window._toRoman?window._toRoman(yr):yr;
           // Update wk-month-lbl in real time while scrolling
           var wml=document.getElementById('wk-month-lbl');
-          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
+          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+_yrLive+'</span>';
         }
       },{passive:true});
     }
@@ -2101,12 +2107,14 @@ function moToggle(){
           var parts=visible.id.replace('mo-m-','').split('-');
           var yr=parseInt(parts[0]),mo=parseInt(parts[1]);
           var locale=typeof window._appLocale==='function'?window._appLocale():'en-GB';
+          var _isLaLive=(locale==='la');
           var d=new Date(yr,mo,1);
-          var mn=d.toLocaleDateString(locale,{month:'long'});
-          mn=mn[0].toUpperCase()+mn.slice(1);
+          var mn=_isLaLive?(window._LA_MONTHS_NOM||[])[mo]:d.toLocaleDateString(locale,{month:'long'});
+          if(!_isLaLive)mn=mn[0].toUpperCase()+mn.slice(1);
+          var _yrLive=_isLaLive&&window._toRoman?window._toRoman(yr):yr;
           // Update wk-month-lbl in real time while scrolling
           var wml=document.getElementById('wk-month-lbl');
-          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+yr+'</span>';
+          if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+_yrLive+'</span>';
         }
       },{passive:true});
     }
