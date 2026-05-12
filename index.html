@@ -315,6 +315,7 @@
     padding-left:5px;padding-right:5px;
     height:17px;line-height:17px;
   }
+  .mo-ev.mo-ev-band{overflow:visible;white-space:nowrap;}
   .mo-ev-band-start{border-radius:99px 0 0 99px!important;margin-left:1px;}
   .mo-ev-band-end{border-radius:0 99px 99px 0!important;margin-right:1px;}
   .mo-ev-band-start.mo-ev-band-end{border-radius:99px!important;margin:0 1px;}
@@ -1618,7 +1619,7 @@ function _moAbbrev(s){
     .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
     .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
     .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
-  try{var c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
+  try{var _c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(_c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
   return s;
 }
 function accOpenAbbrevs(){
@@ -1927,7 +1928,7 @@ function _moAbbrev(s){
     .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
     .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
     .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
-  try{var c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
+  try{var _c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(_c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
   return s;
 }
 function accOpenAbbrevs(){
@@ -2209,7 +2210,8 @@ function moRenderAll(){
               var endDs=endDate.getFullYear()+'-'+String(endDate.getMonth()+1).padStart(2,'0')+'-'+String(endDate.getDate()).padStart(2,'0');
               var isEnd=(ds===endDs||ds===evEndExD);
               var isMulti=(evEndExD>evStartD&&(new Date(evEndExD)-new Date(evStartD))>86400000-1);
-              allDayEvs.push({hex:hex,name:name,idx:evIdx,isStart:isStart,isEnd:isEnd,isMulti:isMulti});
+              var _isMon=new Date(ds+'T00:00:00').getDay()===1;
+              allDayEvs.push({hex:hex,name:name,idx:evIdx,isMon:_isMon,isStart:isStart,isEnd:isEnd,isMulti:isMulti});
             } else timedEvs.push({hex:hex,name:name,idx:evIdx});
           });
           // For maxShow: don't count continuation-band cells (non-start multi-day)
@@ -2227,9 +2229,14 @@ function moRenderAll(){
           allDayCont.forEach(function(ev2){
             var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
             var isLit=(ev2.hex==='#f8f4ec');
-            var txC=isLit?'rgba(60,40,20,0.7)':'rgba(255,255,255,0.75)';
-            // Show event name on continuation cells (truncated, low opacity)
-            var contName=ev2.isEnd?'':('<span class="mo-ev-txt mo-ev-cont-txt" style="color:'+txC+'">'+_moEsc(_moAbbrev(ev2.name))+'</span>');
+            var txC=isLit?'rgba(60,40,20,0.8)':'rgba(255,255,255,0.9)';
+            // Show name reminder on Monday (new week)
+            var contName='';
+            if(!ev2.isEnd&&ev2.isMon){
+              var nm=_moAbbrev(ev2.name)||'';
+              var disp=nm.length>13?nm.slice(0,12)+'…':nm;
+              contName='<span class="mo-ev-txt" style="color:'+txC+';">'+_moEsc(disp)+'</span>';
+            }
             evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+contName+'</div>';
           });
           // PASS 2: real events up to maxReal
@@ -2304,7 +2311,7 @@ function _moAbbrev(s){
     .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
     .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
     .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
-  try{var c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
+  try{var _c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(_c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
   return s;
 }
 function accOpenAbbrevs(){
