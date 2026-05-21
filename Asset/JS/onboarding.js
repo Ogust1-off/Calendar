@@ -415,7 +415,16 @@ function _obPickSrc(val,btn){if(typeof _haptic==="function")_haptic("selection")
   if(parent)parent.querySelectorAll('.ob-src-btn').forEach(function(b){b.classList.remove('ob-src-on');var c=b.querySelector('.ob-src-chk');if(c)c.textContent='';});
   btn.classList.add('ob-src-on');
   var chk=btn.querySelector('.ob-src-chk');if(chk)chk.textContent='\u2713';
-  var d=_obLoad();d.calSource=val;_obSave(d);
+  var d=_obLoad();
+  // If source actually changed, clear old calendar data
+  if(d.calSource && d.calSource!==val){
+    d.calendars=[];
+    d.cal1Ical='';
+    d.cal2Ical='';
+    d.apiKey='';
+    // Keep: cal colors, names, lang, theme, displayName, abbrevs
+  }
+  d.calSource=val;_obSave(d);
 }
 function _obPickPreset(val,btn){if(typeof _haptic==="function")_haptic("selection");
   var parent=btn.parentElement;
@@ -563,8 +572,18 @@ function _obSrcPage1(con,bot){
   if(!bot)bot=document.getElementById('ob-cal-bottom');
   if(!con||!bot)return;
   var d=_obLoad(),src=d.calSource||'google';
+  // Show current config summary
+  var _curSumm='';
+  if(d.calSource==='google'&&d.calendars&&d.calendars.length){
+    _curSumm='<div class="ob-cur-cfg"><span class="ob-cur-lbl">Google</span>'+
+      d.calendars.map(function(c){return '<span class="ob-cur-id">'+_obEsc(c)+'</span>';}).join('')+'</div>';
+  }else if((d.calSource==='ical'||d.calSource==='both')&&d.cal1Ical){
+    _curSumm='<div class="ob-cur-cfg"><span class="ob-cur-lbl">iCal</span>'+
+      '<span class="ob-cur-id">'+_obEsc(d.cal1Ical.length>40?d.cal1Ical.slice(0,39)+'…':d.cal1Ical)+'</span></div>';
+  }
   con.innerHTML='<div class="ob-form">'+
     '<h2 class="ob-h2">'+_ot('obSrcTitle','Source')+'</h2>'+
+    (_curSumm?'<div style="margin-bottom:12px;">'+_curSumm+'</div>':'')+
     '<p class="ob-p2">'+_ot('obSrcSub','How to access your calendar?')+'</p>'+
     '<div class="ob-src-group" id="ob-acc-src">'+
       _srcBtn('google',src==='google','🔑',_ot('obSrcGoogle','Google Calendar'),_ot('obSrcGoogleSub','API key + ID. Recommended.'))+

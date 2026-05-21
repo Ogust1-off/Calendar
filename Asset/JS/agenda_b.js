@@ -62,10 +62,10 @@ function awFmtRemaining(end) {
   const min = Math.floor((totalSec % 3600) / 60);
   const sec = totalSec % 60;
   const _laR=window._getLang&&window._getLang()==='la'&&window._toRoman;
-  const R=n=>_laR?window._toRoman(n):n;
-  if (h > 0)   return R(h)+'h'+(_laR?R(min):String(min).padStart(2,'0'));
-  if (min > 0) return R(min)+'min';
-  return R(sec)+'s';
+  const Rv=n=>_laR?window._toRoman(n):n;
+  if(h>0)return Rv(h)+'h'+(min?Rv(min):'');
+  if(min>0)return Rv(min)+'min';
+  return Rv(sec)+'s';
 }
 
 function awFmtRemainingLong(end) {
@@ -76,10 +76,10 @@ function awFmtRemainingLong(end) {
   const min = Math.floor((totalSec % 3600) / 60);
   const sec = totalSec % 60;
   const _laRL=window._getLang&&window._getLang()==='la'&&window._toRoman;
-  const R=n=>_laRL?window._toRoman(n):n;
-  if (h > 0)   return `${h}h${String(min).padStart(2,'0')}`;
-  if (min > 0) return `${min}min ${String(sec).padStart(2,'0')}s`;
-  return `${sec}s`;
+  const Rv=n=>_laRL?window._toRoman(n):n;
+  if(h>0)return Rv(h)+'h'+(min?Rv(min)+'min':'');
+  if(min>0)return Rv(min)+'min'+(sec?' '+Rv(sec)+'s':'');
+  return Rv(sec)+'s';
 }
 
 function awFmtDuration(start, end) {
@@ -87,22 +87,19 @@ function awFmtDuration(start, end) {
   const ms = new Date(end) - new Date(start);
   const h  = Math.floor(ms / 3600000);
   const m  = Math.floor((ms % 3600000) / 60000);
-  if(window._getLang&&window._getLang()==='la'&&window._toRoman){
-    if(h===0)return window._toRoman(m)+'min';
-    if(m===0)return window._toRoman(h)+'h';
-    return window._toRoman(h)+'h'+window._toRoman(m);
-  }
-  if (h === 0) return `${m}min`;
-  if (m === 0) return `${h}h`;
-  return `${h}h${awPad(m)}`;
+  const _laD=window._getLang&&window._getLang()==='la'&&window._toRoman;
+  const Rv=n=>_laD?window._toRoman(n):n;
+  if(h===0)return Rv(m)+'min';
+  if(m===0)return Rv(h)+'h';
+  return Rv(h)+'h'+Rv(m);
 }
 function awFmtDayLabel(dateStr, long = false) {
   const d = new Date(dateStr + 'T00:00:00');
   if(window._getLang&&window._getLang()==='la'){
     const LA_D=window._LA_DAYS||[];const LA_DS=['Lun','Mar','Mer','Iov','Ven','Sat','Dom'];
     const LA_M=window._LA_MONTHS||[];const LA_MN=window._LA_MONTHS_NOM||[];
-    const R=n=>window._toRoman?window._toRoman(n):n;
-    return long?(LA_D[d.getDay()]||'')+', '+R(d.getDate())+' '+(LA_M[d.getMonth()]||'')+', '+R(d.getFullYear()):(LA_DS[d.getDay()]||'')+' '+R(d.getDate())+' '+(LA_MN[d.getMonth()]||'');
+    const Rv=n=>window._toRoman?window._toRoman(n):n;
+    return long?(LA_D[d.getDay()]||'')+', '+Rv(d.getDate())+' '+(LA_M[d.getMonth()]||'')+' '+Rv(d.getFullYear()):(LA_DS[d.getDay()]||'')+' '+Rv(d.getDate())+' '+(LA_MN[d.getMonth()]||'');
   }
   const s = d.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), long
     ? { weekday: 'long', day: 'numeric', month: 'long' }
@@ -648,8 +645,8 @@ function awUpdateTimer() {
   if (!awLastUpdated) return;
   const secs = Math.round((Date.now()-awLastUpdated)/1000);
   const mins = Math.floor(secs/60);
-  const _langU=typeof window._getLang==='function'?window._getLang():'en';
-  const fr=_langU==='fr',_la=_langU==='la';
+  const _lu=typeof window._getLang==='function'?window._getLang():'en';
+  const fr=_lu==='fr',_la=_lu==='la';
   const _RU=n=>(_la&&window._toRoman)?window._toRoman(n):n;
   const txt=secs<10?(fr?'Mis à jour':_la?'Modo renovatum':'Just updated'):secs<60?(fr?`Mis à jour il y a ${secs}s`:_la?`Renovatum ${_RU(secs)}s`:`Updated ${secs}s ago`):secs<120?(fr?'Mis à jour il y a 1min':_la?'Renovatum Imin':'Updated 1min ago'):(fr?`Mis à jour il y a ${mins}min`:_la?`Renovatum ${_RU(mins)}min`:`Updated ${mins}min ago`);
   ['aw-last-updated','nb-upd','acc-upd'].forEach(id=>{
@@ -970,7 +967,7 @@ function awRenderCalendar(byDay, today) {
     }
     const month6=_laC?(window._LA_MONTHS_NOM||[])[d6.getMonth()]:d6.toLocaleDateString((typeof window._appLocale==='function'?window._appLocale():(window._appLocale||'en-GB')), { month: 'short' });
     const year6=d6.getFullYear();
-    const yearSuffix = year0 === year6 ? ` <span class="aw-cal-year">${_RC(year6)}</span>` : ` <span class="aw-cal-year">${_RC(year0)}</span> \u2013 <span class="aw-cal-year">${_RC(year6)}</span>`;
+    const yearSuffix=year0===year6?` <span class="aw-cal-year">${_RC(year0)}</span>`:` <span class="aw-cal-year">${_RC(year0)}</span> – <span class="aw-cal-year">${_RC(year6)}</span>`;
     return `<strong>${month0.slice(0,3)} \u2013 ${month6}</strong>${yearSuffix}`;
   })();
 

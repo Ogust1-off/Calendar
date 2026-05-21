@@ -315,7 +315,6 @@
     padding-left:5px;padding-right:5px;
     height:17px;line-height:17px;
   }
-  .mo-ev.mo-ev-band{overflow:visible;white-space:nowrap;}
   .mo-ev-band-start{border-radius:99px 0 0 99px!important;margin-left:1px;}
   .mo-ev-band-end{border-radius:0 99px 99px 0!important;margin-right:1px;}
   .mo-ev-band-start.mo-ev-band-end{border-radius:99px!important;margin:0 1px;}
@@ -323,7 +322,6 @@
   /* Timed: text uses event color */
   .mo-ev-timed .mo-ev-txt{color:var(--lbl);}
   .mo-ev-wrap{display:flex;flex-direction:column;gap:4px;}
-  .mo-ev-cont-txt{opacity:.75;font-size:9.5px;}
   /* +N */
   .mo-ev-more{
     font-size:10px;font-weight:400;color:var(--lbl3);
@@ -460,6 +458,10 @@
   .abbrev-arrow{color:var(--lbl3);font-size:16px;flex-shrink:0;}
   .abbrev-del{width:28px;height:28px;border-radius:50%;border:none;background:var(--fill);color:var(--red);cursor:pointer;font-size:14px;flex-shrink:0;}
   .abbrev-empty{color:var(--lbl3);font-size:14px;text-align:center;padding:16px 0;}
+
+  .ob-cur-cfg{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 12px;background:var(--fill);border-radius:10px;border:.5px solid var(--sep);}
+  .ob-cur-lbl{font-size:12px;font-weight:700;color:var(--tint);letter-spacing:.04em;text-transform:uppercase;}
+  .ob-cur-id{font-size:11px;color:var(--lbl2);background:var(--bg2);border-radius:6px;padding:2px 6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -501,10 +503,9 @@
       var cfg2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
       if(cfg2.displayName){
         var lang2=cfg2.lang||'en';
-        var _ss=document.getElementById('splash-sub');
-        if(_ss)_ss.textContent=lang2==='fr'?'par Shortcut™':lang2==='la'?'ab Shortcut™':'by Shortcut™';
+        var _ss=document.getElementById('splash-sub');if(_ss)_ss.textContent=lang2==='fr'?'par Shortcut™':lang2==='la'?'ab Shortcut™':'by Shortcut™';
         var sn=document.getElementById('splash-name');
-        if(sn)sn.textContent=lang2==='fr'?'Bonjour '+cfg2.displayName+' !':lang2==='la'?'Salve, '+cfg2.displayName+'!':'Hi, '+cfg2.displayName+'!';
+        if(sn)sn.textContent=lang2==='fr'?'Bonjour '+cfg2.displayName+' !':lang2==='la'?'Salve, '+cfg2.displayName+'!':'Hi, '+cfg2.displayName+'!';
       }
     }catch(se){}
     setTimeout(window._hideSplash,3500);
@@ -605,7 +606,7 @@
       accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
       accCal2Color:'Couleur Cal\u00a02',accExtraCals:'Calendriers suppl\u00e9mentaires',
       sAdvanced:'Avanc\u00e9',sApp:'Application',sDisplay:'Affichage',
-      accAbbrevs:'Abréviations (mois)',accAbbrevsTitle:'Abréviations personnalisées',accAbbrevsDesc:'Raccourcir les mots dans la vue mois.',accAbbrevFrom:'Mot complet',accAbbrevTo:'Abréviation',accAbbrevAdd:'+ Ajouter',accAbbrevEmpty:'Aucune règle personnalisée.',
+      accAbbrevs:'Abréviations (mois)',accAbbrevsTitle:'Abréviations personnalisées',accAbbrevsDesc:'Raccourcir les mots dans la vue mois.',accAbbrevFrom:'Mot complet',accAbbrevTo:'Abréviation',accAbbrevAdd:'+ Ajouter',accAbbrevEmpty:'Aucune règle.',
     },
     la:{today:'Hodie',allDay:'Totus dies',allDayLabel:'dies',inProgress:'In progressu',
       completed:'COMPLETUM',startingSoon:'MOX INCIPIT',left:'reliquum',in:'in ',inLabel:'In',elapsed:'transivit',
@@ -613,44 +614,28 @@
       noMoreToday:'Nulla iam eventa hodie',noUpcoming:'Nulla eventa futura',
       enjoyBreak:'Otio fruere!',haveGreatWe:'Bonum finem hebdomadis!',nextClass:'Schola proxima',
       tabAgenda:'Agenda',tabWeek:'Hebdomas',tabAccount:'Ratio',today2:'Hodie',
-      refreshBtn:'Renovare',updateAppBtn:'Applicationem renovare',
-      langLabel:'Lingua',themeLabel:'Aspectus',themeDark:'Obscurus',themeLight:'Clarus',themeAuto:'Automaticus',
-      logoutBtn:'Exire',byShortcut:'ab Shortcut™',sCalendars:'Calendaria',
-      obWelcomeSub:'Agenda tuum, semper tecum.',
-      obFeat1:'Agenda et horologium',obFeat2:'Cursus realis',obFeat3:'Claves in machina',obFeat4:'Sine rete',
-      obStartBtn:'Incipe',obLegal:'Data tua hic manent.',
-      obSrcTitle:'Fons',obSrcSub:'Quomodo calendarium accedis?',
-      obSrcApiTitle:'Fons & API',obSrcApiSub:'Coniunge calendarium.',
-      obApiTitle:'Clavis API',obApiSub:'Ad calendaria accedenda.',
-      obGCalTitle:'Calendaria Googlis',obGCalSub:'IDs calendariorum.',
-      obIcalTitle:'Nexus iCal',obIcalSub:'Ex iPhone vel Googli.',
-      obBothTitle:'Ambo',obBothSub:'Cal I Google + Cal II iCal.',
-      obColTitle:'Color',obColSub:'Elige colorem.',obCal1Lbl:'CAL I',obCal2Lbl:'CAL II',
+      refreshBtn:'Renovare',updateAppBtn:'Applicationem renovare',langLabel:'Lingua',themeLabel:'Aspectus',
+      themeDark:'Obscurus',themeLight:'Clarus',themeAuto:'Automaticus',logoutBtn:'Exire',byShortcut:'ab Shortcut™',sCalendars:'Calendaria',
+      obWelcomeSub:'Agenda tuum, semper tecum.',obFeat1:'Agenda et horologium',obFeat2:'Cursus realis',obFeat3:'Claves in machina',obFeat4:'Sine rete',
+      obStartBtn:'Incipe',obLegal:'Data tua hic manent.',obSrcTitle:'Fons',obSrcSub:'Quomodo calendarium accedis?',
+      obSrcApiTitle:'Fons & API',obSrcApiSub:'Coniunge calendarium.',obApiTitle:'Clavis API',obApiSub:'Ad calendaria accedenda.',
+      obGCalTitle:'Calendaria Googlis',obGCalSub:'IDs calendariorum.',obIcalTitle:'Nexus iCal',obIcalSub:'Ex iPhone vel Googli.',
+      obBothTitle:'Ambo',obBothSub:'Cal I Google + Cal II iCal.',obColTitle:'Color',obColSub:'Elige colorem.',obCal1Lbl:'CAL I',obCal2Lbl:'CAL II',
       obColsTitle:'Colores',obStyleCal1Lbl:'STILUS I',obColorLbl:'COLOR',obSubjsLbl:'SUBJECTA',obCal2ColorLbl:'COLOR II',
-      obProfileTitle:'Imago',obProfileSub:'Imago et nomen.',obFirstNameLbl:'PRAENOMEN',
-      obPrefsTitle:'Praeferentiae',obPrefsSub:'Lingua et aspectus.',
+      obProfileTitle:'Imago',obProfileSub:'Imago et nomen.',obFirstNameLbl:'PRAENOMEN',obPrefsTitle:'Praeferentiae',obPrefsSub:'Lingua et aspectus.',
       obOptBadge:'Optionale',obApiKeyLbl:'CLAVIS API',obCal1Google:'CAL I — ID',obCal2Google:'CAL II — ID',
       obCal1Ical:'CAL I — ICAL',obCal2Ical:'CAL II — ICAL',obOpt:'optionale',
       obStyleTitle:'Stilus I',obStyleSub:'Colores adscribe.',obCal2ColTitle:'Color II',obCal2ColSub:'Color Cal II.',
-      obExtraTitle:'Calendaria addita',obExtraSub:'Adde plura.',
-      obSrcGoogle:'Google Calendarium',obSrcGoogleSub:'Clavis API + ID.',
-      obSrcIcal:'Nexus iCal',obSrcIcalSub:'Ex iPhone vel Googli.',
-      obSrcBoth:'Ambo',obSrcBothSub:'Cal I Google + Cal II iCal.',
-      obPresetEcam:'ECAM',obPresetEcamSub:'Subjecta automatice detegit.',
-      obPresetCustom:'Proprium',obPresetCustomSub:'Subjecta tua.',
-      obPresetNone:'Color unus',obPresetNoneSub:'Omnia eadem.',
-      obSubjPlaceholder:'Subjectum…',
-      btnNext:'Sequens',btnBack:'Retro',btnSkip:'Omitte',btnSave:'Serva',btnClose:'Claude',
-      btnOpen:'Aperi',btnAdd:'+ Adde',btnAddCal:'+ Adde calendarium',
-      obSaved:'Servatum!',accExport:'Exporta configurationem',accImport:'Importa configurationem',
-      obCalName:'Nomen',obCal1Name:'Nomen I',obCal2Name:'Nomen II',
+      obExtraTitle:'Calendaria addita',obExtraSub:'Adde plura.',obSrcGoogle:'Google Calendarium',obSrcGoogleSub:'Clavis API + ID.',
+      obSrcIcal:'Nexus iCal',obSrcIcalSub:'Ex iPhone vel Googli.',obSrcBoth:'Ambo',obSrcBothSub:'Cal I Google + Cal II iCal.',
+      obPresetEcam:'ECAM',obPresetEcamSub:'Subjecta automatice detegit.',obPresetCustom:'Proprium',obPresetCustomSub:'Subjecta tua.',
+      obPresetNone:'Color unus',obPresetNoneSub:'Omnia eadem.',obSubjPlaceholder:'Subjectum…',
+      btnNext:'Sequens',btnBack:'Retro',btnSkip:'Omitte',btnSave:'Serva',btnClose:'Claude',btnOpen:'Aperi',btnAdd:'+ Adde',btnAddCal:'+ Adde calendarium',
+      obSaved:'Servatum!',accExport:'Exporta configurationem',accImport:'Importa configurationem',obCalName:'Nomen',obCal1Name:'Nomen I',obCal2Name:'Nomen II',
       obNoCal2:'Nullum secundum calendarium.',obColor:'Color:',noAllDay:'Nulla eventa diei',
       accSrcApi:'Fons & clavis API',accCal1Style:'Stilus I',accCal2Color:'Color II',accExtraCals:'Calendaria addita',
       sAdvanced:'Provectum',sApp:'Applicatio',sDisplay:'Aspectus',
-      accAbbrevs:'Abbreviationes',accAbbrevsTitle:'Abbreviationes propriae',
-      accAbbrevsDesc:'Verba breviora in mense.',accAbbrevFrom:'Verbum plenum',accAbbrevTo:'Forma brevis',
-      accAbbrevAdd:'+ Adde',accAbbrevEmpty:'Nullae regulae.',
-      popDesc:'Descriptio',popTeacher:'Magister',popLocation:'Locus',popVisio:'Visio',
+      accAbbrevs:'Abbreviationes',accAbbrevsTitle:'Abbreviationes propriae',accAbbrevsDesc:'Verba breviora in mense.',accAbbrevFrom:'Verbum plenum',accAbbrevTo:'Forma brevis',accAbbrevAdd:'+ Adde',accAbbrevEmpty:'Nullae regulae.',
     }
   };
   window._t=function(k,a){
@@ -663,7 +648,7 @@
   window._LA_MONTHS=['Ianuarii','Februarii','Martii','Aprilis','Maii','Iunii','Iulii','Augusti','Septembris','Octobris','Novembris','Decembris'];
   window._LA_DAYS=['Dominica','Lunae','Martis','Mercurii','Iovis','Veneris','Saturni'];
   window._toRoman=function(n){if(!n||n<1||n>3999)return String(n);var v=[1000,900,500,400,100,90,50,40,10,9,5,4,1],s=['M','CM','D','CD','C','XC','L','XL','X','IX','V','IV','I'],r='';for(var i=0;i<v.length;i++)while(n>=v[i]){r+=s[i];n-=v[i];}return r;};
-  window._fmtDateLa=function(ds,opts){var d=(ds instanceof Date)?ds:new Date(ds+'T00:00:00');var day=d.getDate(),mon=d.getMonth(),yr=d.getFullYear();var LA_M=window._LA_MONTHS||[];var LA_D=window._LA_DAYS||[];var R=window._toRoman||String;if(opts&&opts.weekday)return LA_D[d.getDay()]+', '+R(day)+' '+LA_M[mon]+', '+R(yr);if(opts&&opts.noYear)return R(day)+' '+LA_M[mon];return R(day)+' '+LA_M[mon]+' '+R(yr);};
+  window._fmtDateLa=function(ds,opts){var d=(ds instanceof Date)?ds:new Date(ds+'T00:00:00');var day=d.getDate(),mon=d.getMonth(),yr=d.getFullYear();var LA_M=window._LA_MONTHS||[];var LA_D=window._LA_DAYS||[];var Rv=window._toRoman||String;if(opts&&opts.weekday)return LA_D[d.getDay()]+', '+Rv(day)+' '+LA_M[mon]+', '+Rv(yr);if(opts&&opts.noYear)return Rv(day)+' '+LA_M[mon];return Rv(day)+' '+LA_M[mon]+' '+Rv(yr);};
 })();
 </script>
 
@@ -799,12 +784,10 @@
           <span id="acc-refresh-status" class="acc-row-status"></span>
         </button>
         <button class="acc-row" id="acc-update-btn" onclick="accUpdateApp()">
-          <span class="acc-row-ico" id="acc-update-ico">&#11014;&#65039;</span>
-          <div style="display:flex;flex-direction:column;flex:1;gap:2px;">
-            <span class="acc-row-lbl" id="acc-update-lbl">Update app</span>
-            <div id="acc-update-bar-wrap" style="display:none"><div id="acc-update-bar" style="height:3px;border-radius:99px;background:var(--fill);overflow:hidden;"><div id="acc-update-bar-fill" style="height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#6366f1);transition:width .4s;"></div></div></div>
-            <span id="acc-update-status" class="acc-row-status"></span>
-          </div>
+          <span class="acc-row-ico">&#11014;&#65039;</span>
+          <span class="acc-row-lbl" id="acc-update-lbl">Update app</span>
+          <div id="acc-update-bar-wrap" style="display:none"><div style="height:3px;border-radius:99px;background:var(--fill);overflow:hidden"><div id="acc-update-bar-fill" style="height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#3b82f6,#6366f1);transition:width .4s"></div></div></div>
+          <span id="acc-update-status" class="acc-row-status"></span>
         </button>
         <button class="acc-row" onclick="accExportConfig()">
           <span class="acc-row-ico">&#128228;</span>
@@ -859,11 +842,7 @@
 <div id="ib">
   <div class="ib-ico">&#128242;</div>
   <div class="ib-txt"><strong>Install the app</strong><small>Share &#8594; Add to Home Screen</small></div>
-  <button class="ib-x" onclick="dismissBanner()">
-        &#10005;
-      </button>
-    </div>
-  </div>
+  <button class="ib-x" onclick="dismissBanner()">&#215;</button>
 </div>
 
 <script>
@@ -1230,23 +1209,24 @@ function accRefresh(){_haptic('medium');
   }
 }
 function accUpdateApp(){
-  var st=document.getElementById('acc-update-status');var ico=document.getElementById('acc-update-ico');
-  function setBar(p){var f=document.getElementById('acc-update-bar-fill');if(f)f.style.width=p+'%';}
-  function setSt(t){if(st)st.textContent=t;}
-  setSt('Checking…');setBar(15);
-  var btn=document.getElementById('acc-update-btn');if(btn)btn.style.pointerEvents='none';
-  var barW=document.getElementById('acc-update-bar-wrap');if(barW)barW.style.display='block';
-  if(ico)ico.textContent='⏳';
-  var clrP='caches' in window?caches.keys().then(function(ks){setSt('Clearing…');setBar(40);return Promise.all(ks.map(function(k){return caches.delete(k);}));}):Promise.resolve();
+  var st=document.getElementById('acc-update-status');
+  var bF=document.getElementById('acc-update-bar-fill');
+  var bW=document.getElementById('acc-update-bar-wrap');
+  var btn=document.getElementById('acc-update-btn');
+  function sB(p){if(bF)bF.style.width=p+'%';}
+  if(st)st.textContent='Checking…';if(bW)bW.style.display='block';sB(15);
+  if(btn)btn.style.pointerEvents='none';
+  var clrP='caches' in window?caches.keys().then(function(ks){if(st)st.textContent='Clearing…';sB(40);return Promise.all(ks.map(function(k){return caches.delete(k);}));}):Promise.resolve();
   clrP.then(function(){
-    setSt('Unregistering…');setBar(70);
+    if(st)st.textContent='Unregistering…';sB(70);
     if('serviceWorker' in navigator){
       navigator.serviceWorker.getRegistrations().then(function(regs){
         regs.forEach(function(r){if(r.waiting)r.waiting.postMessage({type:'SKIP_WAITING'});if(r.installing)r.installing.postMessage({type:'SKIP_WAITING'});if(r.active)r.active.postMessage({type:'SKIP_WAITING'});});
         return Promise.all(regs.map(function(r){return r.unregister();}));
-      }).then(function(){setSt('✓ Done!');setBar(100);if(ico)ico.textContent='✅';setTimeout(function(){window.location.href=location.pathname;},700);});
-    }else{setSt('✓ Done!');setBar(100);if(ico)ico.textContent='✅';setTimeout(function(){window.location.href=location.pathname;},700);}
+      }).then(function(){if(st)st.textContent='✅ Done!';sB(100);setTimeout(function(){window.location.href=location.pathname;},700);});
+    } else {if(st)st.textContent='✅ Done!';sB(100);setTimeout(function(){window.location.href=location.pathname;},700);}
   });
+
 }
 function accLogout(){_haptic('warning');
   var lang=typeof window._getLang==='function'?window._getLang():'en';
@@ -1409,8 +1389,7 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=_isLaS?(window._LA_MONTHS_NOM||[])[m]:d0.toLocaleDateString(locale,{month:'long'});
       if(!_isLaS)mn=mn[0].toUpperCase()+mn.slice(1);
-      var _yrS=_isLaS&&window._toRoman?window._toRoman(y):y;
-      lbl.textContent=mn+' '+_yrS;
+      lbl.textContent=mn+' '+(_isLaS&&window._toRoman?window._toRoman(y):y);
       // Sync week view header label
       var wml=document.getElementById('wk-month-lbl');
       if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
@@ -1630,8 +1609,7 @@ function accOpenAbbrevs(){
   function _e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
   function rows(){if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No rules yet.')+'</p>';
     return rules.map(function(r,i){return '<div class="abbrev-row"><input class="abbrev-inp" placeholder="'+_t('accAbbrevFrom','Word')+'" value="'+_e(r.from)+'" oninput="window._aR['+i+'].from=this.value"/><span class="abbrev-arrow">&rarr;</span><input class="abbrev-inp" placeholder="'+_t('accAbbrevTo','Short')+'" value="'+_e(r.to)+'" oninput="window._aR['+i+'].to=this.value"/><button class="abbrev-del" onclick="window._aD('+i+')">&#10005;</button></div>';}).join('');}
-  window._aR=rules;
-  window._aD=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
+  window._aR=rules;window._aD=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
   var ov=document.createElement('div');ov.id='abbrev-sheet-overlay';
   ov.style.cssText='position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;';
   ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;"><div style="display:flex;align-items:center;margin-bottom:14px;"><strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Abbreviations')+'</strong><button onclick="window._aC()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button></div><p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in month view.')+'</p><div id="abbrev-list">'+rows()+'</div><button onclick="window._aA()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add')+'</button><button onclick="window._aS()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button></div>';
@@ -1724,8 +1702,7 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=_isLaS?(window._LA_MONTHS_NOM||[])[m]:d0.toLocaleDateString(locale,{month:'long'});
       if(!_isLaS)mn=mn[0].toUpperCase()+mn.slice(1);
-      var _yrS=_isLaS&&window._toRoman?window._toRoman(y):y;
-      lbl.textContent=mn+' '+_yrS;
+      lbl.textContent=mn+' '+(_isLaS&&window._toRoman?window._toRoman(y):y);
       // Sync week view header label
       var wml=document.getElementById('wk-month-lbl');
       if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
@@ -1921,35 +1898,6 @@ function moRenderAll(){
   container.innerHTML=html;
 }
 
-function _moAbbrev(s){
-  if(!s)return s;
-  s=s.replace(/\bBienheureuses\b/g,'Bses').replace(/\bBienheureuse\b/g,'Bse').replace(/\bBienheureux\b/g,'Bx').replace(/\bNotre-Dame\b/g,'ND')
-    .replace(/\bSaintes-/g,'Stes-').replace(/\bSaintes /g,'Stes ').replace(/\bSaintes$/g,'Stes')
-    .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
-    .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
-    .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
-  try{var _c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(_c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
-  return s;
-}
-function accOpenAbbrevs(){
-  if(document.getElementById('abbrev-sheet-overlay'))return;
-  var _t=window._t||function(k,fb){return fb||k;};
-  var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-  var rules=(cfg.customAbbrevs||[]).map(function(r){return {from:r.from||'',to:r.to||''};});
-  function _e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-  function rows(){if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No rules yet.')+'</p>';
-    return rules.map(function(r,i){return '<div class="abbrev-row"><input class="abbrev-inp" placeholder="'+_t('accAbbrevFrom','Word')+'" value="'+_e(r.from)+'" oninput="window._aR['+i+'].from=this.value"/><span class="abbrev-arrow">&rarr;</span><input class="abbrev-inp" placeholder="'+_t('accAbbrevTo','Short')+'" value="'+_e(r.to)+'" oninput="window._aR['+i+'].to=this.value"/><button class="abbrev-del" onclick="window._aD('+i+')">&#10005;</button></div>';}).join('');}
-  window._aR=rules;
-  window._aD=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
-  var ov=document.createElement('div');ov.id='abbrev-sheet-overlay';
-  ov.style.cssText='position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;';
-  ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;"><div style="display:flex;align-items:center;margin-bottom:14px;"><strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Abbreviations')+'</strong><button onclick="window._aC()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button></div><p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in month view.')+'</p><div id="abbrev-list">'+rows()+'</div><button onclick="window._aA()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add')+'</button><button onclick="window._aS()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button></div>';
-  document.body.appendChild(ov);
-  window._aC=function(){var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();};
-  ov.addEventListener('click',function(e){if(e.target===ov)window._aC();});
-  window._aA=function(){rules.push({from:'',to:''});var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
-  window._aS=function(){var c2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};c2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});localStorage.setItem('shortcut_config',JSON.stringify(c2));window._aC();};
-}
 function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 
@@ -1988,19 +1936,30 @@ function accExportConfig(){
     var cfg=JSON.parse(raw);
     // Export: keep all fields EXCEPT photo (blob/url can be large)
     var exp={
+      // Source & API
       apiKey:cfg.apiKey||'',
       calSource:cfg.calSource||'',
+      // Calendar 1 (Google)
       calendars:cfg.calendars||[],
+      cal1Name:cfg.cal1Name||'',
+      // Calendar 2 (iCal)
       cal2Ical:cfg.cal2Ical||'',
+      cal2Name:cfg.cal2Name||'',
+      cal2Color:cfg.cal2Color||'',
+      // Cal 1 iCal mode
       cal1Ical:cfg.cal1Ical||'',
+      // Cal 1 style
       cal1Preset:cfg.cal1Preset||'',
       cal1Color:cfg.cal1Color||'',
-      cal2Color:cfg.cal2Color||'',
       cal1Subjects:cfg.cal1Subjects||[],
+      // Extra calendars
       extraCals:cfg.extraCals||[],
+      // Preferences
       displayName:cfg.displayName||'',
       lang:cfg.lang||'en',
       theme:cfg.theme||'auto',
+      // Custom abbreviations
+      customAbbrevs:cfg.customAbbrevs||[],
       exportedAt:new Date().toISOString()
     };
     var json=JSON.stringify(exp,null,2);
@@ -2093,8 +2052,7 @@ function moToggle(){
       var d0=new Date(y,m,1);
       var mn=_isLaS?(window._LA_MONTHS_NOM||[])[m]:d0.toLocaleDateString(locale,{month:'long'});
       if(!_isLaS)mn=mn[0].toUpperCase()+mn.slice(1);
-      var _yrS=_isLaS&&window._toRoman?window._toRoman(y):y;
-      lbl.textContent=mn+' '+_yrS;
+      lbl.textContent=mn+' '+(_isLaS&&window._toRoman?window._toRoman(y):y);
       // Sync week view header label
       var wml=document.getElementById('wk-month-lbl');
       if(wml)wml.innerHTML='<strong>'+mn+'</strong> <span>'+y+'</span>';
@@ -2182,6 +2140,7 @@ function moRenderAll(){
     for(var w=0;w<6;w++){
       // Stop when we've passed the last day of this month
       if(w>=4&&cur.getMonth()!==mo)break;
+      var _bC={};
       var weekHtml='<div class="mo-week">';
       for(var dw=0;dw<7;dw++){
         var isOther=cur.getMonth()!==mo;
@@ -2229,13 +2188,19 @@ function moRenderAll(){
           allDayCont.forEach(function(ev2){
             var bandCls='mo-ev mo-ev-band'+(ev2.isEnd?' mo-ev-band-end':'');
             var isLit=(ev2.hex==='#f8f4ec');
-            var txC=isLit?'rgba(60,40,20,0.8)':'rgba(255,255,255,0.9)';
-            // Show name reminder on Monday (new week)
+            var txC=isLit?'rgba(60,40,20,0.85)':'rgba(255,255,255,0.92)';
             var contName='';
-            if(!ev2.isEnd&&ev2.isMon){
-              var nm=_moAbbrev(ev2.name)||'';
-              var disp=nm.length>13?nm.slice(0,12)+'…':nm;
-              contName='<span class="mo-ev-txt" style="color:'+txC+';">'+_moEsc(disp)+'</span>';
+            if(!ev2.isEnd){
+              var _nm=_moAbbrev(ev2.name)||'';
+              if(ev2.isMon)_bC[ev2.idx]=0;
+              var _shown=_bC[ev2.idx]||0;
+              var _slice=_nm.slice(_shown,_shown+10);
+              if(_slice.length>0){
+                var _hasMore=(_shown+10)<_nm.length;
+                var _disp=_hasMore?_slice+'…':_slice;
+                _bC[ev2.idx]=_shown+10;
+                contName='<span class="mo-ev-txt" style="color:'+txC+';">'+_moEsc(_disp)+'</span>';
+              }
             }
             evHtml+='<div class="'+bandCls+'" style="background:'+(isLit?'rgba(200,184,154,0.5)':ev2.hex)+';" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'+contName+'</div>';
           });
@@ -2249,8 +2214,11 @@ function moRenderAll(){
               var bCls='mo-ev mo-ev-band mo-ev-band-start'+(bSE?' mo-ev-band-end mo-ev-band-single':'');
               var bgB=isLit?'rgba(200,184,154,0.7)':ev2.hex;
               var txB=isLit?'rgba(60,40,20,0.9)':'rgba(255,255,255,0.95)';
+              var _bNm=_moAbbrev(ev2.name)||'';
+              _bC[ev2.idx]=10;
+              var _bTxt=_bNm.length>10?_bNm.slice(0,9)+'…':_bNm;
               evHtml+='<div class="'+bCls+'" style="background:'+bgB+';color:'+txB+'" onclick="event.stopPropagation();if(typeof awPopOpen===\'function\')awPopOpen(this,'+ev2.idx+')">'
-                +'<span class="mo-ev-txt">'+_moEsc(_moAbbrev(ev2.name))+'</span></div>';
+                +'<span class="mo-ev-txt">'+_moEsc(_bTxt)+'</span></div>';
             } else {
               // Single all-day — exact day view pill style
               var _mth=document.documentElement.dataset.theme;
@@ -2304,35 +2272,6 @@ function moRenderAll(){
   container.innerHTML=html;
 }
 
-function _moAbbrev(s){
-  if(!s)return s;
-  s=s.replace(/\bBienheureuses\b/g,'Bses').replace(/\bBienheureuse\b/g,'Bse').replace(/\bBienheureux\b/g,'Bx').replace(/\bNotre-Dame\b/g,'ND')
-    .replace(/\bSaintes-/g,'Stes-').replace(/\bSaintes /g,'Stes ').replace(/\bSaintes$/g,'Stes')
-    .replace(/\bSainte-/g,'Ste-').replace(/\bSainte /g,'Ste ').replace(/\bSainte$/g,'Ste')
-    .replace(/\bSaints-/g,'Sts-').replace(/\bSaints /g,'Sts ').replace(/\bSaints$/g,'Sts')
-    .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
-  try{var _c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(_c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
-  return s;
-}
-function accOpenAbbrevs(){
-  if(document.getElementById('abbrev-sheet-overlay'))return;
-  var _t=window._t||function(k,fb){return fb||k;};
-  var cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};
-  var rules=(cfg.customAbbrevs||[]).map(function(r){return {from:r.from||'',to:r.to||''};});
-  function _e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');}
-  function rows(){if(!rules.length)return '<p class="abbrev-empty">'+_t('accAbbrevEmpty','No rules yet.')+'</p>';
-    return rules.map(function(r,i){return '<div class="abbrev-row"><input class="abbrev-inp" placeholder="'+_t('accAbbrevFrom','Word')+'" value="'+_e(r.from)+'" oninput="window._aR['+i+'].from=this.value"/><span class="abbrev-arrow">&rarr;</span><input class="abbrev-inp" placeholder="'+_t('accAbbrevTo','Short')+'" value="'+_e(r.to)+'" oninput="window._aR['+i+'].to=this.value"/><button class="abbrev-del" onclick="window._aD('+i+')">&#10005;</button></div>';}).join('');}
-  window._aR=rules;
-  window._aD=function(i){rules.splice(i,1);var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
-  var ov=document.createElement('div');ov.id='abbrev-sheet-overlay';
-  ov.style.cssText='position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;';
-  ov.innerHTML='<div style="background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:20px 16px 48px;"><div style="display:flex;align-items:center;margin-bottom:14px;"><strong style="font-size:18px;font-weight:700;flex:1;">'+_t('accAbbrevsTitle','Abbreviations')+'</strong><button onclick="window._aC()" style="background:var(--fill);border:none;border-radius:50%;width:28px;height:28px;font-size:18px;cursor:pointer;color:var(--lbl2);">&#215;</button></div><p style="font-size:13px;color:var(--lbl3);margin-bottom:16px;">'+_t('accAbbrevsDesc','Shorten words in month view.')+'</p><div id="abbrev-list">'+rows()+'</div><button onclick="window._aA()" style="width:100%;margin:12px 0 8px;padding:11px;border-radius:10px;border:.5px solid var(--sep);background:var(--fill);color:var(--tint);font-size:15px;font-weight:600;cursor:pointer;">'+_t('accAbbrevAdd','+ Add')+'</button><button onclick="window._aS()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--tint);color:#fff;font-size:16px;font-weight:600;cursor:pointer;">'+_t('btnSave','Save')+' ✓</button></div>';
-  document.body.appendChild(ov);
-  window._aC=function(){var o=document.getElementById('abbrev-sheet-overlay');if(o)o.remove();};
-  ov.addEventListener('click',function(e){if(e.target===ov)window._aC();});
-  window._aA=function(){rules.push({from:'',to:''});var el=document.getElementById('abbrev-list');if(el)el.innerHTML=rows();};
-  window._aS=function(){var c2=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};c2.customAbbrevs=rules.filter(function(r){return r.from.trim()&&r.to.trim();});localStorage.setItem('shortcut_config',JSON.stringify(c2));window._aC();};
-}
 function _moEsc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 
@@ -2352,7 +2291,7 @@ function moSelectDay(ds){
       // Rebuild using ds as the new centre date
       var saved_today=_wkToday;
       wkInit(window._awByDay, ds);
-      _wkToday=saved_today; // re real today
+      _wkToday=saved_today; // restore real today
       // Re-mark real today in the header
       wkUpdateHdr();
     }
@@ -2363,7 +2302,6 @@ window.addEventListener('load',function(){
   if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone&&!localStorage.getItem('ib'))
     setTimeout(function(){document.getElementById('ib').classList.add('on');},5000);
 });
-
 </script>
 </body>
 </html>
