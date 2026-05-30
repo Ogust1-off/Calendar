@@ -1,3 +1,68 @@
+
+// ── Notification engine ──────────────────────────────────
+var _notifTimers = [];
+function _scheduleNotifications(events) {
+  // Clear existing timers
+  _notifTimers.forEach(function(t){clearTimeout(t);});
+  _notifTimers = [];
+  
+  // Check support + permission
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  
+  // Get user preference (minutes before event)
+  var cfg = {};
+  try{cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};}catch(e){}
+  if(cfg.notifEnabled === false) return;
+  var minsBefore = cfg.notifMinsBefore || 10;
+  
+  var now = Date.now();
+  var maxLead = 24 * 3600000; // only schedule up to 24h ahead
+  
+  events.forEach(function(ev) {
+    if(!ev.start || ev.start.length === 10) return; // skip all-day
+    var startMs = new Date(ev.start).getTime();
+    var notifMs = startMs - minsBefore * 60000;
+    var delay = notifMs - now;
+    if(delay < 0 || delay > maxLead) return;
+    
+    var _lang = window._getLang ? window._getLang() : 'en';
+    var _t = window._t || function(k,fb){return fb||k;};
+    
+    var title = ev.summary || ev.name || 'Event';
+    var timeStr = window.awFmtTime ? window.awFmtTime(ev.start) : ev.start.slice(11,16);
+    var body = (_lang==='fr' ? 'Dans ' + minsBefore + ' min — ' :
+                _lang==='la' ? 'In ' + (window._toRoman?window._toRoman(minsBefore):minsBefore) + 'min — ' :
+                'In ' + minsBefore + ' min — ') + timeStr;
+    if(ev.location) body += '\n' + ev.location;
+    
+    var timer = setTimeout(function() {
+      try {
+        var n = new Notification(title, {
+          body: body,
+          icon: './Asset/Picture/icon-192.png',
+          badge: './Asset/Picture/icon-32.png',
+          tag: 'ev-' + (ev.start||'') + '-' + (title||''),
+          silent: false
+        });
+        n.onclick = function(){ window.focus(); n.close(); };
+      } catch(e) {}
+    }, delay);
+    _notifTimers.push(timer);
+  });
+}
+
+function _requestNotifPermission(cb) {
+  if(!('Notification' in window)) { if(cb) cb(false); return; }
+  if(Notification.permission === 'granted') { if(cb) cb(true); return; }
+  if(Notification.permission === 'denied') { if(cb) cb(false); return; }
+  Notification.requestPermission().then(function(p){ if(cb) cb(p==='granted'); });
+}
+
+function _notifSettingsRow() {
+  // Returns the notification status for the account page UI
+  if(!('Notification' in window)) return 'not-supported';
+  return Notification.permission;
+}
 /*Shortcut™ JS file for Agenda by Augustin de Chalendar
 Copyright © 2026 Ogust'1. All rights reserved.
 */
@@ -1082,6 +1147,8 @@ function awCalGoToday() { awCalOffset = 0;         if (window._awByDay) awRender
 
 function awRender(events) {
   const today = awToday();
+  // Schedule notifications for upcoming events
+  setTimeout(function(){try{_scheduleNotifications(events);}catch(e){}},500);
   const byDay = {};
   awEvCache = events;
   awLastUpdated = Date.now();

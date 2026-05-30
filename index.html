@@ -562,6 +562,7 @@
       accSrcApi:'Source & API key',accCal1Style:'Calendar 1 colour style',
       accCal2Color:'Calendar 2 colour',accExtraCals:'Extra calendars',
       sAdvanced:'Advanced',sApp:'App',sDisplay:'Display',
+      accNotif:'Notifications',accNotifOn:'Enabled',accNotifOff:'Disabled',accNotifBefore:'Before event',accNotifAllow:'Enable notifications',
       accAbbrevs:'Month abbreviations',accAbbrevsTitle:'Custom Abbreviations',accAbbrevsDesc:'Shorten words in the month view.',accAbbrevFrom:'Full word',accAbbrevTo:'Short form',accAbbrevAdd:'+ Add rule',accAbbrevEmpty:'No custom rules yet.',
     },
     fr:{today:'Aujourd\u2019hui',allDay:'Toute la journ\u00e9e',allDayLabel:'journ\u00e9e',inProgress:'En cours',
@@ -606,6 +607,7 @@
       accSrcApi:'Source & cl\u00e9 API',accCal1Style:'Style couleurs Cal\u00a01',
       accCal2Color:'Couleur Cal\u00a02',accExtraCals:'Calendriers suppl\u00e9mentaires',
       sAdvanced:'Avanc\u00e9',sApp:'Application',sDisplay:'Affichage',
+      accNotif:'Notifications',accNotifOn:'Actif',accNotifOff:'Désactivé',accNotifBefore:'Avant l\'événement',accNotifAllow:'Activer les notifications',
       accAbbrevs:'Abréviations (mois)',accAbbrevsTitle:'Abréviations personnalisées',accAbbrevsDesc:'Raccourcir les mots dans la vue mois.',accAbbrevFrom:'Mot complet',accAbbrevTo:'Abréviation',accAbbrevAdd:'+ Ajouter',accAbbrevEmpty:'Aucune règle.',
     },
     la:{today:'Hodie',allDay:'Totus dies',allDayLabel:'dies',inProgress:'In progressu',
@@ -635,6 +637,7 @@
       obNoCal2:'Nullum secundum calendarium.',obColor:'Color:',noAllDay:'Nulla eventa diei',
       accSrcApi:'Fons & clavis API',accCal1Style:'Stilus I',accCal2Color:'Color II',accExtraCals:'Calendaria addita',
       sAdvanced:'Provectum',sApp:'Applicatio',sDisplay:'Aspectus',
+      accNotif:'Notificationes',accNotifOn:'Activum',accNotifOff:'Inactivum',accNotifBefore:'Ante eventum',accNotifAllow:'Notificationes activare',
       accAbbrevs:'Abbreviationes',accAbbrevsTitle:'Abbreviationes propriae',accAbbrevsDesc:'Verba breviora in mense.',accAbbrevFrom:'Verbum plenum',accAbbrevTo:'Forma brevis',accAbbrevAdd:'+ Adde',accAbbrevEmpty:'Nullae regulae.',
     }
   };
@@ -767,6 +770,14 @@
           <span class="acc-row-ico">&#128295;</span>
           <span class="acc-row-lbl" id="acc-lbl-extra">Extra calendars</span>
           <svg class="acc-row-chv" viewBox="0 0 12 12" fill="none"><path d="M4 2l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="acc-row" id="acc-notif-row" onclick="accToggleNotif()">
+          <span class="acc-row-ico" id="acc-notif-ico">&#128276;</span>
+          <div style="display:flex;flex-direction:column;flex:1;gap:2px;">
+            <span class="acc-row-lbl" id="acc-notif-lbl">Notifications</span>
+            <span class="acc-row-status" id="acc-notif-status" style="font-size:12px;color:var(--lbl3)"></span>
+          </div>
+          <div id="acc-notif-seg" style="display:flex;gap:4px;align-items:center;"></div>
         </button>
         <button class="acc-row" onclick="accOpenAbbrevs()">
           <span class="acc-row-ico">&#9000;&#65039;</span>
@@ -1002,7 +1013,7 @@ var VIDS=['v-agenda','v-week','v-account'],TIDS=['tb-0','tb-1','tb-2'],_tab=0;
 function goTab(i){
   _haptic('light');
   _tab=i;
-  if(i===2){setTimeout(function(){_applyLang();var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};},50);}
+  if(i===2){setTimeout(function(){_applyLang();if(typeof accUpdateNotifRow==='function')accUpdateNotifRow();var d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};},50);}
   VIDS.forEach(function(id,j){
     var el=document.getElementById(id);if(!el)return;
     if(j===i){el.classList.add('on');el.style.display=(id==='v-week'?'flex':'block');}
@@ -1600,6 +1611,66 @@ function _moAbbrev(s){
     .replace(/\bSaint-/g,'St-').replace(/\bSaint /g,'St ').replace(/\bSaint$/g,'St');
   try{var _c=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};(_c.customAbbrevs||[]).forEach(function(r){if(r.from&&r.to){var p=new RegExp('\\b'+r.from.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','g');s=s.replace(p,r.to);}});}catch(e){}
   return s;
+}
+
+function accUpdateNotifRow(){
+  var _t=window._t||function(k,fb){return fb||k;};
+  var ico=document.getElementById('acc-notif-ico');
+  var st=document.getElementById('acc-notif-status');
+  var seg=document.getElementById('acc-notif-seg');
+  var cfg={};try{cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};}catch(e){}
+  var perm='Notification' in window?Notification.permission:'denied';
+  var enabled=cfg.notifEnabled!==false;
+  var mins=cfg.notifMinsBefore||10;
+  
+  if(perm==='denied'||!('Notification' in window)){
+    if(ico)ico.textContent='\uD83D\uDD15'; // 🔕
+    if(st)st.textContent=_t('accNotifOff','Disabled — not supported');
+    if(seg)seg.innerHTML='';
+    return;
+  }
+  if(perm==='default'){
+    if(ico)ico.textContent='\uD83D\uDD14'; // 🔔
+    if(st)st.textContent=_t('accNotifAllow','Tap to enable');
+    if(seg)seg.innerHTML='';
+    return;
+  }
+  // Granted
+  if(ico)ico.textContent=enabled?'\uD83D\uDD14':'\uD83D\uDD15';
+  if(st)st.textContent=enabled?mins+'min '+_t('accNotifBefore','before'):_t('accNotifOff','Off');
+  if(seg&&enabled){
+    seg.innerHTML=[5,10,15,30].map(function(m){
+      return '<button onclick="event.stopPropagation();accSetNotifMins('+m+')" '+
+        'style="padding:3px 7px;border-radius:6px;border:.5px solid var(--sep);background:'+(m===mins?'var(--tint)':'var(--fill)')+
+        ';color:'+(m===mins?'#fff':'var(--lbl2)')+';font-size:11px;font-weight:600;cursor:pointer;">'+m+'</button>';
+    }).join('');
+  }else if(seg)seg.innerHTML='';
+}
+
+function accToggleNotif(){
+  _haptic('medium');
+  var perm='Notification' in window?Notification.permission:'denied';
+  if(perm==='default'){
+    _requestNotifPermission(function(granted){
+      if(granted){var d={};try{d=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};}catch(e){}d.notifEnabled=true;localStorage.setItem('shortcut_config',JSON.stringify(d));}
+      accUpdateNotifRow();
+    });
+    return;
+  }
+  var cfg={};try{cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};}catch(e){}
+  cfg.notifEnabled=cfg.notifEnabled===false?true:false;
+  localStorage.setItem('shortcut_config',JSON.stringify(cfg));
+  accUpdateNotifRow();
+  if(cfg.notifEnabled&&window.awEvCache)_scheduleNotifications(window.awEvCache);
+}
+
+function accSetNotifMins(m){
+  _haptic('selection');
+  var cfg={};try{cfg=JSON.parse(localStorage.getItem('shortcut_config')||'null')||{};}catch(e){}
+  cfg.notifMinsBefore=m;cfg.notifEnabled=true;
+  localStorage.setItem('shortcut_config',JSON.stringify(cfg));
+  accUpdateNotifRow();
+  if(window.awEvCache)_scheduleNotifications(window.awEvCache);
 }
 function accOpenAbbrevs(){
   if(document.getElementById('abbrev-sheet-overlay'))return;
